@@ -11,9 +11,11 @@ import java.util.ArrayList;
 @Service
 public class UserServicelmpl implements UserService {
 
+    //自动创建userMapper实例
     @Autowired
     private UserMapper userMapper;
 
+    //@Override强调这是一个覆盖父类的方法，写错也不会报错
     @Override
     public ArrayList<User> list() {
         return userMapper.userList();
