@@ -184,13 +184,30 @@
         </div>
       </div>
     </div>
+
+    <!-- 重置密码确认弹窗 -->
+    <div class="dialog-overlay" v-if="confirmDialog.visible" @click.self="confirmDialog.visible = false">
+      <div class="dialog-box confirm-box">
+        <div class="dialog-header">
+          <h3>提示</h3>
+          <button class="dialog-close" @click="confirmDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="text-align:center;padding:24px;">
+          <p style="color:#fff;font-size:14px;margin:0;">确定将该用户的密码重置为 123456 吗？</p>
+        </div>
+        <div class="dialog-footer" style="justify-content:center;">
+          <button class="btn btn-cancel" @click="confirmDialog.visible = false">取消</button>
+          <button class="btn btn-primary" @click="doResetPassword">确定</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import { Plus, Search } from '@element-plus/icons-vue'
-import { ElIcon, ElMessage, ElMessageBox } from 'element-plus'
+import { ElIcon, ElMessage } from 'element-plus'
 
 const api = axios.create({
   baseURL: 'http://localhost:8088'
@@ -224,6 +241,9 @@ export default {
         visible: false,
         mode: 'create',
         form: { user_id: null, username: '', real_name: '', phone: '', department: '', position: '' }
+      },
+      confirmDialog: {
+        visible: false
       },
       warehouseDialog: {
         visible: false,
@@ -304,7 +324,7 @@ export default {
           ? Math.max(...this.allPersonnel.map(p => p.user_id))
           : 0
         try {
-          const res = await api.post('/user/', {
+          const res = await api.post('/user', {
             user_id: maxId + 1,
             username: f.username,
             real_name: f.real_name,
@@ -326,7 +346,7 @@ export default {
         }
       } else {
         try {
-          const res = await api.put('/user/', {
+          const res = await api.put('/user', {
             user_id: f.user_id,
             username: f.username,
             real_name: f.real_name,
@@ -362,25 +382,23 @@ export default {
     },
 
     resetPassword() {
-      ElMessageBox.confirm('确定将该用户的密码重置为 123456 吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async () => {
-        try {
-          const res = await api.put('/user/', {
-            user_id: this.personnelDialog.form.user_id,
-            password: '123456'
-          })
-          if (res.data.code === 200) {
-            ElMessage.success('密码重置成功')
-          } else {
-            ElMessage.error(res.data.msg || '密码重置失败')
-          }
-        } catch (e) {
-          ElMessage.error('密码重置失败')
+      this.confirmDialog.visible = true
+    },
+    async doResetPassword() {
+      try {
+        const res = await api.put('/user', {
+          user_id: this.personnelDialog.form.user_id,
+          password: '123456'
+        })
+        if (res.data.code === 200) {
+          ElMessage.success('密码重置成功')
+          this.confirmDialog.visible = false
+        } else {
+          ElMessage.error(res.data.msg || '密码重置失败')
         }
-      }).catch(() => {})
+      } catch (e) {
+        ElMessage.error('密码重置失败')
+      }
     },
 
     // 仓库 CRUD
@@ -580,6 +598,9 @@ export default {
   border-radius: 16px;
   width: 460px; max-width: 92vw;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.confirm-box {
+  width: 360px;
 }
 .dialog-header {
   display: flex; align-items: center; justify-content: space-between;
