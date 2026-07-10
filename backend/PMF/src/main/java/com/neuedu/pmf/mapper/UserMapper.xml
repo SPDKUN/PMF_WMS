@@ -2,9 +2,10 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+<!-- mapper 根节点，namespace 对应 Mapper 接口的全限定名 -->
 <mapper namespace="com.neuedu.pmf.mapper.UserMapper">
 
+<!--    定义映射关系-->
     <resultMap id="UserMap" type="com.neuedu.pmf.entity.User">
         <id column="user_id" property="user_id"/>
         <result column="username" property="username"/>
@@ -16,27 +17,33 @@
         <result column="status" property="status"/>
     </resultMap>
 
+<!--    查找全体用户-->
     <select id="userList" resultMap="UserMap">
         SELECT * FROM user
     </select>
 
+<!--    按ID查找用户-->
     <select id="findById" resultMap="UserMap">
         SELECT * FROM user WHERE user_id = #{user_id}
     </select>
 
+<!--    按用户名查找用户-->
     <select id="findByUsername" resultMap="UserMap">
         SELECT * FROM user WHERE username = #{username}
     </select>
 
+<!--    按用户名和密码查找用户-->
     <select id="findByUsernameAndPassword" resultMap="UserMap">
         SELECT * FROM user WHERE username = #{username} AND password = #{password}
     </select>
 
+<!--    新增用户，向表中插入数据-->
     <insert id="save" useGeneratedKeys="true" keyProperty="user_id">
         INSERT INTO user (username, real_name, phone, department, position, password, status)
         VALUES (#{username}, #{real_name}, #{phone}, #{department}, #{position}, #{password}, #{status})
     </insert>
 
+<!--    按ID修改用户信息-->
     <update id="update" parameterType="com.neuedu.pmf.entity.User">
         UPDATE user
         <set>
@@ -65,6 +72,7 @@
         WHERE user_id = #{user_id}
     </update>
 
+<!--    按ID删除用户-->
     <delete id="deleteById">
         DELETE FROM user WHERE user_id = #{user_id}
     </delete>
