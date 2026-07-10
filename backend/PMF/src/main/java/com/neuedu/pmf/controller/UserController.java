@@ -21,7 +21,7 @@ public class UserController {
     @Autowired
     private ExcelExportUtil excelExportUtil;
     
-
+    //返回整用户列表
     @GetMapping("/personnel")
     public ResultData userList() {
         ArrayList<User> users = userService.list();
@@ -30,7 +30,7 @@ public class UserController {
     }
 
 
-    //    请求的路径和请求的方式：来确定来访问哪个方法
+    //创建新的用户
     @PostMapping()
     public ResultData save(@RequestBody User user) {
         boolean flag = userService.save(user);
@@ -42,12 +42,14 @@ public class UserController {
         return ResultData.fail(ResultCode.FAILED);
     }
 
+    //根据id查找用户
     @GetMapping("/{userId}")
     public ResultData getUser(@PathVariable("userId") Integer id) {
         User user = userService.getById(id);
         return ResultData.success(user);
     }
 
+    //根据id删除用户
     @DeleteMapping("/{id}")
     public ResultData delete(@PathVariable("id") Integer id) {
         boolean flag =  userService.delete(id);
@@ -57,13 +59,14 @@ public class UserController {
         return ResultData.fail(ResultCode.FAILED);
     }
 
+    //导出excel表格
     @GetMapping("/excel")
     public void excel(HttpServletResponse response) {
         ArrayList<User> users = userService.list();
         excelExportUtil.exportExcel(response, users, User.class, "用户列表", "用户列表1");
     }
 
-
+    //更新用户信息
     @PutMapping
     public ResultData update(@RequestBody User user) {
         boolean flag =  userService.update(user);
