@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.InventoryCheckDetailMapper">
+
+    <resultMap id="InventoryCheckDetailMap" type="com.neuedu.pmf.entity.InventoryCheckDetail">
+        <id column="detail_id" property="detail_id"/>
+        <result column="check_no" property="check_no"/>
+        <result column="warehouse_id" property="warehouse_id"/>
+        <result column="zone_id" property="zone_id"/>
+        <result column="location_id" property="location_id"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="batch_id" property="batch_id"/>
+        <result column="book_quantity" property="book_quantity"/>
+        <result column="actual_quantity" property="actual_quantity"/>
+        <result column="difference" property="difference"/>
+        <result column="detail_status" property="detail_status"/>
+    </resultMap>
+
+    <select id="list" resultMap="InventoryCheckDetailMap">
+        SELECT * FROM inventory_check_detail
+    </select>
+
+    <select id="findById" resultMap="InventoryCheckDetailMap">
+        SELECT * FROM inventory_check_detail WHERE detail_id = #{detail_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="detail_id">
+        INSERT INTO inventory_check_detail (check_no, warehouse_id, zone_id, location_id, goods_id, batch_id, book_quantity, actual_quantity, difference, detail_status)
+        VALUES (#{check_no}, #{warehouse_id}, #{zone_id}, #{location_id}, #{goods_id}, #{batch_id}, #{book_quantity}, #{actual_quantity}, #{difference}, #{detail_status})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.InventoryCheckDetail">
+        UPDATE inventory_check_detail
+        <set>
+            <if test="check_no != null">check_no = #{check_no},</if>
+            <if test="warehouse_id != null">warehouse_id = #{warehouse_id},</if>
+            <if test="zone_id != null">zone_id = #{zone_id},</if>
+            <if test="location_id != null">location_id = #{location_id},</if>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="batch_id != null">batch_id = #{batch_id},</if>
+            <if test="book_quantity != null">book_quantity = #{book_quantity},</if>
+            <if test="actual_quantity != null">actual_quantity = #{actual_quantity},</if>
+            <if test="difference != null">difference = #{difference},</if>
+            <if test="detail_status != null">detail_status = #{detail_status},</if>
+        </set>
+        WHERE detail_id = #{detail_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM inventory_check_detail WHERE detail_id = #{detail_id}
+    </delete>
+
+</mapper>

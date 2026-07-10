@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.WarehouseMapper">
+
+    <resultMap id="WarehouseMap" type="com.neuedu.pmf.entity.Warehouse">
+        <id column="warehouse_id" property="warehouse_id"/>
+        <result column="warehouse_name" property="warehouse_name"/>
+        <result column="warehouse_type" property="warehouse_type"/>
+        <result column="warehouse_size" property="warehouse_size"/>
+        <result column="total_slots" property="total_slots"/>
+        <result column="available_slots" property="available_slots"/>
+        <result column="location" property="location"/>
+        <result column="temperature" property="temperature"/>
+        <result column="description" property="description"/>
+    </resultMap>
+
+    <select id="list" resultMap="WarehouseMap">
+        SELECT * FROM warehouse
+    </select>
+
+    <select id="findById" resultMap="WarehouseMap">
+        SELECT * FROM warehouse WHERE warehouse_id = #{warehouse_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="warehouse_id">
+        INSERT INTO warehouse (warehouse_name, warehouse_type, warehouse_size, total_slots, available_slots, location, temperature, description)
+        VALUES (#{warehouse_name}, #{warehouse_type}, #{warehouse_size}, #{total_slots}, #{available_slots}, #{location}, #{temperature}, #{description})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.Warehouse">
+        UPDATE warehouse
+        <set>
+            <if test="warehouse_name != null">warehouse_name = #{warehouse_name},</if>
+            <if test="warehouse_type != null">warehouse_type = #{warehouse_type},</if>
+            <if test="warehouse_size != null">warehouse_size = #{warehouse_size},</if>
+            <if test="total_slots != null">total_slots = #{total_slots},</if>
+            <if test="available_slots != null">available_slots = #{available_slots},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="temperature != null">temperature = #{temperature},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE warehouse_id = #{warehouse_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM warehouse WHERE warehouse_id = #{warehouse_id}
+    </delete>
+
+</mapper>

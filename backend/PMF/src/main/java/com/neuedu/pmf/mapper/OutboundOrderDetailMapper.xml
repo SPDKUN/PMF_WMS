@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.OutboundOrderDetailMapper">
+
+    <resultMap id="OutboundOrderDetailMap" type="com.neuedu.pmf.entity.OutboundOrderDetail">
+        <id column="detail_id" property="detail_id"/>
+        <result column="outbound_no" property="outbound_no"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="batch_id" property="batch_id"/>
+        <result column="quantity" property="quantity"/>
+        <result column="warehouse_id" property="warehouse_id"/>
+        <result column="zone_id" property="zone_id"/>
+        <result column="location_id" property="location_id"/>
+    </resultMap>
+
+    <select id="list" resultMap="OutboundOrderDetailMap">
+        SELECT * FROM outbound_order_detail
+    </select>
+
+    <select id="findById" resultMap="OutboundOrderDetailMap">
+        SELECT * FROM outbound_order_detail WHERE detail_id = #{detail_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="detail_id">
+        INSERT INTO outbound_order_detail (outbound_no, goods_id, batch_id, quantity, warehouse_id, zone_id, location_id)
+        VALUES (#{outbound_no}, #{goods_id}, #{batch_id}, #{quantity}, #{warehouse_id}, #{zone_id}, #{location_id})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.OutboundOrderDetail">
+        UPDATE outbound_order_detail
+        <set>
+            <if test="outbound_no != null">outbound_no = #{outbound_no},</if>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="batch_id != null">batch_id = #{batch_id},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="warehouse_id != null">warehouse_id = #{warehouse_id},</if>
+            <if test="zone_id != null">zone_id = #{zone_id},</if>
+            <if test="location_id != null">location_id = #{location_id},</if>
+        </set>
+        WHERE detail_id = #{detail_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM outbound_order_detail WHERE detail_id = #{detail_id}
+    </delete>
+
+</mapper>

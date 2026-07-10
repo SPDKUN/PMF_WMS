@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.QualityCheckHeadMapper">
+
+    <resultMap id="QualityCheckHeadMap" type="com.neuedu.pmf.entity.QualityCheckHead">
+        <id column="quality_check_no" property="quality_check_no"/>
+        <result column="check_type" property="check_type"/>
+        <result column="order_status" property="order_status"/>
+        <result column="inspector_id" property="inspector_id"/>
+        <result column="inspection_time" property="inspection_time"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <select id="list" resultMap="QualityCheckHeadMap">
+        SELECT * FROM quality_check_head
+    </select>
+
+    <select id="findById" resultMap="QualityCheckHeadMap">
+        SELECT * FROM quality_check_head WHERE quality_check_no = #{quality_check_no}
+    </select>
+
+    <insert id="save">
+        INSERT INTO quality_check_head (quality_check_no, check_type, order_status, inspector_id, inspection_time, remark)
+        VALUES (#{quality_check_no}, #{check_type}, #{order_status}, #{inspector_id}, #{inspection_time}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.QualityCheckHead">
+        UPDATE quality_check_head
+        <set>
+            <if test="check_type != null">check_type = #{check_type},</if>
+            <if test="order_status != null">order_status = #{order_status},</if>
+            <if test="inspector_id != null">inspector_id = #{inspector_id},</if>
+            <if test="inspection_time != null">inspection_time = #{inspection_time},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE quality_check_no = #{quality_check_no}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM quality_check_head WHERE quality_check_no = #{quality_check_no}
+    </delete>
+
+</mapper>

@@ -1,0 +1,67 @@
+import { createRouter, createWebHashHistory } from 'vue-router'
+
+import Login from '@/pages/login/index.vue'
+import Regist from '@/pages/regist/index.vue'
+import MainLayout from '@/layouts/MainLayout.vue'
+import Home from '@/pages/home/index.vue'
+import Manage from '@/pages/manage/index.vue'
+import Query from '@/pages/query/index.vue'
+import Tasks from '@/pages/tasks/index.vue'
+import Profile from '@/pages/profile/index.vue'
+
+const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/regist',
+    name: 'Regist',
+    component: Regist
+  },
+  {
+    path: '/',
+    component: MainLayout,
+    redirect: '/home',
+    children: [
+      {
+        path: 'home',
+        name: 'Home',
+        component: Home,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'manage',
+        name: 'Manage',
+        component: Manage,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'query',
+        name: 'Query',
+        component: Query,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'tasks',
+        name: 'Tasks',
+        component: Tasks,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: Profile,
+        meta: { requiresAuth: true }
+      }
+    ]
+  }
+]
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
+})
+
+export default router

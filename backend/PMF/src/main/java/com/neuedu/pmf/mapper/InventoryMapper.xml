@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.InventoryMapper">
+
+    <resultMap id="InventoryMap" type="com.neuedu.pmf.entity.Inventory">
+        <id column="inventory_id" property="inventory_id"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="batch_id" property="batch_id"/>
+        <result column="warehouse_id" property="warehouse_id"/>
+        <result column="zone_id" property="zone_id"/>
+        <result column="location_id" property="location_id"/>
+        <result column="quantity" property="quantity"/>
+        <result column="locked_quantity" property="locked_quantity"/>
+        <result column="inventory_status" property="inventory_status"/>
+        <result column="inbound_time" property="inbound_time"/>
+        <result column="last_updated" property="last_updated"/>
+    </resultMap>
+
+    <select id="list" resultMap="InventoryMap">
+        SELECT * FROM inventory
+    </select>
+
+    <select id="findById" resultMap="InventoryMap">
+        SELECT * FROM inventory WHERE inventory_id = #{inventory_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="inventory_id">
+        INSERT INTO inventory (goods_id, batch_id, warehouse_id, zone_id, location_id, quantity, locked_quantity, inventory_status, inbound_time, last_updated)
+        VALUES (#{goods_id}, #{batch_id}, #{warehouse_id}, #{zone_id}, #{location_id}, #{quantity}, #{locked_quantity}, #{inventory_status}, #{inbound_time}, #{last_updated})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.Inventory">
+        UPDATE inventory
+        <set>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="batch_id != null">batch_id = #{batch_id},</if>
+            <if test="warehouse_id != null">warehouse_id = #{warehouse_id},</if>
+            <if test="zone_id != null">zone_id = #{zone_id},</if>
+            <if test="location_id != null">location_id = #{location_id},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="locked_quantity != null">locked_quantity = #{locked_quantity},</if>
+            <if test="inventory_status != null">inventory_status = #{inventory_status},</if>
+            <if test="inbound_time != null">inbound_time = #{inbound_time},</if>
+            <if test="last_updated != null">last_updated = #{last_updated},</if>
+        </set>
+        WHERE inventory_id = #{inventory_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM inventory WHERE inventory_id = #{inventory_id}
+    </delete>
+
+</mapper>

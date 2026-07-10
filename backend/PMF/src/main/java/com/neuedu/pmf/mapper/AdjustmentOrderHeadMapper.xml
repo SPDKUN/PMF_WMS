@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.AdjustmentOrderHeadMapper">
+
+    <resultMap id="AdjustmentOrderHeadMap" type="com.neuedu.pmf.entity.AdjustmentOrderHead">
+        <id column="adjustment_no" property="adjustment_no"/>
+        <result column="adjustment_type" property="adjustment_type"/>
+        <result column="order_status" property="order_status"/>
+        <result column="operator_id" property="operator_id"/>
+        <result column="adjustment_time" property="adjustment_time"/>
+    </resultMap>
+
+    <select id="list" resultMap="AdjustmentOrderHeadMap">
+        SELECT * FROM adjustment_order_head
+    </select>
+
+    <select id="findById" resultMap="AdjustmentOrderHeadMap">
+        SELECT * FROM adjustment_order_head WHERE adjustment_no = #{adjustment_no}
+    </select>
+
+    <insert id="save">
+        INSERT INTO adjustment_order_head (adjustment_no, adjustment_type, order_status, operator_id, adjustment_time)
+        VALUES (#{adjustment_no}, #{adjustment_type}, #{order_status}, #{operator_id}, #{adjustment_time})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.AdjustmentOrderHead">
+        UPDATE adjustment_order_head
+        <set>
+            <if test="adjustment_type != null">adjustment_type = #{adjustment_type},</if>
+            <if test="order_status != null">order_status = #{order_status},</if>
+            <if test="operator_id != null">operator_id = #{operator_id},</if>
+            <if test="adjustment_time != null">adjustment_time = #{adjustment_time},</if>
+        </set>
+        WHERE adjustment_no = #{adjustment_no}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM adjustment_order_head WHERE adjustment_no = #{adjustment_no}
+    </delete>
+
+</mapper>

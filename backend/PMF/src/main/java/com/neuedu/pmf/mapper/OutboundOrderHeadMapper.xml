@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.OutboundOrderHeadMapper">
+
+    <resultMap id="OutboundOrderHeadMap" type="com.neuedu.pmf.entity.OutboundOrderHead">
+        <id column="outbound_no" property="outbound_no"/>
+        <result column="outbound_type" property="outbound_type"/>
+        <result column="order_status" property="order_status"/>
+        <result column="operator_id" property="operator_id"/>
+        <result column="outbound_time" property="outbound_time"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <select id="list" resultMap="OutboundOrderHeadMap">
+        SELECT * FROM outbound_order_head
+    </select>
+
+    <select id="findById" resultMap="OutboundOrderHeadMap">
+        SELECT * FROM outbound_order_head WHERE outbound_no = #{outbound_no}
+    </select>
+
+    <insert id="save">
+        INSERT INTO outbound_order_head (outbound_no, outbound_type, order_status, operator_id, outbound_time, remark)
+        VALUES (#{outbound_no}, #{outbound_type}, #{order_status}, #{operator_id}, #{outbound_time}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.OutboundOrderHead">
+        UPDATE outbound_order_head
+        <set>
+            <if test="outbound_type != null">outbound_type = #{outbound_type},</if>
+            <if test="order_status != null">order_status = #{order_status},</if>
+            <if test="operator_id != null">operator_id = #{operator_id},</if>
+            <if test="outbound_time != null">outbound_time = #{outbound_time},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE outbound_no = #{outbound_no}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM outbound_order_head WHERE outbound_no = #{outbound_no}
+    </delete>
+
+</mapper>

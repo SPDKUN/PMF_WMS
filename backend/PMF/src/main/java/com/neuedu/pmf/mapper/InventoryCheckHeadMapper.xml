@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.InventoryCheckHeadMapper">
+
+    <resultMap id="InventoryCheckHeadMap" type="com.neuedu.pmf.entity.InventoryCheckHead">
+        <id column="check_no" property="check_no"/>
+        <result column="check_type" property="check_type"/>
+        <result column="order_status" property="order_status"/>
+        <result column="operator_id" property="operator_id"/>
+        <result column="created_time" property="created_time"/>
+        <result column="completed_time" property="completed_time"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <select id="list" resultMap="InventoryCheckHeadMap">
+        SELECT * FROM inventory_check_head
+    </select>
+
+    <select id="findById" resultMap="InventoryCheckHeadMap">
+        SELECT * FROM inventory_check_head WHERE check_no = #{check_no}
+    </select>
+
+    <insert id="save">
+        INSERT INTO inventory_check_head (check_no, check_type, order_status, operator_id, created_time, completed_time, remark)
+        VALUES (#{check_no}, #{check_type}, #{order_status}, #{operator_id}, #{created_time}, #{completed_time}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.InventoryCheckHead">
+        UPDATE inventory_check_head
+        <set>
+            <if test="check_type != null">check_type = #{check_type},</if>
+            <if test="order_status != null">order_status = #{order_status},</if>
+            <if test="operator_id != null">operator_id = #{operator_id},</if>
+            <if test="created_time != null">created_time = #{created_time},</if>
+            <if test="completed_time != null">completed_time = #{completed_time},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE check_no = #{check_no}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM inventory_check_head WHERE check_no = #{check_no}
+    </delete>
+
+</mapper>

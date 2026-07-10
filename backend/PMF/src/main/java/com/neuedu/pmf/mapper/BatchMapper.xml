@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.BatchMapper">
+
+    <resultMap id="BatchMap" type="com.neuedu.pmf.entity.Batch">
+        <id column="batch_id" property="batch_id"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="production_date" property="production_date"/>
+        <result column="expiry_date" property="expiry_date"/>
+        <result column="initial_quantity" property="initial_quantity"/>
+        <result column="remaining_quantity" property="remaining_quantity"/>
+        <result column="batch_status" property="batch_status"/>
+    </resultMap>
+
+    <select id="list" resultMap="BatchMap">
+        SELECT * FROM batch
+    </select>
+
+    <select id="findById" resultMap="BatchMap">
+        SELECT * FROM batch WHERE batch_id = #{batch_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="batch_id">
+        INSERT INTO batch (goods_id, production_date, expiry_date, initial_quantity, remaining_quantity, batch_status)
+        VALUES (#{goods_id}, #{production_date}, #{expiry_date}, #{initial_quantity}, #{remaining_quantity}, #{batch_status})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.Batch">
+        UPDATE batch
+        <set>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="production_date != null">production_date = #{production_date},</if>
+            <if test="expiry_date != null">expiry_date = #{expiry_date},</if>
+            <if test="initial_quantity != null">initial_quantity = #{initial_quantity},</if>
+            <if test="remaining_quantity != null">remaining_quantity = #{remaining_quantity},</if>
+            <if test="batch_status != null">batch_status = #{batch_status},</if>
+        </set>
+        WHERE batch_id = #{batch_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM batch WHERE batch_id = #{batch_id}
+    </delete>
+
+</mapper>

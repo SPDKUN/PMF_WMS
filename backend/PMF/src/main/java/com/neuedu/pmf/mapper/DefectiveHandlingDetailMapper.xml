@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.DefectiveHandlingDetailMapper">
+
+    <resultMap id="DefectiveHandlingDetailMap" type="com.neuedu.pmf.entity.DefectiveHandlingDetail">
+        <id column="detail_id" property="detail_id"/>
+        <result column="handling_no" property="handling_no"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="batch_id" property="batch_id"/>
+        <result column="quantity" property="quantity"/>
+        <result column="source_location_id" property="source_location_id"/>
+        <result column="target_location_id" property="target_location_id"/>
+    </resultMap>
+
+    <select id="list" resultMap="DefectiveHandlingDetailMap">
+        SELECT * FROM defective_handling_detail
+    </select>
+
+    <select id="findById" resultMap="DefectiveHandlingDetailMap">
+        SELECT * FROM defective_handling_detail WHERE detail_id = #{detail_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="detail_id">
+        INSERT INTO defective_handling_detail (handling_no, goods_id, batch_id, quantity, source_location_id, target_location_id)
+        VALUES (#{handling_no}, #{goods_id}, #{batch_id}, #{quantity}, #{source_location_id}, #{target_location_id})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.DefectiveHandlingDetail">
+        UPDATE defective_handling_detail
+        <set>
+            <if test="handling_no != null">handling_no = #{handling_no},</if>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="batch_id != null">batch_id = #{batch_id},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="source_location_id != null">source_location_id = #{source_location_id},</if>
+            <if test="target_location_id != null">target_location_id = #{target_location_id},</if>
+        </set>
+        WHERE detail_id = #{detail_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM defective_handling_detail WHERE detail_id = #{detail_id}
+    </delete>
+
+</mapper>

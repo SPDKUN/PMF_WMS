@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.InboundOrderHeadMapper">
+
+    <resultMap id="InboundOrderHeadMap" type="com.neuedu.pmf.entity.InboundOrderHead">
+        <id column="inbound_no" property="inbound_no"/>
+        <result column="inbound_type" property="inbound_type"/>
+        <result column="order_status" property="order_status"/>
+        <result column="operator_id" property="operator_id"/>
+        <result column="inbound_time" property="inbound_time"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <select id="list" resultMap="InboundOrderHeadMap">
+        SELECT * FROM inbound_order_head
+    </select>
+
+    <select id="findById" resultMap="InboundOrderHeadMap">
+        SELECT * FROM inbound_order_head WHERE inbound_no = #{inbound_no}
+    </select>
+
+    <insert id="save">
+        INSERT INTO inbound_order_head (inbound_no, inbound_type, order_status, operator_id, inbound_time, remark)
+        VALUES (#{inbound_no}, #{inbound_type}, #{order_status}, #{operator_id}, #{inbound_time}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.InboundOrderHead">
+        UPDATE inbound_order_head
+        <set>
+            <if test="inbound_type != null">inbound_type = #{inbound_type},</if>
+            <if test="order_status != null">order_status = #{order_status},</if>
+            <if test="operator_id != null">operator_id = #{operator_id},</if>
+            <if test="inbound_time != null">inbound_time = #{inbound_time},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE inbound_no = #{inbound_no}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM inbound_order_head WHERE inbound_no = #{inbound_no}
+    </delete>
+
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.LocationMapper">
+
+    <resultMap id="LocationMap" type="com.neuedu.pmf.entity.Location">
+        <id column="location_id" property="location_id"/>
+        <result column="location_name" property="location_name"/>
+        <result column="zone_id" property="zone_id"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="is_occupied" property="is_occupied"/>
+        <result column="description" property="description"/>
+    </resultMap>
+
+    <select id="list" resultMap="LocationMap">
+        SELECT * FROM location
+    </select>
+
+    <select id="findById" resultMap="LocationMap">
+        SELECT * FROM location WHERE location_id = #{location_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="location_id">
+        INSERT INTO location (location_name, zone_id, goods_id, is_occupied, description)
+        VALUES (#{location_name}, #{zone_id}, #{goods_id}, #{is_occupied}, #{description})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.Location">
+        UPDATE location
+        <set>
+            <if test="location_name != null">location_name = #{location_name},</if>
+            <if test="zone_id != null">zone_id = #{zone_id},</if>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="is_occupied != null">is_occupied = #{is_occupied},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE location_id = #{location_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM location WHERE location_id = #{location_id}
+    </delete>
+
+</mapper>

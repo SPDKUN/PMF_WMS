@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.GoodsMapper">
+
+    <resultMap id="GoodsMap" type="com.neuedu.pmf.entity.Goods">
+        <id column="goods_id" property="goods_id"/>
+        <result column="goods_code" property="goods_code"/>
+        <result column="category" property="category"/>
+        <result column="goods_name" property="goods_name"/>
+        <result column="storage_location" property="storage_location"/>
+        <result column="storage_condition" property="storage_condition"/>
+        <result column="expiry_date" property="expiry_date"/>
+        <result column="batch_no" property="batch_no"/>
+        <result column="description" property="description"/>
+    </resultMap>
+
+    <select id="list" resultMap="GoodsMap">
+        SELECT * FROM goods
+    </select>
+
+    <select id="findById" resultMap="GoodsMap">
+        SELECT * FROM goods WHERE goods_id = #{goods_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="goods_id">
+        INSERT INTO goods (goods_code, category, goods_name, storage_location, storage_condition, expiry_date, batch_no, description)
+        VALUES (#{goods_code}, #{category}, #{goods_name}, #{storage_location}, #{storage_condition}, #{expiry_date}, #{batch_no}, #{description})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.Goods">
+        UPDATE goods
+        <set>
+            <if test="goods_code != null">goods_code = #{goods_code},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="goods_name != null">goods_name = #{goods_name},</if>
+            <if test="storage_location != null">storage_location = #{storage_location},</if>
+            <if test="storage_condition != null">storage_condition = #{storage_condition},</if>
+            <if test="expiry_date != null">expiry_date = #{expiry_date},</if>
+            <if test="batch_no != null">batch_no = #{batch_no},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE goods_id = #{goods_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM goods WHERE goods_id = #{goods_id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.InboundOrderDetailMapper">
+
+    <resultMap id="InboundOrderDetailMap" type="com.neuedu.pmf.entity.InboundOrderDetail">
+        <id column="detail_id" property="detail_id"/>
+        <result column="inbound_no" property="inbound_no"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="batch_no" property="batch_no"/>
+        <result column="production_date" property="production_date"/>
+        <result column="expiry_date" property="expiry_date"/>
+        <result column="quantity" property="quantity"/>
+        <result column="warehouse_id" property="warehouse_id"/>
+        <result column="zone_id" property="zone_id"/>
+        <result column="location_id" property="location_id"/>
+    </resultMap>
+
+    <select id="list" resultMap="InboundOrderDetailMap">
+        SELECT * FROM inbound_order_detail
+    </select>
+
+    <select id="findById" resultMap="InboundOrderDetailMap">
+        SELECT * FROM inbound_order_detail WHERE detail_id = #{detail_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="detail_id">
+        INSERT INTO inbound_order_detail (inbound_no, goods_id, batch_no, production_date, expiry_date, quantity, warehouse_id, zone_id, location_id)
+        VALUES (#{inbound_no}, #{goods_id}, #{batch_no}, #{production_date}, #{expiry_date}, #{quantity}, #{warehouse_id}, #{zone_id}, #{location_id})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.InboundOrderDetail">
+        UPDATE inbound_order_detail
+        <set>
+            <if test="inbound_no != null">inbound_no = #{inbound_no},</if>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="batch_no != null">batch_no = #{batch_no},</if>
+            <if test="production_date != null">production_date = #{production_date},</if>
+            <if test="expiry_date != null">expiry_date = #{expiry_date},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="warehouse_id != null">warehouse_id = #{warehouse_id},</if>
+            <if test="zone_id != null">zone_id = #{zone_id},</if>
+            <if test="location_id != null">location_id = #{location_id},</if>
+        </set>
+        WHERE detail_id = #{detail_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM inbound_order_detail WHERE detail_id = #{detail_id}
+    </delete>
+
+</mapper>

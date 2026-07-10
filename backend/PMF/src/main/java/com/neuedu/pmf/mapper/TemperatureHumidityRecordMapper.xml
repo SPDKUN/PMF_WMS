@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.TemperatureHumidityRecordMapper">
+
+    <resultMap id="TemperatureHumidityRecordMap" type="com.neuedu.pmf.entity.TemperatureHumidityRecord">
+        <id column="record_id" property="record_id"/>
+        <result column="warehouse_id" property="warehouse_id"/>
+        <result column="temperature" property="temperature"/>
+        <result column="humidity" property="humidity"/>
+        <result column="recorded_time" property="recorded_time"/>
+    </resultMap>
+
+    <select id="list" resultMap="TemperatureHumidityRecordMap">
+        SELECT * FROM temperature_humidity_record
+    </select>
+
+    <select id="findById" resultMap="TemperatureHumidityRecordMap">
+        SELECT * FROM temperature_humidity_record WHERE record_id = #{record_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="record_id">
+        INSERT INTO temperature_humidity_record (warehouse_id, temperature, humidity, recorded_time)
+        VALUES (#{warehouse_id}, #{temperature}, #{humidity}, #{recorded_time})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.TemperatureHumidityRecord">
+        UPDATE temperature_humidity_record
+        <set>
+            <if test="warehouse_id != null">warehouse_id = #{warehouse_id},</if>
+            <if test="temperature != null">temperature = #{temperature},</if>
+            <if test="humidity != null">humidity = #{humidity},</if>
+            <if test="recorded_time != null">recorded_time = #{recorded_time},</if>
+        </set>
+        WHERE record_id = #{record_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM temperature_humidity_record WHERE record_id = #{record_id}
+    </delete>
+
+</mapper>

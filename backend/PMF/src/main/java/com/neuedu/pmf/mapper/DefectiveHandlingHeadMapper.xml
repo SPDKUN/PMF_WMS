@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.DefectiveHandlingHeadMapper">
+
+    <resultMap id="DefectiveHandlingHeadMap" type="com.neuedu.pmf.entity.DefectiveHandlingHead">
+        <id column="handling_no" property="handling_no"/>
+        <result column="handling_type" property="handling_type"/>
+        <result column="order_status" property="order_status"/>
+        <result column="operator_id" property="operator_id"/>
+        <result column="handling_time" property="handling_time"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <select id="list" resultMap="DefectiveHandlingHeadMap">
+        SELECT * FROM defective_handling_head
+    </select>
+
+    <select id="findById" resultMap="DefectiveHandlingHeadMap">
+        SELECT * FROM defective_handling_head WHERE handling_no = #{handling_no}
+    </select>
+
+    <insert id="save">
+        INSERT INTO defective_handling_head (handling_no, handling_type, order_status, operator_id, handling_time, remark)
+        VALUES (#{handling_no}, #{handling_type}, #{order_status}, #{operator_id}, #{handling_time}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.DefectiveHandlingHead">
+        UPDATE defective_handling_head
+        <set>
+            <if test="handling_type != null">handling_type = #{handling_type},</if>
+            <if test="order_status != null">order_status = #{order_status},</if>
+            <if test="operator_id != null">operator_id = #{operator_id},</if>
+            <if test="handling_time != null">handling_time = #{handling_time},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE handling_no = #{handling_no}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM defective_handling_head WHERE handling_no = #{handling_no}
+    </delete>
+
+</mapper>

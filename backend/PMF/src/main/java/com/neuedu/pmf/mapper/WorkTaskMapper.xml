@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.WorkTaskMapper">
+
+    <resultMap id="WorkTaskMap" type="com.neuedu.pmf.entity.WorkTask">
+        <id column="task_id" property="task_id"/>
+        <result column="task_type" property="task_type"/>
+        <result column="priority" property="priority"/>
+        <result column="related_order_no" property="related_order_no"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="source_location_id" property="source_location_id"/>
+        <result column="target_location_id" property="target_location_id"/>
+        <result column="assignee_id" property="assignee_id"/>
+        <result column="deadline" property="deadline"/>
+        <result column="created_time" property="created_time"/>
+        <result column="completed_time" property="completed_time"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <select id="list" resultMap="WorkTaskMap">
+        SELECT * FROM work_task
+    </select>
+
+    <select id="findById" resultMap="WorkTaskMap">
+        SELECT * FROM work_task WHERE task_id = #{task_id}
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="task_id">
+        INSERT INTO work_task (task_type, priority, related_order_no, goods_id, source_location_id, target_location_id, assignee_id, deadline, created_time, completed_time, remark)
+        VALUES (#{task_type}, #{priority}, #{related_order_no}, #{goods_id}, #{source_location_id}, #{target_location_id}, #{assignee_id}, #{deadline}, #{created_time}, #{completed_time}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.neuedu.pmf.entity.WorkTask">
+        UPDATE work_task
+        <set>
+            <if test="task_type != null">task_type = #{task_type},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="related_order_no != null">related_order_no = #{related_order_no},</if>
+            <if test="goods_id != null">goods_id = #{goods_id},</if>
+            <if test="source_location_id != null">source_location_id = #{source_location_id},</if>
+            <if test="target_location_id != null">target_location_id = #{target_location_id},</if>
+            <if test="assignee_id != null">assignee_id = #{assignee_id},</if>
+            <if test="deadline != null">deadline = #{deadline},</if>
+            <if test="created_time != null">created_time = #{created_time},</if>
+            <if test="completed_time != null">completed_time = #{completed_time},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE task_id = #{task_id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM work_task WHERE task_id = #{task_id}
+    </delete>
+
+</mapper>
