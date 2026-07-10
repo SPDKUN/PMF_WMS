@@ -51,7 +51,6 @@
             <input type="checkbox" />
             <span>记住密码</span>
           </label>
-          <a href="#" class="forgot-password">忘记密码？</a>
         </div>
 
         <button type="submit" class="login-btn" :disabled="loading">
@@ -68,10 +67,6 @@
           <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         {{ errorMsg }}
-      </p>
-
-      <p class="regist-link">
-        还没有账号？<router-link to="/regist">立即注册</router-link>
       </p>
     </div>
   </div>
