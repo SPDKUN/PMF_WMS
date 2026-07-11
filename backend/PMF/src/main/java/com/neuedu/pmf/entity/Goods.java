@@ -14,4 +14,5 @@ public class Goods {
     private String goods_name;
     private String storage_condition;
     private Integer quantity;
+    private String unit;
 }

@@ -9,6 +9,7 @@
         <result column="goods_name" property="goods_name"/>
         <result column="storage_condition" property="storage_condition"/>
         <result column="quantity" property="quantity"/>
+        <result column="unit" property="unit"/>
     </resultMap>
 
     <select id="list" resultMap="GoodsMap">
@@ -20,8 +21,8 @@
     </select>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="goods_id">
-        INSERT INTO goods (goods_code, category, goods_name, storage_condition, quantity)
-        VALUES (#{goods_code}, #{category}, #{goods_name}, #{storage_condition}, #{quantity})
+        INSERT INTO goods (goods_code, category, goods_name, storage_condition, quantity, unit)
+        VALUES (#{goods_code}, #{category}, #{goods_name}, #{storage_condition}, #{quantity}, #{unit})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Goods">
@@ -32,6 +33,7 @@
             <if test="goods_name != null">goods_name = #{goods_name},</if>
             <if test="storage_condition != null">storage_condition = #{storage_condition},</if>
             <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
         </set>
         WHERE goods_id = #{goods_id}
     </update>
