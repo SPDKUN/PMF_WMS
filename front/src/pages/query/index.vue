@@ -50,11 +50,12 @@
             <th>仓库尺寸</th>
             <th>可用库位数</th>
             <th>状态</th>
+            <th width="100">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="warehouseList.length === 0">
-            <td colspan="7" class="empty-cell">暂无仓库数据</td>
+            <td colspan="8" class="empty-cell">暂无仓库数据</td>
           </tr>
           <tr v-for="w in warehouseList" :key="w.warehouse_id">
             <td>{{ w.warehouse_id }}</td>
@@ -64,6 +65,7 @@
             <td>{{ w.warehouse_size }}</td>
             <td>{{ w.available_slots }} / {{ w.total_slots }}</td>
             <td><span class="status-tag" :class="w.status === '启用' ? '启用' : '禁用'">{{ w.status === '启用' ? '启用' : '停用' }}</span></td>
+            <td><button class="btn-action view" @click="openViewDialog(w)">查看</button></td>
           </tr>
         </tbody>
       </table>
@@ -94,6 +96,52 @@
       <span v-else-if="activeTab === 'warehouse'">共 {{ warehouseList.length }} 条</span>
       <span v-else>共 {{ currentData.length }} 条</span>
     </div>
+
+    <!-- 仓库查看弹窗（可视化） -->
+    <div class="dialog-overlay" v-if="viewDialog.visible" @click.self="viewDialog.visible = false">
+      <div class="dialog-box view-dialog-box">
+        <div class="dialog-header">
+          <h3>{{ viewDialog.warehouse.warehouse_name }} - 库区库位可视化</h3>
+          <button class="dialog-close" @click="viewDialog.visible = false">&times;</button>
+        </div>
+        <div class="view-dialog-body">
+          <div class="zone-sidebar">
+            <div class="zone-sidebar-title">库区列表</div>
+            <div
+              v-for="zone in viewDialog.zones"
+              :key="zone.zone_id"
+              class="zone-item"
+              :class="{ active: viewDialog.selectedZoneId === zone.zone_id }"
+              @click="selectZone(zone)"
+            >
+              <span class="zone-dot" :class="zone.available_slots > 0 ? 'dot-green' : 'dot-red'"></span>
+              <span class="zone-name">{{ zone.zone_name }}</span>
+              <span class="zone-available">可用: {{ zone.available_slots }}/{{ zone.total_slots }}</span>
+            </div>
+            <div v-if="viewDialog.zones.length === 0" class="zone-empty">暂无库区数据</div>
+          </div>
+          <div class="location-main">
+            <div class="location-main-title" v-if="viewDialog.selectedZone">
+              {{ viewDialog.selectedZone.zone_name }} - 库位一览
+            </div>
+            <div class="location-grid" v-if="viewDialog.selectedZone">
+              <div
+                v-for="loc in viewDialog.locations"
+                :key="loc.location_id"
+                class="location-card"
+                :class="loc.is_occupied === 1 ? 'loc-occupied' : 'loc-free'"
+              >
+                <span class="loc-name">{{ loc.location_name }}</span>
+              </div>
+              <div v-if="viewDialog.locations.length === 0" class="zone-empty">暂无库位数据</div>
+            </div>
+            <div class="location-main-placeholder" v-else>
+              请在左侧选择一个库区查看库位详情
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -115,6 +163,14 @@ export default {
       ],
       personnelList: [],
       warehouseList: [],
+      viewDialog: {
+        visible: false,
+        warehouse: {},
+        zones: [],
+        selectedZoneId: null,
+        selectedZone: null,
+        locations: []
+      },
       inventoryData: [
         { '商品名称': '预制菜A', 'SKU': 'PRE-A001', '库存数量': 500, '可用数量': 480, '锁定数量': 20, '单位': '箱', '仓库': 'A区冷库' },
         { '商品名称': '预制菜B', 'SKU': 'PRE-B002', '库存数量': 300, '可用数量': 300, '锁定数量': 0, '单位': '箱', '仓库': 'B区常温库' },
@@ -185,6 +241,34 @@ export default {
         const res = await request.get('/warehouse/list')
         if (res.code === 200) {
           this.warehouseList = res.data || []
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    async openViewDialog(warehouse) {
+      this.viewDialog.warehouse = warehouse
+      this.viewDialog.selectedZoneId = null
+      this.viewDialog.selectedZone = null
+      this.viewDialog.locations = []
+      this.viewDialog.visible = true
+
+      try {
+        const res = await request.get('/zone/list', { warehouseId: warehouse.warehouse_id })
+        if (res.code === 200) {
+          this.viewDialog.zones = res.data || []
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    async selectZone(zone) {
+      this.viewDialog.selectedZoneId = zone.zone_id
+      this.viewDialog.selectedZone = zone
+      try {
+        const res = await request.get('/location/list', { zoneId: zone.zone_id })
+        if (res.code === 200) {
+          this.viewDialog.locations = res.data || []
         }
       } catch (e) {
         // 静默失败
@@ -270,10 +354,112 @@ export default {
   color: #909399;
 }
 
+.btn-action {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-action.view { background: #f0f9eb; color: #67c23a; }
+.btn-action.view:hover { background: #e1f3d8; }
+
+/* 仓库查看弹窗 */
+.dialog-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.dialog-box {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  width: 460px; max-width: 92vw;
+}
+.dialog-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid #ebeef5;
+}
+.dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
+.dialog-close {
+  background: none; border: none; color: #c0c4cc;
+  font-size: 20px; cursor: pointer; padding: 0; line-height: 1;
+}
+.dialog-close:hover { color: #303133; }
+
+.view-dialog-box { width: 900px; }
+.view-dialog-body { display: flex; height: 460px; }
+.zone-sidebar {
+  width: 240px; min-width: 240px;
+  border-right: 1px solid #ebeef5;
+  overflow-y: auto;
+  background: #fafafa;
+}
+.zone-sidebar-title {
+  padding: 12px 14px;
+  font-size: 13px; font-weight: 600; color: #303133;
+  border-bottom: 1px solid #ebeef5;
+  background: #fff;
+  position: sticky; top: 0;
+}
+.zone-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s;
+}
+.zone-item:hover { background: #ecf5ff; }
+.zone-item.active { background: #d9ecff; }
+.zone-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-green { background: #67c23a; }
+.dot-red { background: #f56c6c; }
+.zone-name {
+  flex: 1; font-size: 13px; color: #303133;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.zone-available { font-size: 11px; color: #909399; flex-shrink: 0; }
+.zone-empty { padding: 20px; text-align: center; color: #c0c4cc; font-size: 13px; }
+
+.location-main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+.location-main-title {
+  padding: 12px 16px;
+  font-size: 13px; font-weight: 600; color: #303133;
+  border-bottom: 1px solid #ebeef5;
+  background: #fff;
+  position: sticky; top: 0; z-index: 1;
+}
+.location-main-placeholder {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: #c0c4cc; font-size: 14px;
+}
+.location-grid {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  padding: 16px;
+  align-content: flex-start;
+}
+.location-card {
+  width: 90px; height: 56px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: default;
+  transition: transform 0.15s;
+}
+.location-card:hover { transform: scale(1.05); }
+.loc-free { background: #f0f9eb; border: 1px solid #b3e19d; }
+.loc-occupied { background: #fef0f0; border: 1px solid #fab6b6; }
+.loc-name { font-size: 11px; color: #303133; text-align: center; word-break: break-all; }
+
 @media (max-width: 768px) {
   .tab-row { flex-wrap: wrap; }
   .tab-row button { padding: 5px 12px; font-size: 12px; }
   .data-table { font-size: 12px; }
   .data-table th, .data-table td { padding: 8px; }
+  .view-dialog-box { width: 98vw; }
+  .view-dialog-body { flex-direction: column; height: auto; max-height: 70vh; }
+  .zone-sidebar { width: 100%; min-width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid #ebeef5; }
 }
 </style>
