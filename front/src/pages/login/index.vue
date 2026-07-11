@@ -27,13 +27,6 @@
           />
         </div>
 
-        <div class="form-options">
-          <label class="remember-me">
-            <input type="checkbox" />
-            <span>记住密码</span>
-          </label>
-        </div>
-
         <button type="submit" class="login-btn" :disabled="loading">
           <span v-if="!loading">登 录</span>
           <span v-else>登录中...</span>
@@ -48,8 +41,11 @@
 <script>
 import axios from 'axios'
 
+import request from '@/utils/request.js'
+
 export default {
   name: 'LoginView',
+  // 定义数据
   data() {
     return {
       username: '',
@@ -58,12 +54,20 @@ export default {
       loading: false
     }
   },
+
+  //生命周期函数，不用调用，时间一到自动执行
+  //例如在页面加载之前先从后台访问数据
+  // mounted() {
+
+  // },
+
+  // 定义方法
   methods: {
     async handleLogin() {
       this.errorMsg = ''
       this.loading = true
       try {
-        const response = await axios.get('http://localhost:8088/auth/login', {
+        const response = await request.get('/auth/login', {
           params: {
             username: this.username,
             password: this.password

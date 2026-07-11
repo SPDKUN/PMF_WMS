@@ -10,21 +10,23 @@ import axios from 'axios'
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // 基础路径（从环境变量获取）
+  baseURL: '/api', // 基础路径（从环境变量获取）
   timeout: 10000, // 请求超时时间（10秒）
   headers: {
     'Content-Type': 'application/json;charset=utf-8'
   }
 })
 
+// service：axios对象，通过这个对象可以给后端发送请求
 
-
-// 请求拦截器
+// 请求拦截器，在每次发送请求之前，会先执行这段添加token的代码
 service.interceptors.request.use(
   (config) => {
-    // 添加token到请求头
-    if (userStore.token) {
-      config.headers.Authorization = `Bearer ${userStore.token}`
+    // 添加token到请求头，从localStorage获取token
+    let token = localStorage.getItem('token')
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
     }
  
     return config
