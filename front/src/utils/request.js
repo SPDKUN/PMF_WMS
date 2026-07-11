@@ -1,10 +1,10 @@
 import axios from 'axios'
 
-import { useUserStore } from '../store/modules/user'
+// import { useUserStore } from '../store/modules/user'
 
 
 // pinia的user仓库
-const userStore = useUserStore();
+// const userStore = useUserStore();
 
 
 

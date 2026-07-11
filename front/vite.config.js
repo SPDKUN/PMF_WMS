@@ -8,5 +8,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  // http:localhost:8080/api/login ==> http://localhost:8088/login
+  server : {
+    port: 8080,
+    open: true
   }
 })
