@@ -13,4 +13,6 @@ public interface LocationService {
     boolean save(Location location);
 
     boolean update(Location location);
+
+    ArrayList<Location> listByZoneId(Integer zoneId);
 }

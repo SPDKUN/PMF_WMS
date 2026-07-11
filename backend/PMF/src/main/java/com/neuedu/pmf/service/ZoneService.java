@@ -13,4 +13,6 @@ public interface ZoneService {
     boolean save(Zone zone);
 
     boolean update(Zone zone);
+
+    ArrayList<Zone> listByWarehouseId(Integer warehouseId);
 }

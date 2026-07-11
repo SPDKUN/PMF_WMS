@@ -79,27 +79,30 @@
             <tr>
               <th>ID</th>
               <th>仓库名称</th>
+              <th>仓库类型</th>
               <th>地址</th>
-              <th>面积(m²)</th>
-              <th>库位数</th>
+              <th>仓库尺寸</th>
+              <th>可用库位数</th>
               <th>状态</th>
-              <th width="160">操作</th>
+              <th width="220">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="warehouseList.length === 0">
-              <td colspan="7" class="empty-cell">暂无仓库数据</td>
+              <td colspan="8" class="empty-cell">暂无仓库数据</td>
             </tr>
-            <tr v-for="w in warehouseList" :key="w.id">
-              <td>{{ w.id }}</td>
-              <td>{{ w.name }}</td>
-              <td>{{ w.address }}</td>
-              <td>{{ w.area }}</td>
-              <td>{{ w.slots }}</td>
-              <td><span class="status-tag" :class="w.status">{{ w.status === '启用' ? '启用' : '停用' }}</span></td>
+            <tr v-for="w in warehouseList" :key="w.warehouse_id">
+              <td>{{ w.warehouse_id }}</td>
+              <td>{{ w.warehouse_name }}</td>
+              <td>{{ w.warehouse_type }}</td>
+              <td>{{ w.location }}</td>
+              <td>{{ w.warehouse_size }}</td>
+              <td>{{ w.available_slots }} / {{ w.total_slots }}</td>
+              <td><span class="status-tag" :class="w.status === '启用' ? '启用' : '禁用'">{{ w.status === '启用' ? '启用' : '停用' }}</span></td>
               <td class="action-cell">
+                <button class="btn-action view" @click="openViewDialog(w)">查看</button>
                 <button class="btn-action edit" @click="openWarehouseDialog(w)">编辑</button>
-                <button class="btn-action delete" @click="deleteWarehouse(w.id)">删除</button>
+                <button class="btn-action delete" @click="deleteWarehouse(w.warehouse_id)">删除</button>
               </td>
             </tr>
           </tbody>
@@ -146,7 +149,7 @@
       </div>
     </div>
 
-    <!-- 仓库弹窗 -->
+    <!-- 仓库新增/编辑弹窗 -->
     <div class="dialog-overlay" v-if="warehouseDialog.visible" @click.self="warehouseDialog.visible = false">
       <div class="dialog-box">
         <div class="dialog-header">
@@ -155,22 +158,36 @@
         </div>
         <div class="dialog-body">
           <div class="form-item">
-            <label>仓库名称</label>
-            <input type="text" v-model="warehouseDialog.form.name" placeholder="请输入仓库名称" />
+            <label>仓库名称 <span class="required">*</span></label>
+            <input type="text" v-model="warehouseDialog.form.warehouse_name" placeholder="请输入仓库名称" />
           </div>
           <div class="form-item">
-            <label>地址</label>
-            <input type="text" v-model="warehouseDialog.form.address" placeholder="请输入地址" />
+            <label>仓库类型 <span class="required">*</span></label>
+            <select v-model="warehouseDialog.form.warehouse_type">
+              <option value="">请选择仓库类型</option>
+              <option value="一般仓库">一般仓库</option>
+              <option value="冷冻库">冷冻库</option>
+              <option value="恒温库">恒温库</option>
+            </select>
           </div>
           <div class="form-item">
-            <label>面积(m²)</label>
-            <input type="number" v-model="warehouseDialog.form.area" placeholder="请输入面积" />
+            <label>地址 <span class="required">*</span></label>
+            <input type="text" v-model="warehouseDialog.form.location" placeholder="请输入地址" />
           </div>
-          <div class="form-item">
-            <label>库位数</label>
-            <input type="number" v-model="warehouseDialog.form.slots" placeholder="请输入库位数" />
+          <div class="form-item" v-if="warehouseDialog.mode === 'create'">
+            <label>仓库尺寸 <span class="required">*</span></label>
+            <select v-model="warehouseDialog.form.warehouse_size">
+              <option value="">请选择仓库尺寸</option>
+              <option value="大">大（16库区/128库位）</option>
+              <option value="中">中（8库区/64库位）</option>
+              <option value="小">小（4库区/32库位）</option>
+            </select>
           </div>
-          <div class="form-item">
+          <div class="form-item" v-else>
+            <label>仓库尺寸</label>
+            <input type="text" :value="warehouseDialog.form.warehouse_size" disabled />
+          </div>
+          <div class="form-item" v-if="warehouseDialog.mode === 'edit'">
             <label>状态</label>
             <select v-model="warehouseDialog.form.status">
               <option value="启用">启用</option>
@@ -201,6 +218,54 @@
         </div>
       </div>
     </div>
+
+    <!-- 仓库查看弹窗（可视化） -->
+    <div class="dialog-overlay" v-if="viewDialog.visible" @click.self="viewDialog.visible = false">
+      <div class="dialog-box view-dialog-box">
+        <div class="dialog-header">
+          <h3>{{ viewDialog.warehouse.warehouse_name }} - 库区库位可视化</h3>
+          <button class="dialog-close" @click="viewDialog.visible = false">&times;</button>
+        </div>
+        <div class="view-dialog-body">
+          <!-- 侧边栏：库区列表 -->
+          <div class="zone-sidebar">
+            <div class="zone-sidebar-title">库区列表</div>
+            <div
+              v-for="zone in viewDialog.zones"
+              :key="zone.zone_id"
+              class="zone-item"
+              :class="{ active: viewDialog.selectedZoneId === zone.zone_id }"
+              @click="selectZone(zone)"
+            >
+              <span class="zone-dot" :class="zone.available_slots > 0 ? 'dot-green' : 'dot-red'"></span>
+              <span class="zone-name">{{ zone.zone_name }}</span>
+              <span class="zone-available">可用: {{ zone.available_slots }}/{{ zone.total_slots }}</span>
+            </div>
+            <div v-if="viewDialog.zones.length === 0" class="zone-empty">暂无库区数据</div>
+          </div>
+          <!-- 主视图区：库位网格 -->
+          <div class="location-main">
+            <div class="location-main-title" v-if="viewDialog.selectedZone">
+              {{ viewDialog.selectedZone.zone_name }} - 库位一览
+            </div>
+            <div class="location-grid" v-if="viewDialog.selectedZone">
+              <div
+                v-for="loc in viewDialog.locations"
+                :key="loc.location_id"
+                class="location-card"
+                :class="loc.is_occupied === 1 ? 'loc-occupied' : 'loc-free'"
+              >
+                <span class="loc-name">{{ loc.location_name }}</span>
+              </div>
+              <div v-if="viewDialog.locations.length === 0" class="zone-empty">暂无库位数据</div>
+            </div>
+            <div class="location-main-placeholder" v-else>
+              请在左侧选择一个库区查看库位详情
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -219,12 +284,7 @@ export default {
       personnelList: [],
       searchType: 'user_id',
       searchKeyword: '',
-      warehouseList: [
-        { id: 1, name: 'A区冷库', address: '园区北路88号', area: 1200, slots: 80, status: '启用' },
-        { id: 2, name: 'B区常温库', address: '园区南路66号', area: 2000, slots: 150, status: '启用' },
-        { id: 3, name: 'C区冷冻库', address: '园区东路33号', area: 800, slots: 50, status: '停用' },
-      ],
-      nextWarehouseId: 4,
+      warehouseList: [],
       personnelDialog: {
         visible: false,
         mode: 'create',
@@ -236,12 +296,21 @@ export default {
       warehouseDialog: {
         visible: false,
         mode: 'create',
-        form: { id: null, name: '', address: '', area: '', slots: '', status: '启用' }
+        form: { warehouse_id: null, warehouse_name: '', warehouse_type: '', location: '', warehouse_size: '', status: '启用' }
+      },
+      viewDialog: {
+        visible: false,
+        warehouse: {},
+        zones: [],
+        selectedZoneId: null,
+        selectedZone: null,
+        locations: []
       }
     }
   },
   mounted() {
     this.fetchPersonnel()
+    this.fetchWarehouses()
   },
   methods: {
     async fetchPersonnel() {
@@ -390,30 +459,125 @@ export default {
     },
 
     // 仓库 CRUD
+    async fetchWarehouses() {
+      try {
+        const res = await request.get('/warehouse/list')
+        if (res.code === 200) {
+          this.warehouseList = res.data || []
+        }
+      } catch (e) {
+        ElMessage.error('获取仓库列表失败')
+      }
+    },
+
     openWarehouseDialog(item) {
       if (item) {
         this.warehouseDialog.mode = 'edit'
-        this.warehouseDialog.form = { ...item }
+        this.warehouseDialog.form = {
+          warehouse_id: item.warehouse_id,
+          warehouse_name: item.warehouse_name,
+          warehouse_type: item.warehouse_type,
+          location: item.location,
+          warehouse_size: item.warehouse_size,
+          status: item.status
+        }
       } else {
         this.warehouseDialog.mode = 'create'
-        this.warehouseDialog.form = { id: null, name: '', address: '', area: '', slots: '', status: '启用' }
+        this.warehouseDialog.form = { warehouse_id: null, warehouse_name: '', warehouse_type: '', location: '', warehouse_size: '', status: '启用' }
       }
       this.warehouseDialog.visible = true
     },
-    submitWarehouse() {
+
+    async submitWarehouse() {
       const f = this.warehouseDialog.form
-      if (!f.name) { alert('请输入仓库名称'); return }
+      if (!f.warehouse_name) { ElMessage.warning('请输入仓库名称'); return }
+      if (!f.warehouse_type) { ElMessage.warning('请选择仓库类型'); return }
+      if (!f.location) { ElMessage.warning('请输入地址'); return }
+
       if (this.warehouseDialog.mode === 'create') {
-        this.warehouseList.push({ ...f, id: this.nextWarehouseId++ })
+        if (!f.warehouse_size) { ElMessage.warning('请选择仓库尺寸'); return }
+        try {
+          const res = await request.post('/warehouse', {
+            warehouse_name: f.warehouse_name,
+            warehouse_type: f.warehouse_type,
+            location: f.location,
+            warehouse_size: f.warehouse_size
+          })
+          if (res.code === 200) {
+            ElMessage.success('新增成功，已自动创建库区和库位')
+            this.warehouseDialog.visible = false
+            this.fetchWarehouses()
+          } else {
+            ElMessage.error(res.msg || '新增失败')
+          }
+        } catch (e) {
+          ElMessage.error('新增失败')
+        }
       } else {
-        const idx = this.warehouseList.findIndex(w => w.id === f.id)
-        if (idx !== -1) this.warehouseList.splice(idx, 1, { ...f })
+        try {
+          const res = await request.put('/warehouse', {
+            warehouse_id: f.warehouse_id,
+            warehouse_name: f.warehouse_name,
+            warehouse_type: f.warehouse_type,
+            location: f.location,
+            status: f.status
+          })
+          if (res.code === 200) {
+            ElMessage.success('修改成功')
+            this.warehouseDialog.visible = false
+            this.fetchWarehouses()
+          } else {
+            ElMessage.error(res.msg || '修改失败')
+          }
+        } catch (e) {
+          ElMessage.error('修改失败')
+        }
       }
-      this.warehouseDialog.visible = false
     },
-    deleteWarehouse(id) {
-      if (confirm('确定删除该仓库？')) {
-        this.warehouseList = this.warehouseList.filter(w => w.id !== id)
+
+    async deleteWarehouse(id) {
+      if (!confirm('确定删除该仓库？将同时删除关联的库区和库位！')) return
+      try {
+        const res = await request.delete(`/warehouse/${id}`)
+        if (res.code === 200) {
+          ElMessage.success('删除成功')
+          this.fetchWarehouses()
+        } else {
+          ElMessage.error(res.msg || '删除失败')
+        }
+      } catch (e) {
+        ElMessage.error('删除失败')
+      }
+    },
+
+    // 仓库查看（可视化）
+    async openViewDialog(warehouse) {
+      this.viewDialog.warehouse = warehouse
+      this.viewDialog.selectedZoneId = null
+      this.viewDialog.selectedZone = null
+      this.viewDialog.locations = []
+      this.viewDialog.visible = true
+
+      try {
+        const res = await request.get('/zone/list', { warehouseId: warehouse.warehouse_id })
+        if (res.code === 200) {
+          this.viewDialog.zones = res.data || []
+        }
+      } catch (e) {
+        ElMessage.error('获取库区列表失败')
+      }
+    },
+
+    async selectZone(zone) {
+      this.viewDialog.selectedZoneId = zone.zone_id
+      this.viewDialog.selectedZone = zone
+      try {
+        const res = await request.get('/location/list', { zoneId: zone.zone_id })
+        if (res.code === 200) {
+          this.viewDialog.locations = res.data || []
+        }
+      } catch (e) {
+        ElMessage.error('获取库位列表失败')
       }
     }
   }
@@ -565,6 +729,8 @@ export default {
 }
 .btn-action.edit { background: #ecf5ff; color: #409EFF; }
 .btn-action.edit:hover { background: #d9ecff; }
+.btn-action.view { background: #f0f9eb; color: #67c23a; }
+.btn-action.view:hover { background: #e1f3d8; }
 .btn-action.delete { background: #fef0f0; color: #f56c6c; }
 .btn-action.delete:hover { background: #fde2e2; }
 
@@ -610,11 +776,101 @@ export default {
 .form-item input:focus, .form-item select:focus { border-color: #409EFF; }
 .form-item select { background: #fff; cursor: pointer; }
 
+/* 仓库查看弹窗 */
+.view-dialog-box {
+  width: 900px; max-width: 95vw;
+}
+.view-dialog-body {
+  display: flex;
+  height: 460px;
+}
+.zone-sidebar {
+  width: 240px; min-width: 240px;
+  border-right: 1px solid #ebeef5;
+  overflow-y: auto;
+  background: #fafafa;
+}
+.zone-sidebar-title {
+  padding: 12px 14px;
+  font-size: 13px; font-weight: 600; color: #303133;
+  border-bottom: 1px solid #ebeef5;
+  background: #fff;
+  position: sticky; top: 0;
+}
+.zone-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s;
+}
+.zone-item:hover { background: #ecf5ff; }
+.zone-item.active { background: #d9ecff; }
+.zone-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-green { background: #67c23a; }
+.dot-red { background: #f56c6c; }
+.zone-name {
+  flex: 1; font-size: 13px; color: #303133;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.zone-available {
+  font-size: 11px; color: #909399; flex-shrink: 0;
+}
+.zone-empty {
+  padding: 20px; text-align: center; color: #c0c4cc; font-size: 13px;
+}
+
+.location-main {
+  flex: 1; display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.location-main-title {
+  padding: 12px 16px;
+  font-size: 13px; font-weight: 600; color: #303133;
+  border-bottom: 1px solid #ebeef5;
+  background: #fff;
+  position: sticky; top: 0; z-index: 1;
+}
+.location-main-placeholder {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: #c0c4cc; font-size: 14px;
+}
+.location-grid {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  padding: 16px;
+  align-content: flex-start;
+}
+.location-card {
+  width: 90px; height: 56px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: default;
+  transition: transform 0.15s;
+}
+.location-card:hover { transform: scale(1.05); }
+.loc-free {
+  background: #f0f9eb;
+  border: 1px solid #b3e19d;
+}
+.loc-occupied {
+  background: #fef0f0;
+  border: 1px solid #fab6b6;
+}
+.loc-name {
+  font-size: 11px; color: #303133;
+  text-align: center; word-break: break-all;
+}
+
 @media (max-width: 768px) {
   .data-table { font-size: 12px; }
   .data-table th, .data-table td { padding: 8px; }
   .action-cell { flex-direction: column; gap: 4px; }
   .toolbar { flex-direction: column; align-items: flex-start; }
   .search-input { width: 120px; }
+  .view-dialog-box { width: 98vw; }
+  .view-dialog-body { flex-direction: column; height: auto; max-height: 70vh; }
+  .zone-sidebar { width: 100%; min-width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid #ebeef5; }
 }
 </style>

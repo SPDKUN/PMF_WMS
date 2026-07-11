@@ -38,4 +38,9 @@ public class LocationServiceImpl implements LocationService {
     public boolean update(Location location) {
         return locationMapper.update(location) > 0;
     }
+
+    @Override
+    public ArrayList<Location> listByZoneId(Integer zoneId) {
+        return locationMapper.findByZoneId(zoneId);
+    }
 }

@@ -15,7 +15,10 @@ public class LocationController {
     private LocationService locationService;
 
     @GetMapping("/list")
-    public ResultData list() {
+    public ResultData list(@RequestParam(required = false) Integer zoneId) {
+        if (zoneId != null) {
+            return ResultData.success(locationService.listByZoneId(zoneId));
+        }
         return ResultData.success(locationService.list());
     }
 

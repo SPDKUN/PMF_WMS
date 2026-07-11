@@ -40,4 +40,12 @@
         DELETE FROM `zone` WHERE zone_id = #{zone_id}
     </delete>
 
+    <select id="findByWarehouseId" resultMap="ZoneMap">
+        SELECT * FROM `zone` WHERE warehouse_id = #{warehouse_id}
+    </select>
+
+    <delete id="deleteByWarehouseId">
+        DELETE FROM `zone` WHERE warehouse_id = #{warehouse_id}
+    </delete>
+
 </mapper>

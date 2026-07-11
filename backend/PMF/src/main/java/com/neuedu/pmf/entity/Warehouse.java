@@ -15,6 +15,6 @@ public class Warehouse {
     private Integer total_slots;
     private Integer available_slots;
     private String location;
-    private String temperature;
+    private String status;
     private String description;
 }

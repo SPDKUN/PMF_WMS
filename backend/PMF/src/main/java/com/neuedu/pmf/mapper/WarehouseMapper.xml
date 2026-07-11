@@ -10,7 +10,7 @@
         <result column="total_slots" property="total_slots"/>
         <result column="available_slots" property="available_slots"/>
         <result column="location" property="location"/>
-        <result column="temperature" property="temperature"/>
+        <result column="status" property="status"/>
         <result column="description" property="description"/>
     </resultMap>
 
@@ -23,8 +23,8 @@
     </select>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="warehouse_id">
-        INSERT INTO warehouse (warehouse_name, warehouse_type, warehouse_size, total_slots, available_slots, location, temperature, description)
-        VALUES (#{warehouse_name}, #{warehouse_type}, #{warehouse_size}, #{total_slots}, #{available_slots}, #{location}, #{temperature}, #{description})
+        INSERT INTO warehouse (warehouse_name, warehouse_type, warehouse_size, total_slots, available_slots, location, status, description)
+        VALUES (#{warehouse_name}, #{warehouse_type}, #{warehouse_size}, #{total_slots}, #{available_slots}, #{location}, #{status}, #{description})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Warehouse">
@@ -36,7 +36,7 @@
             <if test="total_slots != null">total_slots = #{total_slots},</if>
             <if test="available_slots != null">available_slots = #{available_slots},</if>
             <if test="location != null">location = #{location},</if>
-            <if test="temperature != null">temperature = #{temperature},</if>
+            <if test="status != null">status = #{status},</if>
             <if test="description != null">description = #{description},</if>
         </set>
         WHERE warehouse_id = #{warehouse_id}

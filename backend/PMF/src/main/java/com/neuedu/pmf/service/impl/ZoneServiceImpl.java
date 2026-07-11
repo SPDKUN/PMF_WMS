@@ -38,4 +38,9 @@ public class ZoneServiceImpl implements ZoneService {
     public boolean update(Zone zone) {
         return zoneMapper.update(zone) > 0;
     }
+
+    @Override
+    public ArrayList<Zone> listByWarehouseId(Integer warehouseId) {
+        return zoneMapper.findByWarehouseId(warehouseId);
+    }
 }

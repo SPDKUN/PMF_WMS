@@ -15,7 +15,10 @@ public class ZoneController {
     private ZoneService zoneService;
 
     @GetMapping("/list")
-    public ResultData list() {
+    public ResultData list(@RequestParam(required = false) Integer warehouseId) {
+        if (warehouseId != null) {
+            return ResultData.success(zoneService.listByWarehouseId(warehouseId));
+        }
         return ResultData.success(zoneService.list());
     }
 
