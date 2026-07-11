@@ -10,7 +10,8 @@ import java.util.ArrayList;
 public interface BatchMapper {
     ArrayList<Batch> list();
     int save(Batch batch);
-    Batch findById(@Param("batch_id") Integer batchId);
+    Batch findById(@Param("batch_id") String batchId);
     int update(Batch batch);
-    int deleteById(@Param("batch_id") Integer batchId);
+    int deleteById(@Param("batch_id") String batchId);
+    java.util.List<String> findTodayBatchIds(@Param("prefix") String prefix);
 }

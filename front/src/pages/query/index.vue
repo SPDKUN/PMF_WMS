@@ -159,8 +159,50 @@
       </div>
     </div>
 
+    <!-- 批次列表 -->
+    <div v-if="activeTab === 'batch'" class="tab-content">
+      <div class="toolbar">
+        <div class="search-bar">
+          <input
+            type="text"
+            v-model="batchSearchKeyword"
+            placeholder="请输入批次号"
+            @keyup.enter="searchBatch"
+            class="search-input"
+          />
+          <button class="btn btn-search" @click="searchBatch">搜索</button>
+          <button class="btn btn-cancel" @click="resetBatchSearch">重置</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>批次号</th>
+              <th>货物名称</th>
+              <th>保质期至</th>
+              <th>数量</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="batchList.length === 0">
+              <td colspan="5" class="empty-cell">暂无批次数据</td>
+            </tr>
+            <tr v-for="b in batchList" :key="b.batch_id">
+              <td>{{ b.batch_id }}</td>
+              <td>{{ getBatchGoodsName(b.goods_id) }}</td>
+              <td>{{ b.expiry_date }}</td>
+              <td>{{ b.remaining_quantity }}</td>
+              <td><span class="status-tag" :class="getBatchStatusClass(b.batch_status)">{{ b.batch_status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- 其他选项卡（通用表格） -->
-    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods'" class="table-wrapper">
+    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods' && activeTab !== 'batch'" class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -183,6 +225,7 @@
       <span v-if="activeTab === 'personnel'">共 {{ personnelList.length }} 条</span>
       <span v-else-if="activeTab === 'warehouse'">共 {{ warehouseList.length }} 条</span>
       <span v-else-if="activeTab === 'goods'">共 {{ goodsList.length }} 条</span>
+      <span v-else-if="activeTab === 'batch'">共 {{ batchList.length }} 条</span>
       <span v-else>共 {{ currentData.length }} 条</span>
     </div>
 
@@ -263,6 +306,10 @@ export default {
       goodsList: [],
       goodsSearchType: 'goods_code',
       goodsSearchKeyword: '',
+      allBatches: [],
+      batchList: [],
+      batchSearchKeyword: '',
+      batchGoodsMap: {},
       viewDialog: {
         visible: false,
         warehouse: {},
@@ -276,11 +323,6 @@ export default {
         { '商品名称': '预制菜B', 'SKU': 'PRE-B002', '库存数量': 300, '可用数量': 300, '锁定数量': 0, '单位': '箱', '仓库': 'B区常温库' },
         { '商品名称': '调味料C', 'SKU': 'SAU-C001', '库存数量': 1200, '可用数量': 1150, '锁定数量': 50, '单位': '袋', '仓库': 'B区常温库' },
         { '商品名称': '冷冻食材D', 'SKU': 'FRZ-D001', '库存数量': 800, '可用数量': 780, '锁定数量': 20, '单位': 'kg', '仓库': 'C区冷冻库' },
-      ],
-      batchData: [
-        { '批次号': 'B20260710-001', '商品名称': '预制菜A', '生产日期': '2026-07-01', '保质期至': '2027-01-01', '数量': 200, '状态': '正常' },
-        { '批次号': 'B20260709-002', '商品名称': '冷冻食材D', '生产日期': '2026-07-05', '保质期至': '2027-07-05', '数量': 400, '状态': '正常' },
-        { '批次号': 'B20260705-003', '商品名称': '调味料C', '生产日期': '2026-06-20', '保质期至': '2027-06-20', '数量': 600, '状态': '临近保质期' },
       ],
       temperatureData: [
         { '仓库': 'A区冷库', '记录时间': '2026-07-10 08:00', '温度(°C)': -18.5, '湿度(%)': 65, '状态': '正常' },
@@ -306,7 +348,6 @@ export default {
     currentData() {
       const map = {
         inventory: this.inventoryData,
-        batch: this.batchData,
         temperature: this.temperatureData,
         log: this.logData,
       }
@@ -317,6 +358,7 @@ export default {
     this.fetchPersonnel()
     this.fetchWarehouses()
     this.fetchGoods()
+    this.fetchBatches()
   },
   methods: {
     switchTab(key) {
@@ -327,6 +369,8 @@ export default {
         this.fetchWarehouses()
       } else if (key === 'goods' && this.goodsList.length === 0) {
         this.fetchGoods()
+      } else if (key === 'batch' && this.batchList.length === 0) {
+        this.fetchBatches()
       }
     },
     async fetchPersonnel() {
@@ -421,6 +465,56 @@ export default {
     resetGoodsSearch() {
       this.goodsSearchKeyword = ''
       this.goodsList = this.allGoods
+    },
+    async fetchBatches() {
+      try {
+        const res = await request.get('/batch/list')
+        if (res.code === 200) {
+          this.allBatches = res.data || []
+          this.batchList = this.allBatches
+          this.buildBatchGoodsMap()
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    async buildBatchGoodsMap() {
+      try {
+        const res = await request.get('/goods/list')
+        if (res.code === 200) {
+          const goodsList = res.data || []
+          this.batchGoodsMap = {}
+          goodsList.forEach(g => {
+            this.batchGoodsMap[g.goods_id] = g.goods_name
+          })
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    getBatchGoodsName(goodsId) {
+      return this.batchGoodsMap[goodsId] || '-'
+    },
+    getBatchStatusClass(status) {
+      if (status === '正常') return 'status-normal'
+      if (status === '待检') return 'status-pending'
+      if (status === '锁定') return 'status-locked'
+      if (status === '报废') return 'status-scrap'
+      return ''
+    },
+    searchBatch() {
+      const keyword = this.batchSearchKeyword.trim()
+      if (!keyword) {
+        this.batchList = this.allBatches
+        return
+      }
+      this.batchList = this.allBatches.filter(b =>
+        b.batch_id && b.batch_id.includes(keyword)
+      )
+    },
+    resetBatchSearch() {
+      this.batchSearchKeyword = ''
+      this.batchList = this.allBatches
     },
     async openViewDialog(warehouse) {
       this.viewDialog.warehouse = warehouse
@@ -582,8 +676,10 @@ export default {
   padding: 2px 8px;
   border-radius: 4px;
 }
-.status-tag.启用 { background: #f0f9eb; color: #67c23a; }
-.status-tag.禁用 { background: #fef0f0; color: #f56c6c; }
+.status-tag.启用, .status-tag.status-normal { background: #f0f9eb; color: #67c23a; }
+.status-tag.禁用, .status-tag.status-scrap { background: #fef0f0; color: #f56c6c; }
+.status-tag.status-pending { background: #fdf6ec; color: #e6a23c; }
+.status-tag.status-locked { background: #ecf5ff; color: #409EFF; }
 
 .pagination-row {
   display: flex;

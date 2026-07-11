@@ -20,7 +20,7 @@ public class BatchController {
     }
 
     @GetMapping("/{batchId}")
-    public ResultData getById(@PathVariable Integer batchId) {
+    public ResultData getById(@PathVariable String batchId) {
         return ResultData.success(batchService.getById(batchId));
     }
 
@@ -37,7 +37,7 @@ public class BatchController {
     }
 
     @DeleteMapping("/{id}")
-    public ResultData delete(@PathVariable Integer id) {
+    public ResultData delete(@PathVariable String id) {
         boolean flag = batchService.delete(id);
         return flag ? ResultData.success() : ResultData.fail(ResultCode.FAILED);
     }

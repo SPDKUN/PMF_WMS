@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Batch {
-    private Integer batch_id;
+    private String batch_id;
     private Integer goods_id;
     private LocalDate production_date;
     private LocalDate expiry_date;

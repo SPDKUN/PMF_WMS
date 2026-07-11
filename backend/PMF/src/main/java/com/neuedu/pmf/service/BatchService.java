@@ -6,9 +6,9 @@ import java.util.ArrayList;
 public interface BatchService {
     ArrayList<Batch> list();
 
-    Batch getById(Integer id);
+    Batch getById(String id);
 
-    boolean delete(Integer id);
+    boolean delete(String id);
 
     boolean save(Batch batch);
 

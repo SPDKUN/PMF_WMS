@@ -13,16 +13,20 @@
     </resultMap>
 
     <select id="list" resultMap="BatchMap">
-        SELECT * FROM batch
+        SELECT * FROM batch ORDER BY batch_id DESC
     </select>
 
     <select id="findById" resultMap="BatchMap">
         SELECT * FROM batch WHERE batch_id = #{batch_id}
     </select>
 
-    <insert id="save" useGeneratedKeys="true" keyProperty="batch_id">
-        INSERT INTO batch (goods_id, production_date, expiry_date, initial_quantity, remaining_quantity, batch_status)
-        VALUES (#{goods_id}, #{production_date}, #{expiry_date}, #{initial_quantity}, #{remaining_quantity}, #{batch_status})
+    <select id="findTodayBatchIds" resultType="string">
+        SELECT batch_id FROM batch WHERE batch_id LIKE #{prefix}
+    </select>
+
+    <insert id="save">
+        INSERT INTO batch (batch_id, goods_id, production_date, expiry_date, initial_quantity, remaining_quantity, batch_status)
+        VALUES (#{batch_id}, #{goods_id}, #{production_date}, #{expiry_date}, #{initial_quantity}, #{remaining_quantity}, #{batch_status})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Batch">

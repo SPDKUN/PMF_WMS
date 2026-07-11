@@ -41,42 +41,93 @@
 
     <!-- 布置任务 -->
     <div v-if="activeTab === 'assign'" class="tab-content">
-      <div class="form-card">
-        <div class="form-item">
-          <label>任务名称</label>
-          <input type="text" v-model="taskForm.title" placeholder="请输入任务名称" />
+      <!-- 操作选项卡 -->
+      <div class="op-tabs">
+        <button
+          v-for="op in operations"
+          :key="op.key"
+          :class="{ active: activeOp === op.key }"
+          :style="activeOp === op.key
+            ? { background: op.color, color: '#fff', borderColor: op.color }
+            : { color: op.color, borderColor: op.color }"
+          @click="switchOp(op.key)"
+        >{{ op.label }}</button>
+      </div>
+
+      <!-- 新增批次 -->
+      <div v-if="activeOp === 'newBatch'" class="op-content">
+        <div class="form-card">
+          <p class="op-desc">创建新的货物批次，生成批次号并关联货物信息。</p>
+          <button class="btn btn-primary" @click="openNewBatchDialog">新增批次</button>
+
+          <!-- 最近批次列表 -->
+          <div class="table-wrapper" style="margin-top:16px;" v-if="batchList.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>批次号</th>
+                  <th>货物名称</th>
+                  <th>生产日期</th>
+                  <th>到期日期</th>
+                  <th>数量</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="b in batchList" :key="b.batch_id">
+                  <td>{{ b.batch_id }}</td>
+                  <td>{{ getGoodsName(b.goods_id) }}</td>
+                  <td>{{ b.production_date }}</td>
+                  <td>{{ b.expiry_date }}</td>
+                  <td>{{ b.remaining_quantity }}</td>
+                  <td><span class="status-tag" :class="getBatchStatusClass(b.batch_status)">{{ b.batch_status }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="form-item">
-          <label>任务类型</label>
-          <select v-model="taskForm.type">
-            <option value="入库">入库</option>
-            <option value="出库">出库</option>
-            <option value="盘点">盘点</option>
-            <option value="质检">质检</option>
-            <option value="移库">移库</option>
-          </select>
+      </div>
+
+      <!-- 其他操作（占位） -->
+      <div v-else class="op-content">
+        <div class="placeholder-card">{{ getOpDesc(activeOp) }}</div>
+      </div>
+    </div>
+
+    <!-- 新增批次弹窗 -->
+    <div class="dialog-overlay" v-if="newBatchDialog.visible" @click.self="newBatchDialog.visible = false">
+      <div class="dialog-box">
+        <div class="dialog-header">
+          <h3>新增批次</h3>
+          <button class="dialog-close" @click="newBatchDialog.visible = false">&times;</button>
         </div>
-        <div class="form-item">
-          <label>优先级</label>
-          <select v-model="taskForm.priority">
-            <option value="高">高</option>
-            <option value="中">中</option>
-            <option value="低">低</option>
-          </select>
+        <div class="dialog-body">
+          <div class="form-item">
+            <label>选择货物 <span class="required">*</span></label>
+            <select v-model="newBatchDialog.form.goods_id">
+              <option :value="null">请选择货物</option>
+              <option v-for="g in goodsList" :key="g.goods_id" :value="g.goods_id">
+                {{ g.goods_name }} ({{ g.goods_code }})
+              </option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>生产日期 <span class="required">*</span></label>
+            <input type="date" v-model="newBatchDialog.form.production_date" />
+          </div>
+          <div class="form-item">
+            <label>保质期至 <span class="required">*</span></label>
+            <input type="date" v-model="newBatchDialog.form.expiry_date" />
+          </div>
+          <div class="form-item">
+            <label>入库初始数量 <span class="required">*</span></label>
+            <input type="number" v-model.number="newBatchDialog.form.initial_quantity" min="1" placeholder="请输入入库初始数量" />
+          </div>
         </div>
-        <div class="form-item">
-          <label>截止日期</label>
-          <input type="date" v-model="taskForm.deadline" />
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="newBatchDialog.visible = false">取消</button>
+          <button class="btn btn-primary" @click="submitNewBatch">确认创建</button>
         </div>
-        <div class="form-item">
-          <label>指派给</label>
-          <input type="text" v-model="taskForm.assignee" placeholder="请输入指派人" />
-        </div>
-        <div class="form-item">
-          <label>任务描述</label>
-          <textarea v-model="taskForm.description" placeholder="请输入任务描述..." rows="4"></textarea>
-        </div>
-        <button class="btn btn-primary" @click="publishTask">发布任务</button>
       </div>
     </div>
 
@@ -105,11 +156,23 @@
 </template>
 
 <script>
+import request from '@/utils/request.js'
+
 export default {
   name: 'TasksPage',
   data() {
     return {
       activeTab: 'todo',
+      activeOp: 'newBatch',
+      operations: [
+        { key: 'newBatch', label: '新增批次', color: '#409EFF' },
+        { key: 'inbound', label: '入库', color: '#67c23a' },
+        { key: 'outbound', label: '出库', color: '#e6a23c' },
+        { key: 'adjust', label: '库存调整', color: '#9065db' },
+        { key: 'check', label: '库存盘点', color: '#20a0ff' },
+        { key: 'quality', label: '质检', color: '#f56c6c' },
+        { key: 'defective', label: '处理次品', color: '#f39c12' },
+      ],
       todoList: [
         { id: 1, title: '采购入库单 #IN20260710-003', type: '入库', priority: '高', deadline: '2026-07-11', status: '待处理', description: '供应商A的预制菜原料入库，共120箱，需质检后入库A区冷库。' },
         { id: 2, title: '出库单 #OUT20260710-087', type: '出库', priority: '高', deadline: '2026-07-10', status: '待处理', description: '客户B的销售出库单，预制菜A共50箱，需从A区冷库拣货出库。' },
@@ -118,15 +181,50 @@ export default {
         { id: 5, title: '盘点单 #CNT20260710-005', type: '盘点', priority: '低', deadline: '2026-07-15', status: '待处理', description: 'A区冷库月度全盘，需复核系统数据与实际库存差异。' },
         { id: 6, title: '不合格处理 #DEF20260710-011', type: '质检', priority: '低', deadline: '2026-07-13', status: '待处理', description: '批次B20260701-005质检不合格，需确认报废并记录。' },
       ],
-      taskForm: {
-        title: '', type: '入库', priority: '中', deadline: '', assignee: '', description: ''
-      },
       detailVisible: false,
       currentDetail: {},
       nextId: 7,
+      goodsList: [],
+      batchList: [],
+      newBatchDialog: {
+        visible: false,
+        form: { goods_id: null, production_date: '', expiry_date: '', initial_quantity: 0 }
+      }
     }
   },
+  mounted() {
+    this.fetchGoods()
+    this.fetchBatches()
+  },
   methods: {
+    switchOp(key) {
+      this.activeOp = key
+      if (key === 'newBatch') {
+        this.fetchBatches()
+      }
+    },
+    getOpDesc(key) {
+      const map = {
+        inbound: '入库功能开发中...',
+        outbound: '出库功能开发中...',
+        adjust: '库存调整功能开发中...',
+        check: '库存盘点功能开发中...',
+        quality: '质检功能开发中...',
+        defective: '处理次品功能开发中...',
+      }
+      return map[key] || '功能开发中...'
+    },
+    getGoodsName(goodsId) {
+      const g = this.goodsList.find(item => item.goods_id === goodsId)
+      return g ? g.goods_name : '-'
+    },
+    getBatchStatusClass(status) {
+      if (status === '正常') return 'status-normal'
+      if (status === '待检') return 'status-pending'
+      if (status === '锁定') return 'status-locked'
+      if (status === '报废') return 'status-scrap'
+      return ''
+    },
     openDetail(item) {
       this.currentDetail = { ...item }
       this.detailVisible = true
@@ -134,19 +232,60 @@ export default {
     completeTask(id) {
       this.todoList = this.todoList.filter(t => t.id !== id)
     },
-    publishTask() {
-      if (!this.taskForm.title) { alert('请输入任务名称'); return }
-      this.todoList.push({
-        id: this.nextId++,
-        title: this.taskForm.title,
-        type: this.taskForm.type,
-        priority: this.taskForm.priority,
-        deadline: this.taskForm.deadline || '未设定',
-        status: '待处理',
-        description: this.taskForm.description,
-      })
-      this.taskForm = { title: '', type: '入库', priority: '中', deadline: '', assignee: '', description: '' }
-      this.activeTab = 'todo'
+    async fetchGoods() {
+      try {
+        const res = await request.get('/goods/list')
+        if (res.code === 200) {
+          this.goodsList = res.data || []
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    async fetchBatches() {
+      try {
+        const res = await request.get('/batch/list')
+        if (res.code === 200) {
+          this.batchList = res.data || []
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    openNewBatchDialog() {
+      const today = new Date().toISOString().slice(0, 10)
+      this.newBatchDialog.form = {
+        goods_id: null,
+        production_date: today,
+        expiry_date: '',
+        initial_quantity: 0
+      }
+      this.newBatchDialog.visible = true
+    },
+    async submitNewBatch() {
+      const f = this.newBatchDialog.form
+      if (!f.goods_id) { alert('请选择货物'); return }
+      if (!f.production_date) { alert('请选择生产日期'); return }
+      if (!f.expiry_date) { alert('请选择保质期至'); return }
+      if (!f.initial_quantity || f.initial_quantity <= 0) { alert('请输入有效的入库初始数量'); return }
+
+      try {
+        const res = await request.post('/batch', {
+          goods_id: f.goods_id,
+          production_date: f.production_date,
+          expiry_date: f.expiry_date,
+          initial_quantity: f.initial_quantity
+        })
+        if (res.code === 200) {
+          alert('批次创建成功')
+          this.newBatchDialog.visible = false
+          this.fetchBatches()
+        } else {
+          alert(res.msg || '创建失败')
+        }
+      } catch (e) {
+        alert('创建失败')
+      }
     }
   }
 }
@@ -179,6 +318,45 @@ export default {
   color: #fff;
 }
 
+/* 操作选项卡 */
+.op-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.op-tabs button {
+  padding: 6px 16px;
+  border: 2px solid;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.op-tabs button:hover {
+  opacity: 0.8;
+}
+
+.op-content {
+  margin-top: 4px;
+}
+.op-desc {
+  font-size: 13px;
+  color: #909399;
+  margin: 0 0 12px 0;
+}
+
+.placeholder-card {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 40px;
+  text-align: center;
+  color: #c0c4cc;
+  font-size: 14px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -207,6 +385,7 @@ export default {
   border: 1px solid #ebeef5;
   border-radius: 4px;
   overflow: hidden;
+  overflow-x: auto;
 }
 .data-table {
   width: 100%;
@@ -245,6 +424,10 @@ export default {
 .status-tag.待处理 { background: #fdf6ec; color: #e6a23c; }
 .status-tag.进行中 { background: #ecf5ff; color: #409EFF; }
 .status-tag.已完成 { background: #f0f9eb; color: #67c23a; }
+.status-tag.status-normal { background: #f0f9eb; color: #67c23a; }
+.status-tag.status-pending { background: #fdf6ec; color: #e6a23c; }
+.status-tag.status-locked { background: #ecf5ff; color: #409EFF; }
+.status-tag.status-scrap { background: #fef0f0; color: #f56c6c; }
 
 .action-cell { display: flex; gap: 6px; }
 .btn-action {
@@ -261,11 +444,10 @@ export default {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-width: 560px;
 }
-.form-item { display: flex; flex-direction: column; gap: 4px; }
+.form-item { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 .form-item label { font-size: 13px; color: #606266; }
+.form-item .required { color: #f56c6c; }
 .form-item input, .form-item select, .form-item textarea {
   padding: 8px 12px;
   border: 1px solid #dcdfe6;
@@ -305,7 +487,7 @@ export default {
 }
 .dialog-close:hover { color: #303133; }
 .dialog-body {
-  padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;
+  padding: 16px 20px; display: flex; flex-direction: column;
 }
 .detail-row { font-size: 14px; color: #303133; line-height: 1.6; }
 .detail-row .label { color: #909399; }
@@ -318,5 +500,7 @@ export default {
   .form-card { max-width: 100%; }
   .data-table { font-size: 12px; }
   .data-table th, .data-table td { padding: 8px; }
+  .op-tabs { gap: 4px; }
+  .op-tabs button { padding: 5px 10px; font-size: 12px; }
 }
 </style>
