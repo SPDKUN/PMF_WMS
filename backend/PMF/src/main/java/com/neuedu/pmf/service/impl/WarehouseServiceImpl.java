@@ -100,19 +100,45 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouseMapper.save(warehouse);
         Integer warehouseId = newId;
 
-        // 级联创建库区
-        for (int i = 1; i <= zoneCount; i++) {
+        // 预计算库区和库位的ID
+        java.util.Set<Integer> usedZoneIds = new java.util.HashSet<>(zoneMapper.findAllIds());
+        java.util.Set<Integer> usedLocationIds = new java.util.HashSet<>(locationMapper.findAllIds());
+
+        int totalLocations = zoneCount * 8;
+
+        int[] zoneIds = new int[zoneCount];
+        int nextZoneId = 1;
+        for (int i = 0; i < zoneCount; i++) {
+            while (usedZoneIds.contains(nextZoneId)) nextZoneId++;
+            zoneIds[i] = nextZoneId;
+            usedZoneIds.add(nextZoneId);
+            nextZoneId++;
+        }
+
+        int[] locationIds = new int[totalLocations];
+        int nextLocId = 1;
+        for (int i = 0; i < totalLocations; i++) {
+            while (usedLocationIds.contains(nextLocId)) nextLocId++;
+            locationIds[i] = nextLocId;
+            usedLocationIds.add(nextLocId);
+            nextLocId++;
+        }
+
+        int locIdx = 0;
+        for (int i = 0; i < zoneCount; i++) {
+            Integer zoneId = zoneIds[i];
             Zone zone = new Zone();
-            zone.setZone_name(warehouse.getWarehouse_name() + "-" + i);
+            zone.setZone_id(zoneId);
+            zone.setZone_name(warehouse.getWarehouse_name() + "-" + (i + 1));
             zone.setWarehouse_id(warehouseId);
             zone.setTotal_slots(8);
             zone.setAvailable_slots(8);
             zoneMapper.save(zone);
-            Integer zoneId = zone.getZone_id();
 
             // 级联创建库位（每个库区8个库位）
             for (int j = 1; j <= 8; j++) {
                 Location location = new Location();
+                location.setLocation_id(locationIds[locIdx++]);
                 location.setLocation_name(zone.getZone_name() + "-" + j);
                 location.setZone_id(zoneId);
                 location.setIs_occupied(0);

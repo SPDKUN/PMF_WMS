@@ -19,9 +19,9 @@
         SELECT * FROM `zone` WHERE zone_id = #{zone_id}
     </select>
 
-    <insert id="save" useGeneratedKeys="true" keyProperty="zone_id">
-        INSERT INTO `zone` (zone_name, warehouse_id, total_slots, available_slots, description)
-        VALUES (#{zone_name}, #{warehouse_id}, #{total_slots}, #{available_slots}, #{description})
+    <insert id="save">
+        INSERT INTO `zone` (zone_id, zone_name, warehouse_id, total_slots, available_slots, description)
+        VALUES (#{zone_id}, #{zone_name}, #{warehouse_id}, #{total_slots}, #{available_slots}, #{description})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Zone">
@@ -47,5 +47,9 @@
     <delete id="deleteByWarehouseId">
         DELETE FROM `zone` WHERE warehouse_id = #{warehouse_id}
     </delete>
+
+    <select id="findAllIds" resultType="int">
+        SELECT zone_id FROM `zone` ORDER BY zone_id
+    </select>
 
 </mapper>

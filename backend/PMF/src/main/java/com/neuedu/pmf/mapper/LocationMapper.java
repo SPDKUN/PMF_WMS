@@ -15,4 +15,5 @@ public interface LocationMapper {
     int deleteById(@Param("location_id") Integer locationId);
     int deleteByZoneId(@Param("zone_id") Integer zoneId);
     ArrayList<Location> findByZoneId(@Param("zone_id") Integer zoneId);
+    java.util.List<Integer> findAllIds();
 }

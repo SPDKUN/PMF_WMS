@@ -15,4 +15,5 @@ public interface ZoneMapper {
     int deleteById(@Param("zone_id") Integer zoneId);
     int deleteByWarehouseId(@Param("warehouse_id") Integer warehouseId);
     ArrayList<Zone> findByWarehouseId(@Param("warehouse_id") Integer warehouseId);
+    java.util.List<Integer> findAllIds();
 }

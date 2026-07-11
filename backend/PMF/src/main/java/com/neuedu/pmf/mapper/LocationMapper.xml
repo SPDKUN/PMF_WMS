@@ -19,9 +19,9 @@
         SELECT * FROM location WHERE location_id = #{location_id}
     </select>
 
-    <insert id="save" useGeneratedKeys="true" keyProperty="location_id">
-        INSERT INTO location (location_name, zone_id, goods_id, is_occupied, description)
-        VALUES (#{location_name}, #{zone_id}, #{goods_id}, #{is_occupied}, #{description})
+    <insert id="save">
+        INSERT INTO location (location_id, location_name, zone_id, goods_id, is_occupied, description)
+        VALUES (#{location_id}, #{location_name}, #{zone_id}, #{goods_id}, #{is_occupied}, #{description})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Location">
@@ -47,5 +47,9 @@
     <delete id="deleteByZoneId">
         DELETE FROM location WHERE zone_id = #{zone_id}
     </delete>
+
+    <select id="findAllIds" resultType="int">
+        SELECT location_id FROM location ORDER BY location_id
+    </select>
 
 </mapper>
