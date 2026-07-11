@@ -76,6 +76,16 @@ public class UserController {
         return ResultData.fail(ResultCode.FAILED);
     }
 
+    //更新个人信息（含密码修改验证）
+    @PutMapping("/profile")
+    public ResultData updateProfile(@RequestBody java.util.Map<String, Object> params) {
+        User updatedUser = userService.updateProfile(params);
+        if (updatedUser == null) {
+            return ResultData.fail(700, "旧密码错误或用户不存在");
+        }
+        return ResultData.success(updatedUser);
+    }
+
 
 
 }

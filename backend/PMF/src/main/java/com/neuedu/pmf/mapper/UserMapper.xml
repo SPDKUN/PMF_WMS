@@ -37,6 +37,11 @@
         SELECT * FROM user WHERE username = #{username} AND password = #{password}
     </select>
 
+<!--    按用户ID和密码验证-->
+    <select id="findByIdAndPassword" resultMap="UserMap">
+        SELECT * FROM user WHERE user_id = #{user_id} AND password = #{password}
+    </select>
+
 <!--    新增用户，向表中插入数据-->
     <insert id="save" useGeneratedKeys="true" keyProperty="user_id">
         INSERT INTO user (username, real_name, phone, department, position, password, status)

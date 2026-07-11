@@ -20,10 +20,15 @@ spring:
 #    username: remote_user
 #    password: "YourNewStrongPass123!"
 
+#    url: jdbc:mysql://127.0.0.1/pmf?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: root
+#    password: "kk17725602305"
+
     url: jdbc:mysql://127.0.0.1/pmf?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: "kk17725602305"
+    password: "123456"
 
   data:
     redis:

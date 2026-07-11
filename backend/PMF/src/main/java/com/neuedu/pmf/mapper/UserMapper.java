@@ -29,4 +29,8 @@ public interface UserMapper {
 
     //根据ID删除用户
     int deleteById(@Param("user_id") Integer userId);
+
+    //按用户ID和密码验证
+    User findByIdAndPassword(@Param("user_id") Integer userId,
+                             @Param("password") String password);
 }

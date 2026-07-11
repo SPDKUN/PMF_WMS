@@ -82,6 +82,11 @@ export default {
         const token = response.token
         if (token) {
           localStorage.setItem('token', token)
+          // 存储用户基本信息
+          const userData = response.data
+          if (userData) {
+            localStorage.setItem('userInfo', JSON.stringify(userData))
+          }
           this.$router.push({ name: 'Home' })
         } else {
           this.errorMsg = '登录失败，未获取到令牌'

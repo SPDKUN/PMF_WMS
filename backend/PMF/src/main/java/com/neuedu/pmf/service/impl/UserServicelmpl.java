@@ -45,4 +45,62 @@ public class UserServicelmpl implements UserService {
     public User login(String username, String password) {
         return userMapper.findByUsernameAndPassword(username, password);
     }
+
+    @Override
+    public User updateProfile(java.util.Map<String, Object> params) {
+        Integer userId = (Integer) params.get("user_id");
+        if (userId == null) {
+            return null;
+        }
+
+        // 检查是否需要修改密码
+        String oldPassword = (String) params.get("old_password");
+        String newPassword = (String) params.get("new_password");
+
+        if (oldPassword != null && !oldPassword.isEmpty()
+                && newPassword != null && !newPassword.isEmpty()) {
+            // 验证旧密码
+            User verified = userMapper.findByIdAndPassword(userId, oldPassword);
+            if (verified == null) {
+                return null; // 旧密码错误
+            }
+        }
+
+        // 构建更新的User对象
+        User user = new User();
+        user.setUser_id(userId);
+
+        String username = (String) params.get("username");
+        if (username != null && !username.isEmpty()) {
+            user.setUsername(username);
+        }
+
+        String realName = (String) params.get("real_name");
+        if (realName != null && !realName.isEmpty()) {
+            user.setReal_name(realName);
+        }
+
+        String phone = (String) params.get("phone");
+        if (phone != null && !phone.isEmpty()) {
+            user.setPhone(phone);
+        }
+
+        String department = (String) params.get("department");
+        if (department != null && !department.isEmpty()) {
+            user.setDepartment(department);
+        }
+
+        String position = (String) params.get("position");
+        if (position != null && !position.isEmpty()) {
+            user.setPosition(position);
+        }
+
+        // 如果需要修改密码
+        if (newPassword != null && !newPassword.isEmpty()) {
+            user.setPassword(newPassword);
+        }
+
+        userMapper.update(user);
+        return userMapper.findById(userId);
+    }
 }

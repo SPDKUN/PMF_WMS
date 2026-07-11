@@ -94,6 +94,7 @@ export default {
     },
     handleLogout() {
       localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
       this.$router.push({ name: 'Login' })
     },
     updateDateTime() {
