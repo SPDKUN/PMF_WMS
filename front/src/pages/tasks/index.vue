@@ -40,57 +40,25 @@
     </div>
 
     <!-- 布置任务 -->
-    <div v-if="activeTab === 'assign'" class="tab-content">
-      <!-- 操作选项卡 -->
-      <div class="op-tabs">
-        <button
+    <div v-if="activeTab === 'assign'" class="assign-content">
+      <div class="assign-header">
+        <h3>仓库操作中心</h3>
+        <p>选择一个操作类型开始处理仓库任务</p>
+      </div>
+      <div class="op-grid">
+        <div
           v-for="op in operations"
           :key="op.key"
-          :class="{ active: activeOp === op.key }"
-          :style="activeOp === op.key
-            ? { background: op.color, color: '#fff', borderColor: op.color }
-            : { color: op.color, borderColor: op.color }"
-          @click="switchOp(op.key)"
-        >{{ op.label }}</button>
-      </div>
-
-      <!-- 新增批次 -->
-      <div v-if="activeOp === 'newBatch'" class="op-content">
-        <div class="form-card">
-          <p class="op-desc">创建新的货物批次，生成批次号并关联货物信息。</p>
-          <button class="btn btn-primary" @click="openNewBatchDialog">新增批次</button>
-
-          <!-- 最近批次列表 -->
-          <div class="table-wrapper" style="margin-top:16px;" v-if="batchList.length > 0">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>批次号</th>
-                  <th>货物名称</th>
-                  <th>生产日期</th>
-                  <th>到期日期</th>
-                  <th>数量</th>
-                  <th>状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="b in batchList" :key="b.batch_id">
-                  <td>{{ b.batch_id }}</td>
-                  <td>{{ getGoodsName(b.goods_id) }}</td>
-                  <td>{{ b.production_date }}</td>
-                  <td>{{ b.expiry_date }}</td>
-                  <td>{{ b.remaining_quantity }}</td>
-                  <td><span class="status-tag" :class="getBatchStatusClass(b.batch_status)">{{ b.batch_status }}</span></td>
-                </tr>
-              </tbody>
-            </table>
+          class="op-card"
+          :style="{ '--card-color': op.color }"
+          @click="handleOp(op.key)"
+        >
+          <div class="op-card-icon">
+            <span v-html="op.icon"></span>
           </div>
+          <div class="op-card-title">{{ op.label }}</div>
+          <div class="op-card-desc">{{ op.desc }}</div>
         </div>
-      </div>
-
-      <!-- 其他操作（占位） -->
-      <div v-else class="op-content">
-        <div class="placeholder-card">{{ getOpDesc(activeOp) }}</div>
       </div>
     </div>
 
@@ -163,15 +131,14 @@ export default {
   data() {
     return {
       activeTab: 'todo',
-      activeOp: 'newBatch',
       operations: [
-        { key: 'newBatch', label: '新增批次', color: '#409EFF' },
-        { key: 'inbound', label: '入库', color: '#67c23a' },
-        { key: 'outbound', label: '出库', color: '#e6a23c' },
-        { key: 'adjust', label: '库存调整', color: '#9065db' },
-        { key: 'check', label: '库存盘点', color: '#20a0ff' },
-        { key: 'quality', label: '质检', color: '#f56c6c' },
-        { key: 'defective', label: '处理次品', color: '#f39c12' },
+        { key: 'newBatch',  label: '新增批次', color: '#409EFF', icon: '&#128230;', desc: '创建新的货物批次并关联货物信息' },
+        { key: 'inbound',   label: '入库',     color: '#67c23a', icon: '&#128229;', desc: '将货物录入仓库并分配库位' },
+        { key: 'outbound',  label: '出库',     color: '#e6a23c', icon: '&#128228;', desc: '按出库单拣货并完成出库' },
+        { key: 'adjust',    label: '库存调整', color: '#9065db', icon: '&#9881;',  desc: '修正库存数量差异或库位调整' },
+        { key: 'check',     label: '库存盘点', color: '#20a0ff', icon: '&#128203;', desc: '对库位货物进行盘点核对' },
+        { key: 'quality',   label: '质检',     color: '#f56c6c', icon: '&#128270;', desc: '对入库货物进行质量检验' },
+        { key: 'defective', label: '处理次品', color: '#f39c12', icon: '&#128465;', desc: '登记并处理不合格或报废货物' },
       ],
       todoList: [
         { id: 1, title: '采购入库单 #IN20260710-003', type: '入库', priority: '高', deadline: '2026-07-11', status: '待处理', description: '供应商A的预制菜原料入库，共120箱，需质检后入库A区冷库。' },
@@ -197,22 +164,13 @@ export default {
     this.fetchBatches()
   },
   methods: {
-    switchOp(key) {
-      this.activeOp = key
+    handleOp(key) {
       if (key === 'newBatch') {
-        this.fetchBatches()
+        this.openNewBatchDialog()
+      } else {
+        const labels = { inbound: '入库', outbound: '出库', adjust: '库存调整', check: '库存盘点', quality: '质检', defective: '处理次品' }
+        alert(labels[key] + '功能开发中...')
       }
-    },
-    getOpDesc(key) {
-      const map = {
-        inbound: '入库功能开发中...',
-        outbound: '出库功能开发中...',
-        adjust: '库存调整功能开发中...',
-        check: '库存盘点功能开发中...',
-        quality: '质检功能开发中...',
-        defective: '处理次品功能开发中...',
-      }
-      return map[key] || '功能开发中...'
     },
     getGoodsName(goodsId) {
       const g = this.goodsList.find(item => item.goods_id === goodsId)
@@ -271,7 +229,7 @@ export default {
 
       try {
         const res = await request.post('/batch', {
-          goods_id: f.goods_id,
+          goods_id: parseInt(f.goods_id),
           production_date: f.production_date,
           expiry_date: f.expiry_date,
           initial_quantity: f.initial_quantity
@@ -318,43 +276,85 @@ export default {
   color: #fff;
 }
 
-/* 操作选项卡 */
-.op-tabs {
+/* 布置任务 - 操作中心 */
+.assign-content {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 24px;
 }
-.op-tabs button {
-  padding: 6px 16px;
-  border: 2px solid;
-  border-radius: 4px;
-  background: #fff;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+.assign-header {
+  text-align: center;
 }
-.op-tabs button:hover {
-  opacity: 0.8;
+.assign-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #303133;
+  margin: 0 0 6px 0;
 }
-
-.op-content {
-  margin-top: 4px;
-}
-.op-desc {
+.assign-header p {
   font-size: 13px;
   color: #909399;
-  margin: 0 0 12px 0;
+  margin: 0;
 }
 
-.placeholder-card {
+.op-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+.op-card {
+  --card-color: #409EFF;
   background: #fff;
   border: 1px solid #ebeef5;
-  border-radius: 4px;
-  padding: 40px;
+  border-radius: 12px;
+  padding: 24px 16px 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  color: #c0c4cc;
-  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.op-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-color);
+  border-radius: 0 0 2px 2px;
+}
+.op-card:hover {
+  border-color: var(--card-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+.op-card:active {
+  transform: translateY(-1px);
+}
+
+.op-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card-color) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+.op-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 6px;
+}
+.op-card-desc {
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.5;
 }
 
 .btn {
@@ -500,7 +500,7 @@ export default {
   .form-card { max-width: 100%; }
   .data-table { font-size: 12px; }
   .data-table th, .data-table td { padding: 8px; }
-  .op-tabs { gap: 4px; }
-  .op-tabs button { padding: 5px 10px; font-size: 12px; }
+  .op-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 100%; }
+  .op-card { padding: 16px 12px 14px; }
 }
 </style>
