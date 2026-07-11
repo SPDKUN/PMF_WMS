@@ -8,7 +8,25 @@
     </div>
 
     <!-- 人员列表 -->
-    <div v-if="activeTab === 'personnel'" class="table-wrapper">
+    <div v-if="activeTab === 'personnel'" class="tab-content">
+      <div class="toolbar">
+        <div class="search-bar">
+          <select v-model="searchType" class="search-type">
+            <option value="user_id">按ID</option>
+            <option value="real_name">按姓名</option>
+          </select>
+          <input
+            type="text"
+            v-model="searchKeyword"
+            placeholder="请输入搜索关键词"
+            @keyup.enter="searchPersonnel"
+            class="search-input"
+          />
+          <button class="btn btn-search" @click="searchPersonnel">搜索</button>
+          <button class="btn btn-cancel" @click="resetSearch">重置</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -37,9 +55,28 @@
         </tbody>
       </table>
     </div>
+    </div>
 
     <!-- 仓库列表 -->
-    <div v-if="activeTab === 'warehouse'" class="table-wrapper">
+    <div v-if="activeTab === 'warehouse'" class="tab-content">
+      <div class="toolbar">
+        <div class="search-bar">
+          <select v-model="warehouseSearchType" class="search-type">
+            <option value="warehouse_id">按ID</option>
+            <option value="warehouse_name">按名称</option>
+          </select>
+          <input
+            type="text"
+            v-model="warehouseSearchKeyword"
+            placeholder="请输入搜索关键词"
+            @keyup.enter="searchWarehouse"
+            class="search-input"
+          />
+          <button class="btn btn-search" @click="searchWarehouse">搜索</button>
+          <button class="btn btn-cancel" @click="resetWarehouseSearch">重置</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -70,9 +107,60 @@
         </tbody>
       </table>
     </div>
+    </div>
+
+    <!-- 货物列表 -->
+    <div v-if="activeTab === 'goods'" class="tab-content">
+      <div class="toolbar">
+        <div class="search-bar">
+          <select v-model="goodsSearchType" class="search-type">
+            <option value="goods_code">按货物编码</option>
+            <option value="goods_name">按货物名称</option>
+          </select>
+          <input
+            type="text"
+            v-model="goodsSearchKeyword"
+            placeholder="请输入搜索关键词"
+            @keyup.enter="searchGoods"
+            class="search-input"
+          />
+          <button class="btn btn-search" @click="searchGoods">搜索</button>
+          <button class="btn btn-cancel" @click="resetGoodsSearch">重置</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>货物ID</th>
+              <th>货物编码</th>
+              <th>种类</th>
+              <th>名称</th>
+              <th>储存条件</th>
+              <th>数量</th>
+              <th>单位</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="goodsList.length === 0">
+              <td colspan="7" class="empty-cell">暂无货物数据</td>
+            </tr>
+            <tr v-for="g in goodsList" :key="g.goods_id">
+              <td>{{ g.goods_id }}</td>
+              <td>{{ g.goods_code }}</td>
+              <td>{{ g.category }}</td>
+              <td>{{ g.goods_name }}</td>
+              <td>{{ g.storage_condition }}</td>
+              <td>{{ g.quantity }}</td>
+              <td>{{ g.unit }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <!-- 其他选项卡（通用表格） -->
-    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse'" class="table-wrapper">
+    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods'" class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -94,6 +182,7 @@
     <div class="pagination-row">
       <span v-if="activeTab === 'personnel'">共 {{ personnelList.length }} 条</span>
       <span v-else-if="activeTab === 'warehouse'">共 {{ warehouseList.length }} 条</span>
+      <span v-else-if="activeTab === 'goods'">共 {{ goodsList.length }} 条</span>
       <span v-else>共 {{ currentData.length }} 条</span>
     </div>
 
@@ -156,13 +245,24 @@ export default {
       tabs: [
         { key: 'personnel', label: '人员列表' },
         { key: 'warehouse', label: '仓库列表' },
+        { key: 'goods', label: '货物列表' },
         { key: 'inventory', label: '库存明细' },
         { key: 'batch', label: '批次列表' },
         { key: 'temperature', label: '温度列表' },
         { key: 'log', label: '操作日志' },
       ],
+      allPersonnel: [],
       personnelList: [],
+      searchType: 'user_id',
+      searchKeyword: '',
+      allWarehouses: [],
       warehouseList: [],
+      warehouseSearchType: 'warehouse_id',
+      warehouseSearchKeyword: '',
+      allGoods: [],
+      goodsList: [],
+      goodsSearchType: 'goods_code',
+      goodsSearchKeyword: '',
       viewDialog: {
         visible: false,
         warehouse: {},
@@ -216,6 +316,7 @@ export default {
   mounted() {
     this.fetchPersonnel()
     this.fetchWarehouses()
+    this.fetchGoods()
   },
   methods: {
     switchTab(key) {
@@ -224,27 +325,102 @@ export default {
         this.fetchPersonnel()
       } else if (key === 'warehouse' && this.warehouseList.length === 0) {
         this.fetchWarehouses()
+      } else if (key === 'goods' && this.goodsList.length === 0) {
+        this.fetchGoods()
       }
     },
     async fetchPersonnel() {
       try {
         const res = await request.get('/user/personnel')
         if (res.code === 200) {
-          this.personnelList = res.data || []
+          this.allPersonnel = res.data || []
+          this.personnelList = this.allPersonnel
         }
       } catch (e) {
         // 静默失败，查看页不弹错误
       }
     },
+    searchPersonnel() {
+      const keyword = this.searchKeyword.trim()
+      if (!keyword) {
+        this.personnelList = this.allPersonnel
+        return
+      }
+      if (this.searchType === 'user_id') {
+        const id = parseInt(keyword)
+        if (isNaN(id)) return
+        this.personnelList = this.allPersonnel.filter(p => p.user_id === id)
+      } else {
+        this.personnelList = this.allPersonnel.filter(p =>
+          p.real_name && p.real_name.includes(keyword)
+        )
+      }
+    },
+    resetSearch() {
+      this.searchKeyword = ''
+      this.personnelList = this.allPersonnel
+    },
     async fetchWarehouses() {
       try {
         const res = await request.get('/warehouse/list')
         if (res.code === 200) {
-          this.warehouseList = res.data || []
+          this.allWarehouses = res.data || []
+          this.warehouseList = this.allWarehouses
         }
       } catch (e) {
         // 静默失败
       }
+    },
+    searchWarehouse() {
+      const keyword = this.warehouseSearchKeyword.trim()
+      if (!keyword) {
+        this.warehouseList = this.allWarehouses
+        return
+      }
+      if (this.warehouseSearchType === 'warehouse_id') {
+        const id = parseInt(keyword)
+        if (isNaN(id)) return
+        this.warehouseList = this.allWarehouses.filter(w => w.warehouse_id === id)
+      } else {
+        this.warehouseList = this.allWarehouses.filter(w =>
+          w.warehouse_name && w.warehouse_name.includes(keyword)
+        )
+      }
+    },
+    resetWarehouseSearch() {
+      this.warehouseSearchKeyword = ''
+      this.warehouseList = this.allWarehouses
+    },
+    async fetchGoods() {
+      try {
+        const res = await request.get('/goods/list')
+        if (res.code === 200) {
+          this.allGoods = res.data || []
+          this.goodsList = this.allGoods
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    searchGoods() {
+      const keyword = this.goodsSearchKeyword.trim()
+      if (!keyword) {
+        this.goodsList = this.allGoods
+        return
+      }
+      if (this.goodsSearchType === 'goods_code') {
+        this.goodsList = this.allGoods.filter(g =>
+          g.goods_code && g.goods_code.includes(keyword)
+        )
+      } else {
+        this.goodsList = this.allGoods.filter(g =>
+          g.goods_name && g.goods_name.includes(keyword)
+        )
+      }
+    },
+    resetGoodsSearch() {
+      this.goodsSearchKeyword = ''
+      this.goodsList = this.allGoods
     },
     async openViewDialog(warehouse) {
       this.viewDialog.warehouse = warehouse
@@ -280,6 +456,69 @@ export default {
 
 <style scoped>
 .query-page { display: flex; flex-direction: column; gap: 12px; }
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.search-type {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #303133;
+  background: #fff;
+}
+.search-input {
+  height: 32px;
+  width: 180px;
+  padding: 0 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #303133;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: #409EFF; }
+.search-input::placeholder { color: #c0c4cc; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-search {
+  background: #ecf5ff;
+  color: #409EFF;
+}
+.btn-search:hover { background: #d9ecff; }
+.btn-cancel {
+  background: #f4f4f5;
+  color: #606266;
+}
+.btn-cancel:hover { background: #e6e6e8; }
 
 .tab-row {
   display: flex;
