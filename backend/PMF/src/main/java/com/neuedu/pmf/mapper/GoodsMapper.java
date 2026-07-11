@@ -13,4 +13,5 @@ public interface GoodsMapper {
     Goods findById(@Param("goods_id") Integer goodsId);
     int update(Goods goods);
     int deleteById(@Param("goods_id") Integer goodsId);
+    java.util.List<Integer> findAllIds();
 }

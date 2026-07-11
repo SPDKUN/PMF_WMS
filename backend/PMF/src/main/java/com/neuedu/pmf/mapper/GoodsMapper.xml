@@ -20,9 +20,9 @@
         SELECT * FROM goods WHERE goods_id = #{goods_id}
     </select>
 
-    <insert id="save" useGeneratedKeys="true" keyProperty="goods_id">
-        INSERT INTO goods (goods_code, category, goods_name, storage_condition, quantity, unit)
-        VALUES (#{goods_code}, #{category}, #{goods_name}, #{storage_condition}, #{quantity}, #{unit})
+    <insert id="save">
+        INSERT INTO goods (goods_id, goods_code, category, goods_name, storage_condition, quantity, unit)
+        VALUES (#{goods_id}, #{goods_code}, #{category}, #{goods_name}, #{storage_condition}, #{quantity}, #{unit})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Goods">
@@ -41,5 +41,9 @@
     <delete id="deleteById">
         DELETE FROM goods WHERE goods_id = #{goods_id}
     </delete>
+
+    <select id="findAllIds" resultType="int">
+        SELECT goods_id FROM goods ORDER BY goods_id
+    </select>
 
 </mapper>

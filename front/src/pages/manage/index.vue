@@ -4,6 +4,7 @@
     <div class="tab-row">
       <button :class="{ active: activeTab === 'personnel' }" @click="activeTab = 'personnel'">人员列表</button>
       <button :class="{ active: activeTab === 'warehouse' }" @click="activeTab = 'warehouse'">仓库列表</button>
+      <button :class="{ active: activeTab === 'goods' }" @click="activeTab = 'goods'">货物列表</button>
     </div>
 
     <!-- 人员列表 -->
@@ -72,6 +73,23 @@
         <button class="btn btn-primary" @click="openWarehouseDialog()">
           <el-icon><Plus /></el-icon> 新增仓库
         </button>
+        <div class="search-bar">
+          <select v-model="warehouseSearchType" class="search-type">
+            <option value="warehouse_id">按ID</option>
+            <option value="warehouse_name">按名称</option>
+          </select>
+          <input
+            type="text"
+            v-model="warehouseSearchKeyword"
+            placeholder="请输入搜索关键词"
+            @keyup.enter="searchWarehouse"
+            class="search-input"
+          />
+          <button class="btn btn-search" @click="searchWarehouse">
+            <el-icon><Search /></el-icon> 搜索
+          </button>
+          <button class="btn btn-cancel" @click="resetWarehouseSearch">重置</button>
+        </div>
       </div>
       <div class="table-wrapper">
         <table class="data-table">
@@ -107,6 +125,110 @@
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- 货物列表 -->
+    <div v-if="activeTab === 'goods'" class="tab-content">
+      <div class="toolbar">
+        <button class="btn btn-primary" @click="openGoodsDialog()">
+          <el-icon><Plus /></el-icon> 新增货物
+        </button>
+        <div class="search-bar">
+          <select v-model="goodsSearchType" class="search-type">
+            <option value="goods_code">按货物编码</option>
+            <option value="goods_name">按货物名称</option>
+          </select>
+          <input
+            type="text"
+            v-model="goodsSearchKeyword"
+            placeholder="请输入搜索关键词"
+            @keyup.enter="searchGoods"
+            class="search-input"
+          />
+          <button class="btn btn-search" @click="searchGoods">
+            <el-icon><Search /></el-icon> 搜索
+          </button>
+          <button class="btn btn-cancel" @click="resetGoodsSearch">重置</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>货物ID</th>
+              <th>货物编码</th>
+              <th>种类</th>
+              <th>名称</th>
+              <th>储存条件</th>
+              <th>数量</th>
+              <th>单位</th>
+              <th width="100">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="goodsList.length === 0">
+              <td colspan="8" class="empty-cell">暂无货物数据</td>
+            </tr>
+            <tr v-for="g in goodsList" :key="g.goods_id">
+              <td>{{ g.goods_id }}</td>
+              <td>{{ g.goods_code }}</td>
+              <td>{{ g.category }}</td>
+              <td>{{ g.goods_name }}</td>
+              <td>{{ g.storage_condition }}</td>
+              <td>{{ g.quantity }}</td>
+              <td>{{ g.unit }}</td>
+              <td>
+                <button class="btn-action delete" @click="deleteGoods(g.goods_id)" :disabled="g.quantity > 0" :title="g.quantity > 0 ? '数量不为0，不可删除' : ''">删除</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 货物新增弹窗 -->
+    <div class="dialog-overlay" v-if="goodsDialog.visible" @click.self="goodsDialog.visible = false">
+      <div class="dialog-box">
+        <div class="dialog-header">
+          <h3>新增货物</h3>
+          <button class="dialog-close" @click="goodsDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body">
+          <div class="form-item">
+            <label>货物编码 <span class="required">*</span></label>
+            <input type="text" v-model="goodsDialog.form.goods_code" placeholder="请输入货物编码" />
+          </div>
+          <div class="form-item">
+            <label>种类 <span class="required">*</span></label>
+            <select v-model="goodsDialog.form.category">
+              <option value="">请选择种类</option>
+              <option value="原料">原料</option>
+              <option value="成品">成品</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>名称 <span class="required">*</span></label>
+            <input type="text" v-model="goodsDialog.form.goods_name" placeholder="请输入名称" />
+          </div>
+          <div class="form-item">
+            <label>储存条件 <span class="required">*</span></label>
+            <select v-model="goodsDialog.form.storage_condition">
+              <option value="">请选择储存条件</option>
+              <option value="常温">常温</option>
+              <option value="冷冻">冷冻</option>
+              <option value="恒温">恒温</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>单位 <span class="required">*</span></label>
+            <input type="text" v-model="goodsDialog.form.unit" placeholder="请输入单位（如：箱、袋、kg）" />
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="goodsDialog.visible = false">取消</button>
+          <button class="btn btn-primary" @click="submitGoods">确认</button>
+        </div>
       </div>
     </div>
 
@@ -285,6 +407,17 @@ export default {
       searchType: 'user_id',
       searchKeyword: '',
       warehouseList: [],
+      allWarehouses: [],
+      warehouseSearchType: 'warehouse_id',
+      warehouseSearchKeyword: '',
+      goodsList: [],
+      allGoods: [],
+      goodsSearchType: 'goods_code',
+      goodsSearchKeyword: '',
+      goodsDialog: {
+        visible: false,
+        form: { goods_id: null, goods_code: '', category: '', goods_name: '', storage_condition: '', unit: '' }
+      },
       personnelDialog: {
         visible: false,
         mode: 'create',
@@ -311,6 +444,7 @@ export default {
   mounted() {
     this.fetchPersonnel()
     this.fetchWarehouses()
+    this.fetchGoods()
   },
   methods: {
     async fetchPersonnel() {
@@ -463,11 +597,37 @@ export default {
       try {
         const res = await request.get('/warehouse/list')
         if (res.code === 200) {
-          this.warehouseList = res.data || []
+          this.allWarehouses = res.data || []
+          this.warehouseList = this.allWarehouses
         }
       } catch (e) {
         ElMessage.error('获取仓库列表失败')
       }
+    },
+
+    searchWarehouse() {
+      const keyword = this.warehouseSearchKeyword.trim()
+      if (!keyword) {
+        this.warehouseList = this.allWarehouses
+        return
+      }
+      if (this.warehouseSearchType === 'warehouse_id') {
+        const id = parseInt(keyword)
+        if (isNaN(id)) {
+          ElMessage.warning('请输入有效的数字ID')
+          return
+        }
+        this.warehouseList = this.allWarehouses.filter(w => w.warehouse_id === id)
+      } else {
+        this.warehouseList = this.allWarehouses.filter(w =>
+          w.warehouse_name && w.warehouse_name.includes(keyword)
+        )
+      }
+    },
+
+    resetWarehouseSearch() {
+      this.warehouseSearchKeyword = ''
+      this.warehouseList = this.allWarehouses
     },
 
     openWarehouseDialog(item) {
@@ -578,6 +738,89 @@ export default {
         }
       } catch (e) {
         ElMessage.error('获取库位列表失败')
+      }
+    },
+
+    // 货物 CRUD
+    async fetchGoods() {
+      try {
+        const res = await request.get('/goods/list')
+        if (res.code === 200) {
+          this.allGoods = res.data || []
+          this.goodsList = this.allGoods
+        }
+      } catch (e) {
+        ElMessage.error('获取货物列表失败')
+      }
+    },
+
+    searchGoods() {
+      const keyword = this.goodsSearchKeyword.trim()
+      if (!keyword) {
+        this.goodsList = this.allGoods
+        return
+      }
+      if (this.goodsSearchType === 'goods_code') {
+        this.goodsList = this.allGoods.filter(g =>
+          g.goods_code && g.goods_code.includes(keyword)
+        )
+      } else {
+        this.goodsList = this.allGoods.filter(g =>
+          g.goods_name && g.goods_name.includes(keyword)
+        )
+      }
+    },
+
+    resetGoodsSearch() {
+      this.goodsSearchKeyword = ''
+      this.goodsList = this.allGoods
+    },
+
+    openGoodsDialog() {
+      this.goodsDialog.form = { goods_code: '', category: '', goods_name: '', storage_condition: '', unit: '' }
+      this.goodsDialog.visible = true
+    },
+
+    async submitGoods() {
+      const f = this.goodsDialog.form
+      if (!f.goods_code) { ElMessage.warning('请输入货物编码'); return }
+      if (!f.category) { ElMessage.warning('请选择种类'); return }
+      if (!f.goods_name) { ElMessage.warning('请输入名称'); return }
+      if (!f.storage_condition) { ElMessage.warning('请选择储存条件'); return }
+      if (!f.unit) { ElMessage.warning('请输入单位'); return }
+
+      try {
+        const res = await request.post('/goods', {
+          goods_code: f.goods_code,
+          category: f.category,
+          goods_name: f.goods_name,
+          storage_condition: f.storage_condition,
+          unit: f.unit
+        })
+        if (res.code === 200) {
+          ElMessage.success('新增成功')
+          this.goodsDialog.visible = false
+          this.fetchGoods()
+        } else {
+          ElMessage.error(res.msg || '新增失败')
+        }
+      } catch (e) {
+        ElMessage.error('新增失败')
+      }
+    },
+
+    async deleteGoods(id) {
+      if (!confirm('确定删除该货物？')) return
+      try {
+        const res = await request.delete(`/goods/${id}`)
+        if (res.code === 200) {
+          ElMessage.success('删除成功')
+          this.fetchGoods()
+        } else {
+          ElMessage.error(res.msg || '删除失败')
+        }
+      } catch (e) {
+        ElMessage.error('删除失败')
       }
     }
   }
@@ -733,6 +976,7 @@ export default {
 .btn-action.view:hover { background: #e1f3d8; }
 .btn-action.delete { background: #fef0f0; color: #f56c6c; }
 .btn-action.delete:hover { background: #fde2e2; }
+.btn-action.delete:disabled { background: #f5f5f5; color: #c0c4cc; cursor: not-allowed; }
 
 /* 弹窗 */
 .dialog-overlay {
