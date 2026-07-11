@@ -74,9 +74,21 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setAvailable_slots(totalSlots);
         warehouse.setStatus("启用");
 
-        // 插入仓库
+        // 获取当前所有ID中最小的未用正数作为新ID
+        java.util.List<Integer> existingIds = warehouseMapper.findAllIds();
+        int newId = 1;
+        for (int id : existingIds) {
+            if (id == newId) {
+                newId++;
+            } else if (id > newId) {
+                break;
+            }
+        }
+        warehouse.setWarehouse_id(newId);
+
+        // 插入仓库（显式指定ID）
         warehouseMapper.save(warehouse);
-        Integer warehouseId = warehouse.getWarehouse_id();
+        Integer warehouseId = newId;
 
         // 级联创建库区
         for (int i = 1; i <= zoneCount; i++) {

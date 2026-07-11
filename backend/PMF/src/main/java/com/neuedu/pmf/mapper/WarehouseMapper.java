@@ -13,4 +13,5 @@ public interface WarehouseMapper {
     Warehouse findById(@Param("warehouse_id") Integer warehouseId);
     int update(Warehouse warehouse);
     int deleteById(@Param("warehouse_id") Integer warehouseId);
+    java.util.List<Integer> findAllIds();
 }

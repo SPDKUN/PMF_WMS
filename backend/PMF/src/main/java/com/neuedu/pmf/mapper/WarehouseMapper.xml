@@ -22,9 +22,9 @@
         SELECT * FROM warehouse WHERE warehouse_id = #{warehouse_id}
     </select>
 
-    <insert id="save" useGeneratedKeys="true" keyProperty="warehouse_id">
-        INSERT INTO warehouse (warehouse_name, warehouse_type, warehouse_size, total_slots, available_slots, location, status, description)
-        VALUES (#{warehouse_name}, #{warehouse_type}, #{warehouse_size}, #{total_slots}, #{available_slots}, #{location}, #{status}, #{description})
+    <insert id="save">
+        INSERT INTO warehouse (warehouse_id, warehouse_name, warehouse_type, warehouse_size, total_slots, available_slots, location, status, description)
+        VALUES (#{warehouse_id}, #{warehouse_name}, #{warehouse_type}, #{warehouse_size}, #{total_slots}, #{available_slots}, #{location}, #{status}, #{description})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Warehouse">
@@ -45,5 +45,9 @@
     <delete id="deleteById">
         DELETE FROM warehouse WHERE warehouse_id = #{warehouse_id}
     </delete>
+
+    <select id="findAllIds" resultType="int">
+        SELECT warehouse_id FROM warehouse ORDER BY warehouse_id
+    </select>
 
 </mapper>
