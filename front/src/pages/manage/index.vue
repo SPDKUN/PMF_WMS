@@ -205,22 +205,9 @@
 </template>
 
 <script>
-import axios from 'axios'
 import request from '@/utils/request.js'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { ElIcon, ElMessage } from 'element-plus'
-
-const api = axios.create({
-  baseURL: 'http://localhost:8088'
-})
-
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
 
 export default {
   name: 'ManagePage',
@@ -259,9 +246,9 @@ export default {
   methods: {
     async fetchPersonnel() {
       try {
-        const res = await api.get('/user/personnel')
-        if (res.data.code === 200) {
-          this.allPersonnel = res.data.data || []
+        const res = await request.get('/user/personnel')
+        if (res.code === 200) {
+          this.allPersonnel = res.data || []
           this.personnelList = this.allPersonnel
         }
       } catch (e) {
@@ -325,7 +312,7 @@ export default {
           ? Math.max(...this.allPersonnel.map(p => p.user_id))
           : 0
         try {
-          const res = await api.post('/user', {
+          const res = await request.post('/user', {
             user_id: maxId + 1,
             username: f.username,
             real_name: f.real_name,
@@ -335,19 +322,19 @@ export default {
             password: '123456',
             status: 1
           })
-          if (res.data.code === 200) {
+          if (res.code === 200) {
             ElMessage.success('新增成功')
             this.personnelDialog.visible = false
             this.fetchPersonnel()
           } else {
-            ElMessage.error(res.data.msg || '新增失败')
+            ElMessage.error(res.msg || '新增失败')
           }
         } catch (e) {
           ElMessage.error('新增失败')
         }
       } else {
         try {
-          const res = await api.put('/user', {
+          const res = await request.put('/user', {
             user_id: f.user_id,
             username: f.username,
             real_name: f.real_name,
@@ -355,12 +342,12 @@ export default {
             department: f.department,
             position: f.position
           })
-          if (res.data.code === 200) {
+          if (res.code === 200) {
             ElMessage.success('修改成功')
             this.personnelDialog.visible = false
             this.fetchPersonnel()
           } else {
-            ElMessage.error(res.data.msg || '修改失败')
+            ElMessage.error(res.msg || '修改失败')
           }
         } catch (e) {
           ElMessage.error('修改失败')
@@ -370,12 +357,12 @@ export default {
 
     deletePersonnel(id) {
       if (!confirm('确定删除该人员？')) return
-      api.delete(`/user/${id}`).then(res => {
-        if (res.data.code === 200) {
+      request.delete(`/user/${id}`).then(res => {
+        if (res.code === 200) {
           ElMessage.success('删除成功')
           this.fetchPersonnel()
         } else {
-          ElMessage.error(res.data.msg || '删除失败')
+          ElMessage.error(res.msg || '删除失败')
         }
       }).catch(() => {
         ElMessage.error('删除失败')
@@ -387,15 +374,15 @@ export default {
     },
     async doResetPassword() {
       try {
-        const res = await api.put('/user', {
+        const res = await request.put('/user', {
           user_id: this.personnelDialog.form.user_id,
           password: '123456'
         })
-        if (res.data.code === 200) {
+        if (res.code === 200) {
           ElMessage.success('密码重置成功')
           this.confirmDialog.visible = false
         } else {
-          ElMessage.error(res.data.msg || '密码重置失败')
+          ElMessage.error(res.msg || '密码重置失败')
         }
       } catch (e) {
         ElMessage.error('密码重置失败')
