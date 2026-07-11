@@ -22,7 +22,7 @@
           </thead>
           <tbody>
             <tr v-if="todoList.length === 0">
-              <td colspan="6" class="empty-cell">🎉 所有待办已完成！</td>
+              <td colspan="6" class="empty-cell">所有待办已完成！</td>
             </tr>
             <tr v-for="item in todoList" :key="item.id" @click="openDetail(item)" style="cursor:pointer;">
               <td>{{ item.title }}</td>
@@ -153,62 +153,59 @@ export default {
 </script>
 
 <style scoped>
-.tasks-page { display: flex; flex-direction: column; gap: 16px; }
+.tasks-page { display: flex; flex-direction: column; gap: 12px; }
 
 .tab-row {
   display: flex;
   gap: 0;
-  background: rgba(255,255,255,0.03);
-  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
   padding: 4px;
   width: fit-content;
-  border: 1px solid rgba(255,255,255,0.05);
 }
 .tab-row button {
-  padding: 8px 24px;
+  padding: 6px 20px;
   border: none;
-  border-radius: 12px;
+  border-radius: 4px;
   background: transparent;
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
+  color: #606266;
+  font-size: 13px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s;
 }
 .tab-row button.active {
-  background: rgba(79,172,254,0.2);
+  background: #409EFF;
   color: #fff;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
+  gap: 4px;
+  padding: 6px 16px;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 13px;
-  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s;
 }
 .btn-primary {
-  background: linear-gradient(135deg, var(--glow-blue), var(--glow-purple));
+  background: #409EFF;
   color: #fff;
   align-self: flex-start;
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,172,254,0.25); }
+.btn-primary:hover { background: #66b1ff; }
 .btn-cancel {
-  background: rgba(255,255,255,0.06);
-  color: var(--text-secondary);
+  background: #f4f4f5;
+  color: #606266;
 }
-.btn-cancel:hover { background: rgba(255,255,255,0.1); }
+.btn-cancel:hover { background: #e6e6e8; }
 
 .table-wrapper {
-  background: var(--bg-card);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
   overflow: hidden;
 }
 .data-table {
@@ -217,113 +214,109 @@ export default {
   font-size: 13px;
 }
 .data-table thead {
-  background: rgba(255,255,255,0.03);
+  background: #f5f7fa;
 }
 .data-table th {
-  padding: 12px 16px;
+  padding: 10px 14px;
   text-align: left;
   font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: #303133;
+  border-bottom: 1px solid #ebeef5;
   white-space: nowrap;
 }
 .data-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  color: var(--text-primary);
+  padding: 10px 14px;
+  border-bottom: 1px solid #ebeef5;
+  color: #606266;
 }
-.data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-.empty-cell { text-align: center; padding: 40px 0; color: var(--text-dim); }
+.data-table tbody tr:hover { background: #f5f7fa; }
+.empty-cell { text-align: center; padding: 40px 0; color: #c0c4cc; }
 
 .priority-tag {
-  font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 600;
+  font-size: 11px; padding: 2px 8px; border-radius: 4px;
 }
-.priority-tag.高 { background: rgba(244,114,182,0.15); color: var(--glow-pink); }
-.priority-tag.中 { background: rgba(251,146,60,0.15); color: var(--glow-orange); }
-.priority-tag.低 { background: rgba(52,211,153,0.12); color: var(--glow-green); }
+.priority-tag.高 { background: #fef0f0; color: #f56c6c; }
+.priority-tag.中 { background: #fdf6ec; color: #e6a23c; }
+.priority-tag.低 { background: #f0f9eb; color: #67c23a; }
 
 .status-tag {
-  font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 500;
+  font-size: 11px; padding: 2px 8px; border-radius: 4px;
 }
-.status-tag.待处理 { background: rgba(251,146,60,0.12); color: var(--glow-orange); }
-.status-tag.进行中 { background: rgba(79,172,254,0.15); color: var(--glow-blue); }
-.status-tag.已完成 { background: rgba(52,211,153,0.12); color: var(--glow-green); }
+.status-tag.待处理 { background: #fdf6ec; color: #e6a23c; }
+.status-tag.进行中 { background: #ecf5ff; color: #409EFF; }
+.status-tag.已完成 { background: #f0f9eb; color: #67c23a; }
 
-.action-cell { display: flex; gap: 8px; }
+.action-cell { display: flex; gap: 6px; }
 .btn-action {
-  padding: 4px 14px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; transition: var(--transition);
+  padding: 4px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s;
 }
-.btn-action.done { background: rgba(52,211,153,0.15); color: var(--glow-green); }
-.btn-action.done:hover { background: rgba(52,211,153,0.25); }
+.btn-action.done { background: #f0f9eb; color: #67c23a; }
+.btn-action.done:hover { background: #e1f3d8; }
 
 /* 表单卡片 */
 .form-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
-  padding: 24px 28px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 600px;
+  gap: 14px;
+  max-width: 560px;
 }
 .form-item { display: flex; flex-direction: column; gap: 4px; }
-.form-item label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.form-item label { font-size: 13px; color: #606266; }
 .form-item input, .form-item select, .form-item textarea {
-  padding: 10px 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
   font-size: 13px;
-  color: #fff;
-  transition: var(--transition);
+  color: #303133;
+  outline: none;
+  transition: border-color 0.2s;
   font-family: inherit;
 }
 .form-item input:focus, .form-item select:focus, .form-item textarea:focus {
-  outline: none;
-  border-color: var(--glow-blue);
+  border-color: #409EFF;
 }
-.form-item select { cursor: pointer; }
-.form-item select option { background: #1a1d2e; color: #fff; }
+.form-item select { background: #fff; cursor: pointer; }
 .form-item textarea { resize: vertical; min-height: 80px; }
 
 /* 弹窗 */
 .dialog-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5); z-index: 9999;
+  background: rgba(0,0,0,0.35); z-index: 9999;
   display: flex; align-items: center; justify-content: center;
 }
 .dialog-box {
-  background: #1a1d2e;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
-  width: 500px; max-width: 92vw;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  width: 480px; max-width: 92vw;
 }
 .dialog-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 20px; border-bottom: 1px solid #ebeef5;
 }
-.dialog-header h3 { font-size: 16px; font-weight: 600; color: #fff; }
+.dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
 .dialog-close {
-  background: none; border: none; color: var(--text-dim);
-  font-size: 22px; cursor: pointer; padding: 0; line-height: 1;
+  background: none; border: none; color: #c0c4cc;
+  font-size: 20px; cursor: pointer; padding: 0; line-height: 1;
 }
-.dialog-close:hover { color: #fff; }
+.dialog-close:hover { color: #303133; }
 .dialog-body {
-  padding: 20px 24px; display: flex; flex-direction: column; gap: 12px;
+  padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;
 }
-.detail-row { font-size: 14px; color: var(--text-primary); line-height: 1.6; }
-.detail-row .label { color: var(--text-secondary); }
+.detail-row { font-size: 14px; color: #303133; line-height: 1.6; }
+.detail-row .label { color: #909399; }
 .dialog-footer {
-  display: flex; justify-content: flex-end; gap: 10px;
-  padding: 12px 24px 20px; border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 20px 16px; border-top: 1px solid #ebeef5;
 }
 
 @media (max-width: 768px) {
   .form-card { max-width: 100%; }
   .data-table { font-size: 12px; }
-  .data-table th, .data-table td { padding: 8px 10px; }
+  .data-table th, .data-table td { padding: 8px; }
 }
 </style>

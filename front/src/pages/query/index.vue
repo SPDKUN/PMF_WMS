@@ -106,40 +106,38 @@ export default {
 </script>
 
 <style scoped>
-.query-page { display: flex; flex-direction: column; gap: 16px; }
+.query-page { display: flex; flex-direction: column; gap: 12px; }
 
 .tab-row {
   display: flex;
   gap: 0;
-  background: rgba(255,255,255,0.03);
-  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
   padding: 4px;
   width: fit-content;
-  border: 1px solid rgba(255,255,255,0.05);
   flex-wrap: wrap;
 }
 .tab-row button {
-  padding: 8px 20px;
+  padding: 6px 18px;
   border: none;
-  border-radius: 12px;
+  border-radius: 4px;
   background: transparent;
-  color: var(--text-secondary);
+  color: #606266;
   font-size: 13px;
-  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s;
   white-space: nowrap;
 }
 .tab-row button.active {
-  background: rgba(79,172,254,0.2);
+  background: #409EFF;
   color: #fff;
 }
 
 .table-wrapper {
-  background: var(--bg-card);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
   overflow: hidden;
   overflow-x: auto;
 }
@@ -149,36 +147,36 @@ export default {
   font-size: 13px;
 }
 .data-table thead {
-  background: rgba(255,255,255,0.03);
+  background: #f5f7fa;
 }
 .data-table th {
-  padding: 12px 16px;
+  padding: 10px 14px;
   text-align: left;
   font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: #303133;
+  border-bottom: 1px solid #ebeef5;
   white-space: nowrap;
 }
 .data-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  color: var(--text-primary);
+  padding: 10px 14px;
+  border-bottom: 1px solid #ebeef5;
+  color: #606266;
 }
-.data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-.empty-cell { text-align: center; padding: 40px 0; color: var(--text-dim); }
+.data-table tbody tr:hover { background: #f5f7fa; }
+.empty-cell { text-align: center; padding: 40px 0; color: #c0c4cc; }
 
 .pagination-row {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: #909399;
 }
 
 @media (max-width: 768px) {
   .tab-row { flex-wrap: wrap; }
-  .tab-row button { padding: 6px 14px; font-size: 12px; }
+  .tab-row button { padding: 5px 12px; font-size: 12px; }
   .data-table { font-size: 12px; }
-  .data-table th, .data-table td { padding: 8px 10px; }
+  .data-table th, .data-table td { padding: 8px; }
 }
 </style>

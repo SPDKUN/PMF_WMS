@@ -109,80 +109,77 @@ export default {
 }
 
 .profile-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-card);
-  padding: 32px;
-  box-shadow: var(--shadow-card);
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 28px;
   width: 100%;
-  max-width: 680px;
+  max-width: 640px;
 }
 
 .avatar-section {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ebeef5;
 }
 .avatar {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--glow-blue), var(--glow-purple));
+  background: #409EFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
 }
 .avatar-info .name {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
-  color: #fff;
+  color: #303133;
 }
 .avatar-info .role {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 4px;
+  font-size: 13px;
+  color: #909399;
+  margin-top: 2px;
 }
 
 .mode-switch {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 20px;
+  gap: 4px;
+  padding: 6px 18px;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 13px;
-  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s;
 }
 .btn-primary {
-  background: linear-gradient(135deg, var(--glow-blue), var(--glow-purple));
+  background: #409EFF;
   color: #fff;
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,172,254,0.25); }
+.btn-primary:hover { background: #66b1ff; }
 .btn-cancel {
-  background: rgba(255,255,255,0.06);
-  color: var(--text-secondary);
-  margin-left: 10px;
+  background: #f4f4f5;
+  color: #606266;
+  margin-left: 8px;
 }
-.btn-cancel:hover { background: rgba(255,255,255,0.1); }
+.btn-cancel:hover { background: #e6e6e8; }
 
 .info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 .info-item {
   display: flex;
@@ -191,37 +188,33 @@ export default {
 }
 .info-item label {
   font-size: 12px;
-  color: var(--text-dim);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #909399;
 }
 .info-item input {
-  height: 40px;
-  padding: 0 14px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
   font-size: 14px;
-  color: #fff;
-  transition: var(--transition);
+  color: #303133;
+  outline: none;
+  transition: border-color 0.2s;
 }
 .info-item input:focus {
-  outline: none;
-  border-color: var(--glow-blue);
+  border-color: #409EFF;
 }
 .info-item input:disabled {
-  background: rgba(255,255,255,0.01);
-  color: var(--text-secondary);
+  background: #f5f7fa;
+  color: #909399;
   cursor: not-allowed;
 }
 .info-item .hint {
   font-size: 11px;
-  color: var(--text-dim);
+  color: #c0c4cc;
 }
 
 @media (max-width: 768px) {
-  .profile-card { padding: 20px; }
+  .profile-card { padding: 16px; }
   .info-grid { grid-template-columns: 1fr; }
   .avatar-section { flex-direction: column; text-align: center; }
 }
