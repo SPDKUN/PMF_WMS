@@ -23,7 +23,7 @@ const routes = [
   {
     path: '/',
     component: MainLayout,
-    redirect: '/home',
+    redirect: '/login',
     children: [
       {
         path: 'home',
