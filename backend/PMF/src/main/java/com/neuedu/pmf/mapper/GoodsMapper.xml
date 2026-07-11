@@ -7,11 +7,8 @@
         <result column="goods_code" property="goods_code"/>
         <result column="category" property="category"/>
         <result column="goods_name" property="goods_name"/>
-        <result column="storage_location" property="storage_location"/>
         <result column="storage_condition" property="storage_condition"/>
-        <result column="expiry_date" property="expiry_date"/>
-        <result column="batch_no" property="batch_no"/>
-        <result column="description" property="description"/>
+        <result column="quantity" property="quantity"/>
     </resultMap>
 
     <select id="list" resultMap="GoodsMap">
@@ -23,8 +20,8 @@
     </select>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="goods_id">
-        INSERT INTO goods (goods_code, category, goods_name, storage_location, storage_condition, expiry_date, batch_no, description)
-        VALUES (#{goods_code}, #{category}, #{goods_name}, #{storage_location}, #{storage_condition}, #{expiry_date}, #{batch_no}, #{description})
+        INSERT INTO goods (goods_code, category, goods_name, storage_condition, quantity)
+        VALUES (#{goods_code}, #{category}, #{goods_name}, #{storage_condition}, #{quantity})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Goods">
@@ -33,11 +30,8 @@
             <if test="goods_code != null">goods_code = #{goods_code},</if>
             <if test="category != null">category = #{category},</if>
             <if test="goods_name != null">goods_name = #{goods_name},</if>
-            <if test="storage_location != null">storage_location = #{storage_location},</if>
             <if test="storage_condition != null">storage_condition = #{storage_condition},</if>
-            <if test="expiry_date != null">expiry_date = #{expiry_date},</if>
-            <if test="batch_no != null">batch_no = #{batch_no},</if>
-            <if test="description != null">description = #{description},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
         </set>
         WHERE goods_id = #{goods_id}
     </update>
