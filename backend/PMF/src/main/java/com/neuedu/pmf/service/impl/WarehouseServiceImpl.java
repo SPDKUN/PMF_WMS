@@ -1,8 +1,10 @@
 package com.neuedu.pmf.service.impl;
 
+import com.neuedu.pmf.common.ResultCode;
 import com.neuedu.pmf.entity.Location;
 import com.neuedu.pmf.entity.Warehouse;
 import com.neuedu.pmf.entity.Zone;
+import com.neuedu.pmf.exception.BusinessException;
 import com.neuedu.pmf.mapper.LocationMapper;
 import com.neuedu.pmf.mapper.WarehouseMapper;
 import com.neuedu.pmf.mapper.ZoneMapper;
@@ -38,6 +40,14 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     @Transactional
     public boolean delete(Integer id) {
+        Warehouse warehouse = warehouseMapper.findById(id);
+        if (warehouse == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND);
+        }
+        // 检查是否有库位被占用
+        if (!warehouse.getAvailable_slots().equals(warehouse.getTotal_slots())) {
+            throw new BusinessException(ResultCode.FAILED.getCode(), "仓库非空，不能删除");
+        }
         // 级联删除：先删库位，再删库区，最后删仓库
         java.util.ArrayList<Zone> zones = zoneMapper.findByWarehouseId(id);
         for (Zone zone : zones) {
@@ -114,7 +124,32 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
+    @Transactional
     public boolean update(Warehouse warehouse) {
+        String newName = warehouse.getWarehouse_name();
+        if (newName != null && !newName.isEmpty()) {
+            Warehouse old = warehouseMapper.findById(warehouse.getWarehouse_id());
+            if (old != null && !newName.equals(old.getWarehouse_name())) {
+                String oldName = old.getWarehouse_name();
+                // 级联更新库区名称
+                java.util.ArrayList<Zone> zones = zoneMapper.findByWarehouseId(warehouse.getWarehouse_id());
+                for (Zone zone : zones) {
+                    String oldZoneName = zone.getZone_name();
+                    String newZoneName = oldZoneName.replace(oldName, newName);
+                    zone.setZone_name(newZoneName);
+                    zoneMapper.update(zone);
+
+                    // 级联更新库位名称
+                    java.util.ArrayList<Location> locations = locationMapper.findByZoneId(zone.getZone_id());
+                    for (Location loc : locations) {
+                        String oldLocName = loc.getLocation_name();
+                        String newLocName = oldLocName.replace(oldName, newName);
+                        loc.setLocation_name(newLocName);
+                        locationMapper.update(loc);
+                    }
+                }
+            }
+        }
         return warehouseMapper.update(warehouse) > 0;
     }
 }
