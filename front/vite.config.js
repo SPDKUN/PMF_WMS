@@ -14,10 +14,12 @@ export default defineConfig({
   server : {
     port: 8080,
     open: true,
+    proxy:{
     '/api': {
         target: 'http://localhost:8088', // 后端接口地址
         changeOrigin: true, // 开启跨域
         rewrite: (path) => path.replace(/^\/api/, '') // 重写路径
-      }
+      }      
+    }
   }
 })

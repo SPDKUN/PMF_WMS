@@ -67,14 +67,19 @@ export default {
       this.errorMsg = ''
       this.loading = true
       try {
+
+        // 1. 先打印 request 对象，确保导入正确
+    console.log('request 对象：', request)
+
         const response = await request.get('/auth/login', {
-          params: {
-            username: this.username,
-            password: this.password
-          }
+          username: this.username,
+          password: this.password
         })
 
-        const token = response.data.token
+        // 3. 打印 response 实际值
+    console.log('response 实际值：', response)
+
+        const token = response.token
         if (token) {
           localStorage.setItem('token', token)
           this.$router.push({ name: 'Home' })

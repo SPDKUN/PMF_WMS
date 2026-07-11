@@ -206,6 +206,7 @@
 
 <script>
 import axios from 'axios'
+import request from '@/utils/request.js'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { ElIcon, ElMessage } from 'element-plus'
 
