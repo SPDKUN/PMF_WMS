@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public interface InventoryService {
     ArrayList<Inventory> list();
 
-    ArrayList<InventoryVO> listWithDetails(String goodsName, Integer locationId);
+    ArrayList<InventoryVO> listWithDetails(String batchId);
 
     Inventory getById(Integer id);
 

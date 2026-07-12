@@ -1,10 +1,13 @@
 package com.neuedu.pmf.service.impl;
 
 import com.neuedu.pmf.entity.Batch;
+import com.neuedu.pmf.entity.Inventory;
 import com.neuedu.pmf.mapper.BatchMapper;
+import com.neuedu.pmf.mapper.InventoryMapper;
 import com.neuedu.pmf.service.BatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +18,9 @@ public class BatchServiceImpl implements BatchService {
 
     @Autowired
     private BatchMapper batchMapper;
+
+    @Autowired
+    private InventoryMapper inventoryMapper;
 
     @Override
     public ArrayList<Batch> list() {
@@ -32,6 +38,7 @@ public class BatchServiceImpl implements BatchService {
     }
 
     @Override
+    @Transactional
     public boolean save(Batch batch) {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "B" + today;
@@ -54,7 +61,20 @@ public class BatchServiceImpl implements BatchService {
             batch.setBatch_status("待检");
         }
 
-        return batchMapper.save(batch) > 0;
+        int result = batchMapper.save(batch);
+        if (result > 0) {
+            Inventory inventory = new Inventory();
+            inventory.setGoods_id(batch.getGoods_id());
+            inventory.setBatch_id(batchId);
+            inventory.setWarehouse_id(null);
+            inventory.setZone_id(null);
+            inventory.setLocation_id(null);
+            inventory.setQuantity(batch.getInitial_quantity());
+            inventory.setLocked_quantity(0);
+            inventory.setInventory_status("待入库");
+            inventoryMapper.save(inventory);
+        }
+        return result > 0;
     }
 
     @Override

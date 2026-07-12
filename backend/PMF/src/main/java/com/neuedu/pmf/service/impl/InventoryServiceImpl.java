@@ -21,8 +21,8 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public ArrayList<InventoryVO> listWithDetails(String goodsName, Integer locationId) {
-        return inventoryMapper.listWithDetails(goodsName, locationId);
+    public ArrayList<InventoryVO> listWithDetails(String batchId) {
+        return inventoryMapper.listWithDetails(batchId);
     }
 
     @Override

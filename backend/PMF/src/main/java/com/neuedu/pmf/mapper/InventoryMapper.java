@@ -10,7 +10,7 @@ import java.util.ArrayList;
 @Mapper
 public interface InventoryMapper {
     ArrayList<Inventory> list();
-    ArrayList<InventoryVO> listWithDetails(@Param("goodsName") String goodsName, @Param("locationId") Integer locationId);
+    ArrayList<InventoryVO> listWithDetails(@Param("batchId") String batchId);
     int save(Inventory inventory);
     Inventory findById(@Param("inventory_id") Integer inventoryId);
     int update(Inventory inventory);

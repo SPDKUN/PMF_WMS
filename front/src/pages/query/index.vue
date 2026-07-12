@@ -206,41 +206,14 @@
       <div class="toolbar">
         <div class="search-bar">
           <div class="search-item">
-            <label>货物名称</label>
+            <label>批次号</label>
             <input
               type="text"
-              v-model="inventorySearch.goodsName"
-              placeholder="请输入货物名称"
+              v-model="inventorySearch.batchId"
+              placeholder="请输入批次号"
               @keyup.enter="searchInventory"
               class="search-input"
             />
-          </div>
-          <div class="search-item">
-            <label>仓库</label>
-            <select v-model="inventorySearch.warehouseId" @change="onInvWarehouseChange">
-              <option :value="null">全部仓库</option>
-              <option v-for="w in invWarehouseList" :key="w.warehouse_id" :value="w.warehouse_id">
-                {{ w.warehouse_name }}
-              </option>
-            </select>
-          </div>
-          <div class="search-item">
-            <label>库区</label>
-            <select v-model="inventorySearch.zoneId" @change="onInvZoneChange" :disabled="!inventorySearch.warehouseId">
-              <option :value="null">全部库区</option>
-              <option v-for="z in invZoneList" :key="z.zone_id" :value="z.zone_id">
-                {{ z.zone_name }}
-              </option>
-            </select>
-          </div>
-          <div class="search-item">
-            <label>库位</label>
-            <select v-model="inventorySearch.locationId" :disabled="!inventorySearch.zoneId">
-              <option :value="null">全部库位</option>
-              <option v-for="l in invLocationList" :key="l.location_id" :value="l.location_id">
-                {{ l.location_name }}
-              </option>
-            </select>
           </div>
           <button class="btn btn-search" @click="searchInventory">搜索</button>
           <button class="btn btn-cancel" @click="resetInventorySearch">重置</button>
@@ -256,12 +229,13 @@
               <th>存储位置</th>
               <th>当前数量</th>
               <th>锁定数量</th>
+              <th>库存状态</th>
               <th>单位</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="inventoryTableData.length === 0">
-              <td colspan="7" class="empty-cell">暂无库存数据</td>
+              <td colspan="8" class="empty-cell">暂无库存数据</td>
             </tr>
             <tr v-for="item in inventoryTableData" :key="item.inventory_id">
               <td>{{ item.inventory_id }}</td>
@@ -270,6 +244,7 @@
               <td>{{ item.location_name || '-' }}</td>
               <td>{{ item.quantity }}</td>
               <td>{{ item.locked_quantity }}</td>
+              <td><span class="status-tag" :class="invStatusClass(item.inventory_status)">{{ item.inventory_status }}</span></td>
               <td>{{ item.unit || '-' }}</td>
             </tr>
           </tbody>
@@ -443,14 +418,8 @@ export default {
         locations: []
       },
       inventorySearch: {
-        goodsName: '',
-        warehouseId: null,
-        zoneId: null,
-        locationId: null,
+        batchId: '',
       },
-      invWarehouseList: [],
-      invZoneList: [],
-      invLocationList: [],
       inventoryTableData: [],
       inventoryTotal: 0,
       temperatureData: [
@@ -499,7 +468,6 @@ export default {
       } else if (key === 'batch' && this.batchList.length === 0) {
         this.fetchBatches()
       } else if (key === 'inventory' && this.inventoryTableData.length === 0) {
-        this.loadInvWarehouses()
         this.loadInventoryData()
       } else if (key === 'log' && this.logData.length === 0) {
         this.fetchLogs()
@@ -651,49 +619,10 @@ export default {
     },
 
     // --- 库存明细 ---
-    async loadInvWarehouses() {
-      try {
-        const res = await request.get('/warehouse/list')
-        if (res.code === 200) {
-          this.invWarehouseList = res.data || []
-        }
-      } catch (e) { /* ignore */ }
-    },
-    async loadInvZones(warehouseId) {
-      if (!warehouseId) { this.invZoneList = []; return }
-      try {
-        const res = await request.get('/zone/list', { warehouseId })
-        if (res.code === 200) { this.invZoneList = res.data || [] }
-      } catch (e) { this.invZoneList = [] }
-    },
-    async loadInvLocations(zoneId) {
-      if (!zoneId) { this.invLocationList = []; return }
-      try {
-        const res = await request.get('/location/list', { zoneId })
-        if (res.code === 200) { this.invLocationList = res.data || [] }
-      } catch (e) { this.invLocationList = [] }
-    },
-    onInvWarehouseChange() {
-      this.inventorySearch.zoneId = null
-      this.inventorySearch.locationId = null
-      this.invZoneList = []
-      this.invLocationList = []
-      if (this.inventorySearch.warehouseId) {
-        this.loadInvZones(this.inventorySearch.warehouseId)
-      }
-    },
-    onInvZoneChange() {
-      this.inventorySearch.locationId = null
-      this.invLocationList = []
-      if (this.inventorySearch.zoneId) {
-        this.loadInvLocations(this.inventorySearch.zoneId)
-      }
-    },
     async loadInventoryData() {
       try {
         const params = {}
-        if (this.inventorySearch.goodsName) { params.goodsName = this.inventorySearch.goodsName }
-        if (this.inventorySearch.locationId) { params.locationId = this.inventorySearch.locationId }
+        if (this.inventorySearch.batchId) { params.batchId = this.inventorySearch.batchId }
         const res = await request.get('/inventory/listWithDetails', params)
         if (res.code === 200) {
           this.inventoryTableData = res.data || []
@@ -704,11 +633,16 @@ export default {
         this.inventoryTotal = 0
       }
     },
+    invStatusClass(status) {
+      if (status === '正常') return 'status-normal'
+      if (status === '待入库') return 'status-pending'
+      if (status === '待出库') return 'status-locked'
+      if (status === '待报废') return 'status-scrap'
+      return ''
+    },
     searchInventory() { this.loadInventoryData() },
     resetInventorySearch() {
-      this.inventorySearch = { goodsName: '', warehouseId: null, zoneId: null, locationId: null }
-      this.invZoneList = []
-      this.invLocationList = []
+      this.inventorySearch = { batchId: '' }
       this.loadInventoryData()
     },
 

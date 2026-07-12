@@ -21,9 +21,8 @@ public class InventoryController {
 
     @GetMapping("/listWithDetails")
     public ResultData listWithDetails(
-            @RequestParam(required = false) String goodsName,
-            @RequestParam(required = false) Integer locationId) {
-        return ResultData.success(inventoryService.listWithDetails(goodsName, locationId));
+            @RequestParam(required = false) String batchId) {
+        return ResultData.success(inventoryService.listWithDetails(batchId));
     }
 
     @GetMapping("/{id}")

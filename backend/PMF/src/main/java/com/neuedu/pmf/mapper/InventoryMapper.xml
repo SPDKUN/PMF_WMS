@@ -12,8 +12,6 @@
         <result column="quantity" property="quantity"/>
         <result column="locked_quantity" property="locked_quantity"/>
         <result column="inventory_status" property="inventory_status"/>
-        <result column="inbound_time" property="inbound_time"/>
-        <result column="last_updated" property="last_updated"/>
     </resultMap>
 
     <resultMap id="InventoryVOMap" type="com.neuedu.pmf.vo.InventoryVO">
@@ -29,8 +27,6 @@
         <result column="quantity" property="quantity"/>
         <result column="locked_quantity" property="locked_quantity"/>
         <result column="inventory_status" property="inventory_status"/>
-        <result column="inbound_time" property="inbound_time"/>
-        <result column="last_updated" property="last_updated"/>
     </resultMap>
 
     <select id="list" resultMap="InventoryMap">
@@ -43,11 +39,8 @@
         LEFT JOIN goods g ON i.goods_id = g.goods_id
         LEFT JOIN location l ON i.location_id = l.location_id
         <where>
-            <if test="goodsName != null and goodsName != ''">
-                AND g.goods_name LIKE CONCAT('%', #{goodsName}, '%')
-            </if>
-            <if test="locationId != null">
-                AND i.location_id = #{locationId}
+            <if test="batchId != null and batchId != ''">
+                AND i.batch_id LIKE CONCAT('%', #{batchId}, '%')
             </if>
         </where>
         ORDER BY i.inventory_id DESC
@@ -58,8 +51,8 @@
     </select>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="inventory_id">
-        INSERT INTO inventory (goods_id, batch_id, warehouse_id, zone_id, location_id, quantity, locked_quantity, inventory_status, inbound_time, last_updated)
-        VALUES (#{goods_id}, #{batch_id}, #{warehouse_id}, #{zone_id}, #{location_id}, #{quantity}, #{locked_quantity}, #{inventory_status}, #{inbound_time}, #{last_updated})
+        INSERT INTO inventory (goods_id, batch_id, warehouse_id, zone_id, location_id, quantity, locked_quantity, inventory_status)
+        VALUES (#{goods_id}, #{batch_id}, #{warehouse_id}, #{zone_id}, #{location_id}, #{quantity}, #{locked_quantity}, #{inventory_status})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Inventory">
@@ -73,8 +66,6 @@
             <if test="quantity != null">quantity = #{quantity},</if>
             <if test="locked_quantity != null">locked_quantity = #{locked_quantity},</if>
             <if test="inventory_status != null">inventory_status = #{inventory_status},</if>
-            <if test="inbound_time != null">inbound_time = #{inbound_time},</if>
-            <if test="last_updated != null">last_updated = #{last_updated},</if>
         </set>
         WHERE inventory_id = #{inventory_id}
     </update>
