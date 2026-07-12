@@ -14,5 +14,6 @@ public class OperationLog {
     private Integer operator_id;
     private String operation_type;
     private String operation_content;
+    private String operation_result;
     private LocalDateTime operation_time;
 }

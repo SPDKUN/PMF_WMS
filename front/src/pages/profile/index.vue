@@ -32,7 +32,7 @@
           <div class="info-value">{{ userInfo.phone || '-' }}</div>
         </div>
         <div class="info-item">
-          <label>角色</label>
+          <label>职位</label>
           <div class="info-value">{{ userInfo.position || '-' }}</div>
         </div>
         <div class="info-item">
@@ -69,14 +69,6 @@
           <div class="form-item">
             <label>手机号 <span class="required">*</span></label>
             <input type="text" v-model="editForm.phone" placeholder="请输入手机号" />
-          </div>
-          <div class="form-item">
-            <label>部门</label>
-            <input type="text" v-model="editForm.department" placeholder="请输入部门" />
-          </div>
-          <div class="form-item">
-            <label>职位</label>
-            <input type="text" v-model="editForm.position" placeholder="请输入职位" />
           </div>
 
           <!-- 密码修改区域 -->

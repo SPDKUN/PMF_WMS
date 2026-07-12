@@ -7,11 +7,25 @@
         <result column="operator_id" property="operator_id"/>
         <result column="operation_type" property="operation_type"/>
         <result column="operation_content" property="operation_content"/>
+        <result column="operation_result" property="operation_result"/>
         <result column="operation_time" property="operation_time"/>
     </resultMap>
 
     <select id="list" resultMap="OperationLogMap">
+        SELECT * FROM operation_log ORDER BY operation_time DESC
+    </select>
+
+    <select id="listWithFilter" resultMap="OperationLogMap">
         SELECT * FROM operation_log
+        <where>
+            <if test="date != null and date != ''">
+                AND DATE(operation_time) = #{date}
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND operation_type = #{operationType}
+            </if>
+        </where>
+        ORDER BY operation_time DESC
     </select>
 
     <select id="findById" resultMap="OperationLogMap">
@@ -19,8 +33,8 @@
     </select>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="log_id">
-        INSERT INTO operation_log (operator_id, operation_type, operation_content, operation_time)
-        VALUES (#{operator_id}, #{operation_type}, #{operation_content}, #{operation_time})
+        INSERT INTO operation_log (operator_id, operation_type, operation_content, operation_result, operation_time)
+        VALUES (#{operator_id}, #{operation_type}, #{operation_content}, #{operation_result}, #{operation_time})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.OperationLog">
@@ -29,6 +43,7 @@
             <if test="operator_id != null">operator_id = #{operator_id},</if>
             <if test="operation_type != null">operation_type = #{operation_type},</if>
             <if test="operation_content != null">operation_content = #{operation_content},</if>
+            <if test="operation_result != null">operation_result = #{operation_result},</if>
             <if test="operation_time != null">operation_time = #{operation_time},</if>
         </set>
         WHERE log_id = #{log_id}

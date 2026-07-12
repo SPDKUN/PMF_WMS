@@ -277,8 +277,54 @@
       </div>
     </div>
 
+    <!-- 操作日志 -->
+    <div v-if="activeTab === 'log'" class="tab-content">
+      <div class="toolbar">
+        <div class="search-bar">
+          <div class="search-item">
+            <label>操作日期</label>
+            <input type="date" v-model="logSearch.date" class="search-input" placeholder="选择日期" />
+          </div>
+          <div class="search-item">
+            <label>操作类型</label>
+            <select v-model="logSearch.operationType">
+              <option value="">全部</option>
+              <option v-for="t in logOperationTypes" :key="t" :value="t">{{ t }}</option>
+            </select>
+          </div>
+          <button class="btn btn-search" @click="searchLogs">搜索</button>
+          <button class="btn btn-cancel" @click="resetLogSearch">重置</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>时间（操作时间）</th>
+              <th>操作人名称</th>
+              <th>操作类型</th>
+              <th>操作内容</th>
+              <th>操作结果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="logData.length === 0">
+              <td colspan="5" class="empty-cell">暂无操作日志</td>
+            </tr>
+            <tr v-for="log in logData" :key="log.log_id">
+              <td>{{ log.operation_time }}</td>
+              <td>{{ getOperatorName(log.operator_id) }}</td>
+              <td>{{ log.operation_type }}</td>
+              <td>{{ log.operation_content }}</td>
+              <td>{{ log.operation_result || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- 其他选项卡（通用表格） -->
-    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods' && activeTab !== 'batch' && activeTab !== 'inventory'" class="table-wrapper">
+    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods' && activeTab !== 'batch' && activeTab !== 'inventory' && activeTab !== 'log'" class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -303,6 +349,7 @@
       <span v-else-if="activeTab === 'goods'">共 {{ goodsList.length }} 条</span>
       <span v-else-if="activeTab === 'batch'">共 {{ batchList.length }} 条</span>
       <span v-else-if="activeTab === 'inventory'">共 {{ inventoryTableData.length }} 条</span>
+      <span v-else-if="activeTab === 'log'">共 {{ logData.length }} 条</span>
       <span v-else>共 {{ currentData.length }} 条</span>
     </div>
 
@@ -413,13 +460,13 @@ export default {
         { '仓库': 'C区冷冻库', '记录时间': '2026-07-10 07:00', '温度(°C)': -21.5, '湿度(%)': 71, '状态': '正常' },
         { '仓库': 'B区常温库', '记录时间': '2026-07-10 08:00', '温度(°C)': 22.0, '湿度(%)': 55, '状态': '正常' },
       ],
-      logData: [
-        { '时间': '2026-07-10 08:30', '操作人': '张三', '操作类型': '入库', '描述': '采购入库 PRE-A001 200箱', '结果': '成功' },
-        { '时间': '2026-07-10 08:15', '操作人': '李四', '操作类型': '出库', '描述': '销售出库 PRE-B002 50箱', '结果': '成功' },
-        { '时间': '2026-07-10 07:50', '操作人': '王五', '操作类型': '盘点', '描述': '全盘 A区冷库', '结果': '成功' },
-        { '时间': '2026-07-10 07:30', '操作人': '张三', '操作类型': '质检', '描述': '来料检 FRZ-D001', '结果': '通过' },
-        { '时间': '2026-07-09 17:00', '操作人': '赵六', '操作类型': '移库', '描述': 'A区→B区 调味料C 100袋', '结果': '成功' },
-      ]
+      logData: [],
+      logSearch: {
+        date: '',
+        operationType: ''
+      },
+      logOperationTypes: [],
+      operatorNameMap: {}
     }
   },
   computed: {
@@ -430,7 +477,6 @@ export default {
     currentData() {
       const map = {
         temperature: this.temperatureData,
-        log: this.logData,
       }
       return map[this.activeTab] || []
     }
@@ -455,6 +501,8 @@ export default {
       } else if (key === 'inventory' && this.inventoryTableData.length === 0) {
         this.loadInvWarehouses()
         this.loadInventoryData()
+      } else if (key === 'log' && this.logData.length === 0) {
+        this.fetchLogs()
       }
     },
     async fetchPersonnel() {
@@ -463,6 +511,7 @@ export default {
         if (res.code === 200) {
           this.allPersonnel = res.data || []
           this.personnelList = this.allPersonnel
+          this.buildOperatorNameMap()
         }
       } catch (e) {
         // 静默失败，查看页不弹错误
@@ -663,6 +712,45 @@ export default {
       this.loadInventoryData()
     },
 
+    // --- 操作日志 ---
+    async fetchLogs(params = {}) {
+      try {
+        const res = await request.get('/operationLog/list', params)
+        if (res.code === 200) {
+          this.logData = res.data || []
+          this.extractLogOperationTypes()
+          this.buildOperatorNameMap()
+        }
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    extractLogOperationTypes() {
+      const types = new Set()
+      this.logData.forEach(log => {
+        if (log.operation_type) types.add(log.operation_type)
+      })
+      this.logOperationTypes = Array.from(types)
+    },
+    buildOperatorNameMap() {
+      this.allPersonnel.forEach(p => {
+        this.operatorNameMap[p.user_id] = p.real_name || p.username
+      })
+    },
+    getOperatorName(operatorId) {
+      return this.operatorNameMap[operatorId] || operatorId
+    },
+    searchLogs() {
+      const params = {}
+      if (this.logSearch.date) params.date = this.logSearch.date
+      if (this.logSearch.operationType) params.operationType = this.logSearch.operationType
+      this.fetchLogs(params)
+    },
+    resetLogSearch() {
+      this.logSearch = { date: '', operationType: '' }
+      this.fetchLogs()
+    },
+
     async openViewDialog(warehouse) {
       this.viewDialog.warehouse = warehouse
       this.viewDialog.selectedZoneId = null
@@ -738,6 +826,15 @@ export default {
 }
 .search-input:focus { border-color: #409EFF; }
 .search-input::placeholder { color: #c0c4cc; }
+
+/* 隐藏 date 输入框空值时的默认格式提示 */
+input[type="date"]:invalid::-webkit-datetime-edit {
+  color: transparent;
+}
+input[type="date"]:focus::-webkit-datetime-edit,
+input[type="date"]:valid::-webkit-datetime-edit {
+  color: #303133;
+}
 
 .search-item {
   display: flex;

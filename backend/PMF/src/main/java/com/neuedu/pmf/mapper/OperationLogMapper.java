@@ -9,6 +9,8 @@ import java.util.ArrayList;
 @Mapper
 public interface OperationLogMapper {
     ArrayList<OperationLog> list();
+    ArrayList<OperationLog> listWithFilter(@Param("date") String date,
+                                           @Param("operationType") String operationType);
     int save(OperationLog operationLog);
     OperationLog findById(@Param("log_id") Integer logId);
     int update(OperationLog operationLog);

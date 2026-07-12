@@ -20,6 +20,11 @@ public class OperationLogServiceImpl implements OperationLogService {
     }
 
     @Override
+    public ArrayList<OperationLog> listWithFilter(String date, String operationType) {
+        return operationLogMapper.listWithFilter(date, operationType);
+    }
+
+    @Override
     public OperationLog getById(Integer id) {
         return operationLogMapper.findById(id);
     }

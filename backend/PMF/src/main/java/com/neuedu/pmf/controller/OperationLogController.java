@@ -15,7 +15,11 @@ public class OperationLogController {
     private OperationLogService operationLogService;
 
     @GetMapping("/list")
-    public ResultData list() {
+    public ResultData list(@RequestParam(required = false) String date,
+                           @RequestParam(required = false) String operationType) {
+        if (date != null || operationType != null) {
+            return ResultData.success(operationLogService.listWithFilter(date, operationType));
+        }
         return ResultData.success(operationLogService.list());
     }
 

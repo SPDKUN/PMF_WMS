@@ -254,11 +254,26 @@
           </div>
           <div class="form-item">
             <label>所属部门 <span class="required">*</span></label>
-            <input type="text" v-model="personnelDialog.form.department" placeholder="请输入所属部门" />
+            <select v-model="personnelDialog.form.department" @change="onDepartmentChange">
+              <option value="">请选择所属部门</option>
+              <option value="管理部门">管理部门</option>
+              <option value="仓管部门">仓管部门</option>
+              <option value="质检部门">质检部门</option>
+            </select>
           </div>
           <div class="form-item">
             <label>职位 <span class="required">*</span></label>
-            <input type="text" v-model="personnelDialog.form.position" placeholder="请输入职位" />
+            <select v-model="personnelDialog.form.position" :disabled="!personnelDialog.form.department">
+              <option value="">请选择职位</option>
+              <option v-for="pos in availablePositions" :key="pos" :value="pos">{{ pos }}</option>
+            </select>
+          </div>
+          <div class="form-item" v-if="personnelDialog.mode === 'edit'">
+            <label>账号状态</label>
+            <select v-model="personnelDialog.form.status">
+              <option :value="1">启用</option>
+              <option :value="0">停用</option>
+            </select>
           </div>
           <div class="form-item" v-if="personnelDialog.mode === 'edit'">
             <button class="btn btn-reset-pwd" @click="resetPassword">重置密码</button>
@@ -421,7 +436,7 @@ export default {
       personnelDialog: {
         visible: false,
         mode: 'create',
-        form: { user_id: null, username: '', real_name: '', phone: '', department: '', position: '' }
+        form: { user_id: null, username: '', real_name: '', phone: '', department: '', position: '', status: 1 }
       },
       confirmDialog: {
         visible: false
@@ -439,6 +454,16 @@ export default {
         selectedZone: null,
         locations: []
       }
+    }
+  },
+  computed: {
+    availablePositions() {
+      const map = {
+        '管理部门': ['主管'],
+        '仓管部门': ['仓库管理员', '仓库员工'],
+        '质检部门': ['质检员', '温度检测员'],
+      }
+      return map[this.personnelDialog.form.department] || []
     }
   },
   mounted() {
@@ -493,13 +518,18 @@ export default {
           real_name: item.real_name,
           phone: item.phone,
           department: item.department,
-          position: item.position
+          position: item.position,
+          status: item.status != null ? item.status : 1
         }
       } else {
         this.personnelDialog.mode = 'create'
-        this.personnelDialog.form = { user_id: null, username: '', real_name: '', phone: '', department: '', position: '' }
+        this.personnelDialog.form = { user_id: null, username: '', real_name: '', phone: '', department: '', position: '', status: 1 }
       }
       this.personnelDialog.visible = true
+    },
+
+    onDepartmentChange() {
+      this.personnelDialog.form.position = ''
     },
 
     async submitPersonnel() {
@@ -507,8 +537,8 @@ export default {
       if (!f.username) { ElMessage.warning('请输入用户名'); return }
       if (!f.real_name) { ElMessage.warning('请输入姓名'); return }
       if (!f.phone) { ElMessage.warning('请输入手机号'); return }
-      if (!f.department) { ElMessage.warning('请输入所属部门'); return }
-      if (!f.position) { ElMessage.warning('请输入职位'); return }
+      if (!f.department) { ElMessage.warning('请选择所属部门'); return }
+      if (!f.position) { ElMessage.warning('请选择职位'); return }
 
       if (this.personnelDialog.mode === 'create') {
         const maxId = this.allPersonnel.length > 0
@@ -543,7 +573,8 @@ export default {
             real_name: f.real_name,
             phone: f.phone,
             department: f.department,
-            position: f.position
+            position: f.position,
+            status: f.status
           })
           if (res.code === 200) {
             ElMessage.success('修改成功')

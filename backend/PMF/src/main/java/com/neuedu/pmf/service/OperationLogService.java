@@ -6,6 +6,8 @@ import java.util.ArrayList;
 public interface OperationLogService {
     ArrayList<OperationLog> list();
 
+    ArrayList<OperationLog> listWithFilter(String date, String operationType);
+
     OperationLog getById(Integer id);
 
     boolean delete(Integer id);
