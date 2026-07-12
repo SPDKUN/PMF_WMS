@@ -19,6 +19,13 @@ public class InventoryController {
         return ResultData.success(inventoryService.list());
     }
 
+    @GetMapping("/listWithDetails")
+    public ResultData listWithDetails(
+            @RequestParam(required = false) String goodsName,
+            @RequestParam(required = false) Integer locationId) {
+        return ResultData.success(inventoryService.listWithDetails(goodsName, locationId));
+    }
+
     @GetMapping("/{id}")
     public ResultData getById(@PathVariable("id") Integer id) {
         return ResultData.success(inventoryService.getById(id));

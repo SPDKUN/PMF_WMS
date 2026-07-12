@@ -201,8 +201,84 @@
       </div>
     </div>
 
+    <!-- 库存明细 -->
+    <div v-if="activeTab === 'inventory'" class="tab-content">
+      <div class="toolbar">
+        <div class="search-bar">
+          <div class="search-item">
+            <label>货物名称</label>
+            <input
+              type="text"
+              v-model="inventorySearch.goodsName"
+              placeholder="请输入货物名称"
+              @keyup.enter="searchInventory"
+              class="search-input"
+            />
+          </div>
+          <div class="search-item">
+            <label>仓库</label>
+            <select v-model="inventorySearch.warehouseId" @change="onInvWarehouseChange">
+              <option :value="null">全部仓库</option>
+              <option v-for="w in invWarehouseList" :key="w.warehouse_id" :value="w.warehouse_id">
+                {{ w.warehouse_name }}
+              </option>
+            </select>
+          </div>
+          <div class="search-item">
+            <label>库区</label>
+            <select v-model="inventorySearch.zoneId" @change="onInvZoneChange" :disabled="!inventorySearch.warehouseId">
+              <option :value="null">全部库区</option>
+              <option v-for="z in invZoneList" :key="z.zone_id" :value="z.zone_id">
+                {{ z.zone_name }}
+              </option>
+            </select>
+          </div>
+          <div class="search-item">
+            <label>库位</label>
+            <select v-model="inventorySearch.locationId" :disabled="!inventorySearch.zoneId">
+              <option :value="null">全部库位</option>
+              <option v-for="l in invLocationList" :key="l.location_id" :value="l.location_id">
+                {{ l.location_name }}
+              </option>
+            </select>
+          </div>
+          <button class="btn btn-search" @click="searchInventory">搜索</button>
+          <button class="btn btn-cancel" @click="resetInventorySearch">重置</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>货物名称</th>
+              <th>批次号</th>
+              <th>存储位置</th>
+              <th>当前数量</th>
+              <th>锁定数量</th>
+              <th>单位</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="inventoryTableData.length === 0">
+              <td colspan="7" class="empty-cell">暂无库存数据</td>
+            </tr>
+            <tr v-for="item in inventoryTableData" :key="item.inventory_id">
+              <td>{{ item.inventory_id }}</td>
+              <td>{{ item.goods_name || '-' }}</td>
+              <td>{{ item.batch_id }}</td>
+              <td>{{ item.location_name || '-' }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.locked_quantity }}</td>
+              <td>{{ item.unit || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- 其他选项卡（通用表格） -->
-    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods' && activeTab !== 'batch'" class="table-wrapper">
+    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods' && activeTab !== 'batch' && activeTab !== 'inventory'" class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -226,6 +302,7 @@
       <span v-else-if="activeTab === 'warehouse'">共 {{ warehouseList.length }} 条</span>
       <span v-else-if="activeTab === 'goods'">共 {{ goodsList.length }} 条</span>
       <span v-else-if="activeTab === 'batch'">共 {{ batchList.length }} 条</span>
+      <span v-else-if="activeTab === 'inventory'">共 {{ inventoryTableData.length }} 条</span>
       <span v-else>共 {{ currentData.length }} 条</span>
     </div>
 
@@ -318,12 +395,17 @@ export default {
         selectedZone: null,
         locations: []
       },
-      inventoryData: [
-        { '商品名称': '预制菜A', 'SKU': 'PRE-A001', '库存数量': 500, '可用数量': 480, '锁定数量': 20, '单位': '箱', '仓库': 'A区冷库' },
-        { '商品名称': '预制菜B', 'SKU': 'PRE-B002', '库存数量': 300, '可用数量': 300, '锁定数量': 0, '单位': '箱', '仓库': 'B区常温库' },
-        { '商品名称': '调味料C', 'SKU': 'SAU-C001', '库存数量': 1200, '可用数量': 1150, '锁定数量': 50, '单位': '袋', '仓库': 'B区常温库' },
-        { '商品名称': '冷冻食材D', 'SKU': 'FRZ-D001', '库存数量': 800, '可用数量': 780, '锁定数量': 20, '单位': 'kg', '仓库': 'C区冷冻库' },
-      ],
+      inventorySearch: {
+        goodsName: '',
+        warehouseId: null,
+        zoneId: null,
+        locationId: null,
+      },
+      invWarehouseList: [],
+      invZoneList: [],
+      invLocationList: [],
+      inventoryTableData: [],
+      inventoryTotal: 0,
       temperatureData: [
         { '仓库': 'A区冷库', '记录时间': '2026-07-10 08:00', '温度(°C)': -18.5, '湿度(%)': 65, '状态': '正常' },
         { '仓库': 'A区冷库', '记录时间': '2026-07-10 07:00', '温度(°C)': -18.2, '湿度(%)': 64, '状态': '正常' },
@@ -347,7 +429,6 @@ export default {
     },
     currentData() {
       const map = {
-        inventory: this.inventoryData,
         temperature: this.temperatureData,
         log: this.logData,
       }
@@ -371,6 +452,9 @@ export default {
         this.fetchGoods()
       } else if (key === 'batch' && this.batchList.length === 0) {
         this.fetchBatches()
+      } else if (key === 'inventory' && this.inventoryTableData.length === 0) {
+        this.loadInvWarehouses()
+        this.loadInventoryData()
       }
     },
     async fetchPersonnel() {
@@ -516,6 +600,69 @@ export default {
       this.batchSearchKeyword = ''
       this.batchList = this.allBatches
     },
+
+    // --- 库存明细 ---
+    async loadInvWarehouses() {
+      try {
+        const res = await request.get('/warehouse/list')
+        if (res.code === 200) {
+          this.invWarehouseList = res.data || []
+        }
+      } catch (e) { /* ignore */ }
+    },
+    async loadInvZones(warehouseId) {
+      if (!warehouseId) { this.invZoneList = []; return }
+      try {
+        const res = await request.get('/zone/list', { warehouseId })
+        if (res.code === 200) { this.invZoneList = res.data || [] }
+      } catch (e) { this.invZoneList = [] }
+    },
+    async loadInvLocations(zoneId) {
+      if (!zoneId) { this.invLocationList = []; return }
+      try {
+        const res = await request.get('/location/list', { zoneId })
+        if (res.code === 200) { this.invLocationList = res.data || [] }
+      } catch (e) { this.invLocationList = [] }
+    },
+    onInvWarehouseChange() {
+      this.inventorySearch.zoneId = null
+      this.inventorySearch.locationId = null
+      this.invZoneList = []
+      this.invLocationList = []
+      if (this.inventorySearch.warehouseId) {
+        this.loadInvZones(this.inventorySearch.warehouseId)
+      }
+    },
+    onInvZoneChange() {
+      this.inventorySearch.locationId = null
+      this.invLocationList = []
+      if (this.inventorySearch.zoneId) {
+        this.loadInvLocations(this.inventorySearch.zoneId)
+      }
+    },
+    async loadInventoryData() {
+      try {
+        const params = {}
+        if (this.inventorySearch.goodsName) { params.goodsName = this.inventorySearch.goodsName }
+        if (this.inventorySearch.locationId) { params.locationId = this.inventorySearch.locationId }
+        const res = await request.get('/inventory/listWithDetails', params)
+        if (res.code === 200) {
+          this.inventoryTableData = res.data || []
+          this.inventoryTotal = this.inventoryTableData.length
+        }
+      } catch (e) {
+        this.inventoryTableData = []
+        this.inventoryTotal = 0
+      }
+    },
+    searchInventory() { this.loadInventoryData() },
+    resetInventorySearch() {
+      this.inventorySearch = { goodsName: '', warehouseId: null, zoneId: null, locationId: null }
+      this.invZoneList = []
+      this.invLocationList = []
+      this.loadInventoryData()
+    },
+
     async openViewDialog(warehouse) {
       this.viewDialog.warehouse = warehouse
       this.viewDialog.selectedZoneId = null
@@ -591,6 +738,35 @@ export default {
 }
 .search-input:focus { border-color: #409EFF; }
 .search-input::placeholder { color: #c0c4cc; }
+
+.search-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.search-item label {
+  font-size: 12px;
+  color: #909399;
+}
+.search-item input,
+.search-item select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #303133;
+  outline: none;
+  background: #fff;
+  min-width: 120px;
+}
+.search-item input:focus,
+.search-item select:focus { border-color: #409EFF; }
+.search-item select:disabled {
+  background: #f5f7fa;
+  color: #c0c4cc;
+  cursor: not-allowed;
+}
 
 .btn {
   display: inline-flex;

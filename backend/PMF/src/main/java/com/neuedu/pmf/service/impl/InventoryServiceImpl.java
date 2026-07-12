@@ -3,6 +3,7 @@ package com.neuedu.pmf.service.impl;
 import com.neuedu.pmf.entity.Inventory;
 import com.neuedu.pmf.mapper.InventoryMapper;
 import com.neuedu.pmf.service.InventoryService;
+import com.neuedu.pmf.vo.InventoryVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,11 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public ArrayList<Inventory> list() {
         return inventoryMapper.list();
+    }
+
+    @Override
+    public ArrayList<InventoryVO> listWithDetails(String goodsName, Integer locationId) {
+        return inventoryMapper.listWithDetails(goodsName, locationId);
     }
 
     @Override

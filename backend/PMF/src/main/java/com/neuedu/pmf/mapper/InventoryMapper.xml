@@ -16,8 +16,41 @@
         <result column="last_updated" property="last_updated"/>
     </resultMap>
 
+    <resultMap id="InventoryVOMap" type="com.neuedu.pmf.vo.InventoryVO">
+        <id column="inventory_id" property="inventory_id"/>
+        <result column="goods_id" property="goods_id"/>
+        <result column="goods_name" property="goods_name"/>
+        <result column="unit" property="unit"/>
+        <result column="batch_id" property="batch_id"/>
+        <result column="warehouse_id" property="warehouse_id"/>
+        <result column="zone_id" property="zone_id"/>
+        <result column="location_id" property="location_id"/>
+        <result column="location_name" property="location_name"/>
+        <result column="quantity" property="quantity"/>
+        <result column="locked_quantity" property="locked_quantity"/>
+        <result column="inventory_status" property="inventory_status"/>
+        <result column="inbound_time" property="inbound_time"/>
+        <result column="last_updated" property="last_updated"/>
+    </resultMap>
+
     <select id="list" resultMap="InventoryMap">
         SELECT * FROM inventory
+    </select>
+
+    <select id="listWithDetails" resultMap="InventoryVOMap">
+        SELECT i.*, g.goods_name, g.unit, l.location_name
+        FROM inventory i
+        LEFT JOIN goods g ON i.goods_id = g.goods_id
+        LEFT JOIN location l ON i.location_id = l.location_id
+        <where>
+            <if test="goodsName != null and goodsName != ''">
+                AND g.goods_name LIKE CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="locationId != null">
+                AND i.location_id = #{locationId}
+            </if>
+        </where>
+        ORDER BY i.inventory_id DESC
     </select>
 
     <select id="findById" resultMap="InventoryMap">
