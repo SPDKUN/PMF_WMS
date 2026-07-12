@@ -40,7 +40,9 @@ App({
     isLoggedIn: false,
     token: '',
     userInfo: null,
-    // Server base URL - change this to your actual backend server address
-    baseUrl: 'http://localhost:8088'
+    // Server base URL
+    // 当前：电脑和手机连同一个WiFi → 用WLAN适配器IPv4地址
+    // 热点方案：Windows开启移动热点后 → 用热点适配器IP（通常是192.168.137.1）
+    baseUrl: 'http://10.242.194.76:8088'
   }
 })
