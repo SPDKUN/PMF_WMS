@@ -82,4 +82,8 @@
         DELETE FROM user WHERE user_id = #{user_id}
     </delete>
 
+    <select id="findByPosition" resultMap="UserMap">
+        SELECT * FROM user WHERE position = #{position}
+    </select>
+
 </mapper>

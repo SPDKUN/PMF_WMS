@@ -38,4 +38,9 @@ public class QualityCheckDetailServiceImpl implements QualityCheckDetailService 
     public boolean update(QualityCheckDetail qualityCheckDetail) {
         return qualityCheckDetailMapper.update(qualityCheckDetail) > 0;
     }
+
+    @Override
+    public QualityCheckDetail getByCheckNo(String qualityCheckNo) {
+        return qualityCheckDetailMapper.findByCheckNo(qualityCheckNo);
+    }
 }

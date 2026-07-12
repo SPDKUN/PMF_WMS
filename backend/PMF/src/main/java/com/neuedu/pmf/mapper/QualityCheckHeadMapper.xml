@@ -40,4 +40,8 @@
         DELETE FROM quality_check_head WHERE quality_check_no = #{quality_check_no}
     </delete>
 
+    <select id="findTodayCheckNos" resultType="string">
+        SELECT quality_check_no FROM quality_check_head WHERE quality_check_no LIKE #{prefix}
+    </select>
+
 </mapper>

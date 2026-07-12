@@ -78,6 +78,16 @@ import {
   Box, List, Clock, Cpu, Promotion, Plus, ArrowRight, DocumentCopy, Check
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
+import request from '@/utils/request.js'
+
+const taskTypeMeta = {
+  '质检': { icon: 'List', color: '#9254de' },
+  '入库': { icon: 'ArrowRight', color: '#409EFF' },
+  '出库': { icon: 'Check', color: '#f56c6c' },
+  '库存调整': { icon: 'Box', color: '#e6a23c' },
+  '库存盘点': { icon: 'DocumentCopy', color: '#67c23a' },
+  '处理不合格货物': { icon: 'DocumentCopy', color: '#e6a23c' }
+}
 
 export default {
   name: 'WarehouseDashboard',
@@ -90,19 +100,13 @@ export default {
       lastUpdate: '',
       aiMessage: '',
       aiProcessing: false,
-      todoList: [
-        { title: '采购入库单 #IN20260710-003', desc: '待质检，共 120 件', priority: '高', icon: 'ArrowRight', color: '#409EFF' },
-        { title: '出库单 #OUT20260710-087', desc: '待拣货，优先级高', priority: '高', icon: 'Check', color: '#f56c6c' },
-        { title: '库存调整 #ADJ20260710-022', desc: '库位移库，待执行', priority: '中', icon: 'Box', color: '#e6a23c' },
-        { title: '质检任务 #QC20260710-015', desc: '来料检，待抽样', priority: '中', icon: 'List', color: '#9254de' },
-        { title: '盘点单 #CNT20260710-005', desc: '全盘，待复核差异', priority: '低', icon: 'DocumentCopy', color: '#67c23a' },
-        { title: '不合格处理 #DEF20260710-011', desc: '报废确认，待审批', priority: '低', icon: 'DocumentCopy', color: '#e6a23c' }
-      ]
+      todoList: []
     }
   },
   mounted() {
     this.updateTime()
     this.timer = setInterval(this.updateTime, 60000)
+    this.fetchTasks()
   },
   beforeDestroy() {
     clearInterval(this.timer)
@@ -113,6 +117,27 @@ export default {
     },
     priorityClass(priority) {
       return { 高: 'high', 中: 'medium', 低: 'low' }[priority] || 'low'
+    },
+    getTaskMeta(taskType) {
+      return taskTypeMeta[taskType] || { icon: 'List', color: '#409EFF' }
+    },
+    async fetchTasks() {
+      const stored = localStorage.getItem('userInfo')
+      if (!stored) return
+      try {
+        const data = JSON.parse(stored)
+        const uid = data.user_id
+        if (!uid) return
+        const res = await request.get('/qualityCheck/myTasks', { assigneeId: uid })
+        if (res.code === 200) {
+          this.todoList = (res.data || []).map(t => ({
+            title: t.related_order_no || '-',
+            desc: t.task_type,
+            priority: t.priority,
+            ...this.getTaskMeta(t.task_type)
+          }))
+        }
+      } catch (e) { /* ignore */ }
     },
     markTodoDone(index) { this.todoList.splice(index, 1) },
     handleAiSend() {

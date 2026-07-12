@@ -13,4 +13,6 @@ public interface BatchService {
     boolean save(Batch batch);
 
     boolean update(Batch batch);
+
+    ArrayList<Batch> listByStatus(String batchStatus);
 }

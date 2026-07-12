@@ -22,4 +22,6 @@ public interface UserService {
      * @return 更新后的用户信息，null表示旧密码验证失败
      */
     User updateProfile(java.util.Map<String, Object> params);
+
+    ArrayList<User> listByPosition(String position);
 }

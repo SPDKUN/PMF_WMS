@@ -13,4 +13,5 @@ public interface QualityCheckHeadMapper {
     QualityCheckHead findById(@Param("quality_check_no") String qualityCheckNo);
     int update(QualityCheckHead qualityCheckHead);
     int deleteById(@Param("quality_check_no") String qualityCheckNo);
+    java.util.List<String> findTodayCheckNos(@Param("prefix") String prefix);
 }

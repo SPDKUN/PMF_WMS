@@ -81,4 +81,9 @@ public class BatchServiceImpl implements BatchService {
     public boolean update(Batch batch) {
         return batchMapper.update(batch) > 0;
     }
+
+    @Override
+    public ArrayList<Batch> listByStatus(String batchStatus) {
+        return batchMapper.findByStatus(batchStatus);
+    }
 }

@@ -46,4 +46,8 @@
         DELETE FROM batch WHERE batch_id = #{batch_id}
     </delete>
 
+    <select id="findByStatus" resultMap="BatchMap">
+        SELECT * FROM batch WHERE batch_status = #{batch_status}
+    </select>
+
 </mapper>

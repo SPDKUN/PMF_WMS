@@ -7,7 +7,6 @@
         <result column="quality_check_no" property="quality_check_no"/>
         <result column="goods_id" property="goods_id"/>
         <result column="batch_id" property="batch_id"/>
-        <result column="location_id" property="location_id"/>
         <result column="inspection_result" property="inspection_result"/>
         <result column="defect_reason" property="defect_reason"/>
         <result column="handling_suggestion" property="handling_suggestion"/>
@@ -21,9 +20,13 @@
         SELECT * FROM quality_check_detail WHERE detail_id = #{detail_id}
     </select>
 
+    <select id="findByCheckNo" resultMap="QualityCheckDetailMap">
+        SELECT * FROM quality_check_detail WHERE quality_check_no = #{quality_check_no}
+    </select>
+
     <insert id="save" useGeneratedKeys="true" keyProperty="detail_id">
-        INSERT INTO quality_check_detail (quality_check_no, goods_id, batch_id, location_id, inspection_result, defect_reason, handling_suggestion)
-        VALUES (#{quality_check_no}, #{goods_id}, #{batch_id}, #{location_id}, #{inspection_result}, #{defect_reason}, #{handling_suggestion})
+        INSERT INTO quality_check_detail (quality_check_no, goods_id, batch_id, inspection_result, defect_reason, handling_suggestion)
+        VALUES (#{quality_check_no}, #{goods_id}, #{batch_id}, #{inspection_result}, #{defect_reason}, #{handling_suggestion})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.QualityCheckDetail">
@@ -32,7 +35,6 @@
             <if test="quality_check_no != null">quality_check_no = #{quality_check_no},</if>
             <if test="goods_id != null">goods_id = #{goods_id},</if>
             <if test="batch_id != null">batch_id = #{batch_id},</if>
-            <if test="location_id != null">location_id = #{location_id},</if>
             <if test="inspection_result != null">inspection_result = #{inspection_result},</if>
             <if test="defect_reason != null">defect_reason = #{defect_reason},</if>
             <if test="handling_suggestion != null">handling_suggestion = #{handling_suggestion},</if>

@@ -38,4 +38,9 @@ public class WorkTaskServiceImpl implements WorkTaskService {
     public boolean update(WorkTask workTask) {
         return workTaskMapper.update(workTask) > 0;
     }
+
+    @Override
+    public ArrayList<WorkTask> listByAssigneeId(Integer assigneeId) {
+        return workTaskMapper.findByAssigneeId(assigneeId);
+    }
 }

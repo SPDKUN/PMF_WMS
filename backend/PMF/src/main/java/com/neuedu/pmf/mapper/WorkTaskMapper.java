@@ -13,4 +13,5 @@ public interface WorkTaskMapper {
     WorkTask findById(@Param("task_id") Integer taskId);
     int update(WorkTask workTask);
     int deleteById(@Param("task_id") Integer taskId);
+    ArrayList<WorkTask> findByAssigneeId(@Param("assignee_id") Integer assigneeId);
 }

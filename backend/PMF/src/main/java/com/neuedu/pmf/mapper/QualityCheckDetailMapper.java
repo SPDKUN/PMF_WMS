@@ -13,4 +13,5 @@ public interface QualityCheckDetailMapper {
     QualityCheckDetail findById(@Param("detail_id") Integer detailId);
     int update(QualityCheckDetail qualityCheckDetail);
     int deleteById(@Param("detail_id") Integer detailId);
+    QualityCheckDetail findByCheckNo(@Param("quality_check_no") String qualityCheckNo);
 }

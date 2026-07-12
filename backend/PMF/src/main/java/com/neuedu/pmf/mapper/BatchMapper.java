@@ -14,4 +14,5 @@ public interface BatchMapper {
     int update(Batch batch);
     int deleteById(@Param("batch_id") String batchId);
     java.util.List<String> findTodayBatchIds(@Param("prefix") String prefix);
+    ArrayList<Batch> findByStatus(@Param("batch_status") String batchStatus);
 }

@@ -13,4 +13,6 @@ public interface WorkTaskService {
     boolean save(WorkTask workTask);
 
     boolean update(WorkTask workTask);
+
+    ArrayList<WorkTask> listByAssigneeId(Integer assigneeId);
 }

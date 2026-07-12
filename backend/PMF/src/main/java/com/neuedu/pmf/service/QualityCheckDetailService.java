@@ -13,4 +13,6 @@ public interface QualityCheckDetailService {
     boolean save(QualityCheckDetail qualityCheckDetail);
 
     boolean update(QualityCheckDetail qualityCheckDetail);
+
+    QualityCheckDetail getByCheckNo(String qualityCheckNo);
 }

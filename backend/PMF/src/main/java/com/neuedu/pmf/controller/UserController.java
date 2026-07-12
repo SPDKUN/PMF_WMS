@@ -86,7 +86,10 @@ public class UserController {
         return ResultData.success(updatedUser);
     }
 
-
+    @GetMapping("/inspectors")
+    public ResultData getInspectors() {
+        return ResultData.success(userService.listByPosition("质检员"));
+    }
 
 }
 

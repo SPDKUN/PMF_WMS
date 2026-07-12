@@ -14,6 +14,7 @@ public class WorkTask {
     private String task_type;
     private String priority;
     private String related_order_no;
+    private String related_batch_id;
     private Integer goods_id;
     private Integer source_location_id;
     private Integer target_location_id;

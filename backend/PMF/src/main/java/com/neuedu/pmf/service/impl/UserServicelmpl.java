@@ -103,4 +103,9 @@ public class UserServicelmpl implements UserService {
         userMapper.update(user);
         return userMapper.findById(userId);
     }
+
+    @Override
+    public ArrayList<User> listByPosition(String position) {
+        return userMapper.findByPosition(position);
+    }
 }

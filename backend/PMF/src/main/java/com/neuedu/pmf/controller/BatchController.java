@@ -41,4 +41,9 @@ public class BatchController {
         boolean flag = batchService.delete(id);
         return flag ? ResultData.success() : ResultData.fail(ResultCode.FAILED);
     }
+
+    @GetMapping("/byStatus")
+    public ResultData getByStatus(@RequestParam String status) {
+        return ResultData.success(batchService.listByStatus(status));
+    }
 }

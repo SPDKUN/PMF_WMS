@@ -7,6 +7,7 @@
         <result column="task_type" property="task_type"/>
         <result column="priority" property="priority"/>
         <result column="related_order_no" property="related_order_no"/>
+        <result column="related_batch_id" property="related_batch_id"/>
         <result column="goods_id" property="goods_id"/>
         <result column="source_location_id" property="source_location_id"/>
         <result column="target_location_id" property="target_location_id"/>
@@ -25,9 +26,15 @@
         SELECT * FROM work_task WHERE task_id = #{task_id}
     </select>
 
+    <select id="findByAssigneeId" resultMap="WorkTaskMap">
+        SELECT * FROM work_task
+        WHERE assignee_id = #{assignee_id} AND completed_time IS NULL
+        ORDER BY FIELD(priority, '高','中','低'), deadline ASC
+    </select>
+
     <insert id="save" useGeneratedKeys="true" keyProperty="task_id">
-        INSERT INTO work_task (task_type, priority, related_order_no, goods_id, source_location_id, target_location_id, assignee_id, deadline, created_time, completed_time, remark)
-        VALUES (#{task_type}, #{priority}, #{related_order_no}, #{goods_id}, #{source_location_id}, #{target_location_id}, #{assignee_id}, #{deadline}, #{created_time}, #{completed_time}, #{remark})
+        INSERT INTO work_task (task_type, priority, related_order_no, related_batch_id, goods_id, source_location_id, target_location_id, assignee_id, deadline, created_time, completed_time, remark)
+        VALUES (#{task_type}, #{priority}, #{related_order_no}, #{related_batch_id}, #{goods_id}, #{source_location_id}, #{target_location_id}, #{assignee_id}, #{deadline}, #{created_time}, #{completed_time}, #{remark})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.WorkTask">
@@ -36,6 +43,7 @@
             <if test="task_type != null">task_type = #{task_type},</if>
             <if test="priority != null">priority = #{priority},</if>
             <if test="related_order_no != null">related_order_no = #{related_order_no},</if>
+            <if test="related_batch_id != null">related_batch_id = #{related_batch_id},</if>
             <if test="goods_id != null">goods_id = #{goods_id},</if>
             <if test="source_location_id != null">source_location_id = #{source_location_id},</if>
             <if test="target_location_id != null">target_location_id = #{target_location_id},</if>

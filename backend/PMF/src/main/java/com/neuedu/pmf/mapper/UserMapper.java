@@ -33,4 +33,7 @@ public interface UserMapper {
     //按用户ID和密码验证
     User findByIdAndPassword(@Param("user_id") Integer userId,
                              @Param("password") String password);
+
+    //按职位查找用户
+    ArrayList<User> findByPosition(@Param("position") String position);
 }
