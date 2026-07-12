@@ -1,0 +1,80 @@
+/* 注册页样式 */
+.register-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 40rpx 60rpx;
+}
+
+.register-header {
+  text-align: center;
+  margin: 60rpx 0 50rpx;
+}
+
+.register-header .title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #303133;
+  margin-bottom: 12rpx;
+}
+
+.register-header .subtitle {
+  font-size: 28rpx;
+  color: #909399;
+}
+
+.register-form {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 50rpx 40rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.register-form .form-group {
+  margin-bottom: 30rpx;
+}
+
+.register-form .form-label {
+  font-size: 28rpx;
+  color: #303133;
+  margin-bottom: 12rpx;
+}
+
+.register-form .form-input {
+  height: 84rpx;
+  background: #f5f7fa;
+  border: 2rpx solid #e4e7ed;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+}
+
+.register-form .form-input:focus {
+  border-color: #409eff;
+  background: #fff;
+}
+
+.register-btn {
+  width: 100%;
+  height: 90rpx;
+  background: #409eff;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  border-radius: 12rpx;
+  border: none;
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-btn:active {
+  background: #3a8ee6;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 30rpx;
+  font-size: 28rpx;
+  color: #909399;
+}

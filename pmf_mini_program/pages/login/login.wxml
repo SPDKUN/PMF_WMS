@@ -1,0 +1,30 @@
+<!-- 登录页 -->
+<view class="login-page">
+  <view class="login-header">
+    <view class="logo-text">PMF</view>
+    <view class="subtitle">智能仓储管理系统</view>
+    <view class="desc">Smart Warehouse Management System</view>
+  </view>
+
+  <view class="login-form">
+    <view class="form-group">
+      <view class="form-label">用户名</view>
+      <input class="form-input" placeholder="请输入用户名" value="{{username}}" bindinput="onUsernameInput" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">密码</view>
+      <input class="form-input" type="password" placeholder="请输入密码" value="{{password}}" bindinput="onPasswordInput" />
+    </view>
+
+    <button class="login-btn" bindtap="handleLogin" loading="{{loading}}">登 录</button>
+
+    <view class="register-link" bindtap="goToRegister">
+      还没有账号？<text class="text-primary">立即注册</text>
+    </view>
+  </view>
+
+  <view class="login-footer">
+    <text class="text-muted text-sm">© 2026 PMF Warehouse Management</text>
+  </view>
+</view>

@@ -1,0 +1,128 @@
+<!-- 任务页面 - 我的待办 + 任务分配 -->
+<view class="tasks-page">
+  <!-- Tab切换 -->
+  <view class="tabs">
+    <view class="tab-item {{activeTab === 'mytodos' ? 'active' : ''}}" bindtap="switchTab" data-tab="mytodos">我的待办</view>
+    <view class="tab-item {{activeTab === 'assign' ? 'active' : ''}}" bindtap="switchTab" data-tab="assign">任务中心</view>
+  </view>
+
+  <!-- 我的待办 -->
+  <view wx:if="{{activeTab === 'mytodos'}}" class="tab-content">
+    <view wx:if="{{todoList.length === 0}}" class="empty-state">
+      <view class="icon">🎉</view>
+      <view>暂无待办任务</view>
+    </view>
+    <view wx:else>
+      <view class="card" wx:for="{{todoList}}" wx:key="task_id">
+        <view class="flex-between mb-20">
+          <view class="text-bold text-lg">{{item.task_type || '待处理任务'}}</view>
+          <view class="tag {{item.priority === 'high' ? 'tag-danger' : item.priority === 'medium' ? 'tag-warning' : 'tag-success'}}">
+            {{item.priority === 'high' ? '高优先级' : item.priority === 'medium' ? '中优先级' : '低优先级'}}
+          </view>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">关联单号:</text> {{item.related_order_no || '-'}}
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">货物ID:</text> {{item.goods_id || '-'}}
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">源库位:</text> {{item.source_location_id || '-'}}
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">目标库位:</text> {{item.target_location_id || '-'}}
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">截止时间:</text> {{item.deadline || '-'}}
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">备注:</text> {{item.remark || '-'}}
+        </view>
+        <view class="mt-20 text-right" wx:if="{{item.task_status !== 'completed'}}">
+          <button class="btn-success" size="mini" bindtap="completeTask" data-id="{{item.task_id}}">标记完成</button>
+        </view>
+        <view wx:if="{{item.task_status === 'completed'}}" class="mt-20 text-right">
+          <text class="tag tag-success">✅ 已完成</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 任务中心 -->
+  <view wx:if="{{activeTab === 'assign'}}">
+    <view class="section-title text-bold mb-20">操作中心</view>
+    <view class="operation-grid">
+      <view class="op-card" bindtap="openTaskModal" data-type="inbound">
+        <view class="op-icon">📥</view>
+        <view class="op-title">新增批次</view>
+        <view class="op-desc text-sm text-muted">创建新批次入库</view>
+      </view>
+      <view class="op-card" bindtap="showComingSoon">
+        <view class="op-icon">🚚</view>
+        <view class="op-title">入库作业</view>
+        <view class="op-desc text-sm text-muted">入库单操作</view>
+      </view>
+      <view class="op-card" bindtap="showComingSoon">
+        <view class="op-icon">📤</view>
+        <view class="op-title">出库作业</view>
+        <view class="op-desc text-sm text-muted">出库单操作</view>
+      </view>
+      <view class="op-card" bindtap="showComingSoon">
+        <view class="op-icon">🔄</view>
+        <view class="op-title">库位调整</view>
+        <view class="op-desc text-sm text-muted">调整货物库位</view>
+      </view>
+      <view class="op-card" bindtap="showComingSoon">
+        <view class="op-icon">📊</view>
+        <view class="op-title">库存盘点</view>
+        <view class="op-desc text-sm text-muted">盘点库存差异</view>
+      </view>
+      <view class="op-card" bindtap="showComingSoon">
+        <view class="op-icon">🔍</view>
+        <view class="op-title">质量检验</view>
+        <view class="op-desc text-sm text-muted">质检单处理</view>
+      </view>
+      <view class="op-card" bindtap="showComingSoon">
+        <view class="op-icon">⚠️</view>
+        <view class="op-title">残次处理</view>
+        <view class="op-desc text-sm text-muted">残次品处理</view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 新增批次模态框 -->
+<view wx:if="{{showBatchModal}}" class="modal-mask" bindtap="closeBatchModal">
+  <view class="modal-content" catchtap="noop">
+    <view class="modal-header">新增批次</view>
+    <view class="form-group">
+      <view class="form-label">批次号 <text class="text-danger">*</text></view>
+      <input class="form-input" placeholder="请输入批次号" value="{{batchForm.batch_id}}" data-field="batch_id" bindinput="onBatchInput" />
+    </view>
+    <view class="form-group">
+      <view class="form-label">货物ID <text class="text-danger">*</text></view>
+      <input class="form-input" type="number" placeholder="请输入货物ID" value="{{batchForm.goods_id}}" data-field="goods_id" bindinput="onBatchInput" />
+    </view>
+    <view class="form-group">
+      <view class="form-label">生产日期</view>
+      <picker mode="date" value="{{batchForm.production_date}}" bindchange="onProdDateChange">
+        <view class="form-input picker-input">{{batchForm.production_date || '请选择生产日期'}}</view>
+      </picker>
+    </view>
+    <view class="form-group">
+      <view class="form-label">过期日期</view>
+      <picker mode="date" value="{{batchForm.expiry_date}}" bindchange="onExpDateChange">
+        <view class="form-input picker-input">{{batchForm.expiry_date || '请选择过期日期'}}</view>
+      </picker>
+    </view>
+    <view class="form-group">
+      <view class="form-label">初始数量 <text class="text-danger">*</text></view>
+      <input class="form-input" type="number" placeholder="请输入初始数量" value="{{batchForm.initial_quantity}}" data-field="initial_quantity" bindinput="onBatchInput" />
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-default" bindtap="closeBatchModal">取消</button>
+      <button class="btn-primary ml-20" bindtap="submitBatch">确定</button>
+    </view>
+  </view>
+</view>

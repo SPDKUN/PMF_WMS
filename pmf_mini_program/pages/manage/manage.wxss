@@ -1,0 +1,60 @@
+/* 管理页样式 */
+.manage-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 20rpx;
+}
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab-content {
+  padding-bottom: 120rpx;
+}
+
+/* 列表项 */
+.item-info {
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.item-title {
+  font-size: 30rpx;
+  color: #303133;
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+
+.item-meta {
+  font-size: 24rpx;
+}
+
+.item-actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.action-link {
+  font-size: 26rpx;
+  padding: 8rpx 0;
+}
+
+/* 表单 */
+.form-textarea {
+  width: 100%;
+  min-height: 120rpx;
+  border: 2rpx solid #dcdfe6;
+  border-radius: 8rpx;
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.picker-input {
+  display: flex;
+  align-items: center;
+  color: #606266;
+}

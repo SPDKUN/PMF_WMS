@@ -1,0 +1,182 @@
+<!-- 管理页面 - 人员/仓库/货物 CRUD -->
+<view class="manage-page">
+  <!-- Tab切换 -->
+  <view class="tabs">
+    <view class="tab-item {{activeTab === 'personnel' ? 'active' : ''}}" bindtap="switchTab" data-tab="personnel">人员管理</view>
+    <view class="tab-item {{activeTab === 'warehouse' ? 'active' : ''}}" bindtap="switchTab" data-tab="warehouse">仓库管理</view>
+    <view class="tab-item {{activeTab === 'goods' ? 'active' : ''}}" bindtap="switchTab" data-tab="goods">货物管理</view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input placeholder="{{searchPlaceholder}}" value="{{searchKeyword}}" bindinput="onSearchInput" confirm-type="search" bindconfirm="doSearch" />
+    <button class="search-btn" bindtap="doSearch">搜索</button>
+  </view>
+
+  <!-- 人员管理 Tab -->
+  <view wx:if="{{activeTab === 'personnel'}}" class="tab-content">
+    <view wx:if="{{filteredList.length === 0}}" class="empty-state">
+      <view class="icon">👤</view>
+      <view>暂无人员数据</view>
+    </view>
+    <view wx:else>
+      <view class="list-item" wx:for="{{filteredList}}" wx:key="user_id">
+        <view class="item-info">
+          <view class="item-title">{{item.real_name}} <text class="text-sm text-muted">@{{item.username}}</text></view>
+          <view class="item-meta text-sm text-muted">
+            <text>{{item.phone || '未填写手机号'}}</text>
+            <text wx:if="{{item.department}}"> | {{item.department}}</text>
+            <text wx:if="{{item.position}}"> | {{item.position}}</text>
+          </view>
+        </view>
+        <view class="item-actions">
+          <view class="action-link text-primary" bindtap="openEditModal" data-item="{{item}}">编辑</view>
+          <view class="action-link text-danger ml-20" bindtap="confirmDelete" data-id="{{item.user_id}}" data-type="personnel">删除</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 仓库管理 Tab -->
+  <view wx:if="{{activeTab === 'warehouse'}}" class="tab-content">
+    <view wx:if="{{filteredList.length === 0}}" class="empty-state">
+      <view class="icon">🏭</view>
+      <view>暂无仓库数据</view>
+    </view>
+    <view wx:else>
+      <view class="list-item" wx:for="{{filteredList}}" wx:key="warehouse_id">
+        <view class="item-info" bindtap="viewWarehouseDetail" data-item="{{item}}">
+          <view class="item-title">{{item.warehouse_name}}</view>
+          <view class="item-meta text-sm text-muted">
+            <text>{{item.warehouse_type || '-'}}</text>
+            <text> | {{item.warehouse_size || '-'}}型</text>
+            <text> | 库位: {{item.available_slots || 0}}/{{item.total_slots || 0}}</text>
+            <text> | {{item.status || '-'}}</text>
+          </view>
+        </view>
+        <view class="item-actions">
+          <view class="action-link text-primary" bindtap="openEditModal" data-item="{{item}}">编辑</view>
+          <view class="action-link text-danger ml-20" bindtap="confirmDelete" data-id="{{item.warehouse_id}}" data-type="warehouse">删除</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 货物管理 Tab -->
+  <view wx:if="{{activeTab === 'goods'}}" class="tab-content">
+    <view wx:if="{{filteredList.length === 0}}" class="empty-state">
+      <view class="icon">📦</view>
+      <view>暂无货物数据</view>
+    </view>
+    <view wx:else>
+      <view class="list-item" wx:for="{{filteredList}}" wx:key="goods_id">
+        <view class="item-info">
+          <view class="item-title">{{item.goods_name}}</view>
+          <view class="item-meta text-sm text-muted">
+            <text>编码: {{item.goods_code || '-'}}</text>
+            <text> | 类别: {{item.category || '-'}}</text>
+            <text> | 数量: {{item.quantity || 0}} {{item.unit || ''}}</text>
+            <text wx:if="{{item.storage_condition}}"> | {{item.storage_condition}}</text>
+          </view>
+        </view>
+        <view class="item-actions">
+          <view class="action-link text-primary" bindtap="openEditModal" data-item="{{item}}">编辑</view>
+          <view class="action-link text-danger ml-20" bindtap="confirmDelete" data-id="{{item.goods_id}}" data-type="goods">删除</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 新增按钮 -->
+  <view class="fab" bindtap="openAddModal">＋</view>
+</view>
+
+<!-- 编辑/新增模态框 -->
+<view wx:if="{{showModal}}" class="modal-mask" bindtap="closeModal">
+  <view class="modal-content" catchtap="noop">
+    <view class="modal-header">{{modalTitle}}</view>
+
+    <!-- 人员表单 -->
+    <block wx:if="{{activeTab === 'personnel'}}">
+      <view class="form-group">
+        <view class="form-label">用户名 <text class="text-danger">*</text></view>
+        <input class="form-input" placeholder="请输入用户名" value="{{form.username}}" data-field="username" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">真实姓名 <text class="text-danger">*</text></view>
+        <input class="form-input" placeholder="请输入真实姓名" value="{{form.real_name}}" data-field="real_name" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">手机号</view>
+        <input class="form-input" type="number" placeholder="请输入手机号" value="{{form.phone}}" data-field="phone" bindinput="onFormInput" />
+      </view>
+      <view class="form-group" wx:if="{{!isEdit}}">
+        <view class="form-label">密码 <text class="text-danger">*</text></view>
+        <input class="form-input" type="password" placeholder="请输入密码" value="{{form.password}}" data-field="password" bindinput="onFormInput" />
+      </view>
+    </block>
+
+    <!-- 仓库表单 -->
+    <block wx:if="{{activeTab === 'warehouse'}}">
+      <view class="form-group">
+        <view class="form-label">仓库名称 <text class="text-danger">*</text></view>
+        <input class="form-input" placeholder="请输入仓库名称" value="{{form.warehouse_name}}" data-field="warehouse_name" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">仓库类型</view>
+        <input class="form-input" placeholder="如: 常温库/冷库" value="{{form.warehouse_type}}" data-field="warehouse_type" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">仓库规模</view>
+        <picker mode="selector" range="{{sizeOptions}}" value="{{sizeIndex}}" bindchange="onSizeChange">
+          <view class="form-input picker-input">{{sizeOptions[sizeIndex] || '请选择仓库规模'}}</view>
+        </picker>
+      </view>
+      <view class="form-group">
+        <view class="form-label">位置</view>
+        <input class="form-input" placeholder="请输入仓库位置" value="{{form.location}}" data-field="location" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">状态</view>
+        <input class="form-input" placeholder="如: 运营中" value="{{form.status}}" data-field="status" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">描述</view>
+        <textarea class="form-textarea" placeholder="请输入仓库描述" value="{{form.description}}" data-field="description" bindinput="onFormInput" />
+      </view>
+    </block>
+
+    <!-- 货物表单 -->
+    <block wx:if="{{activeTab === 'goods'}}">
+      <view class="form-group">
+        <view class="form-label">货物编码 <text class="text-danger">*</text></view>
+        <input class="form-input" placeholder="请输入货物编码" value="{{form.goods_code}}" data-field="goods_code" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">货物名称 <text class="text-danger">*</text></view>
+        <input class="form-input" placeholder="请输入货物名称" value="{{form.goods_name}}" data-field="goods_name" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">类别</view>
+        <input class="form-input" placeholder="请输入货物类别" value="{{form.category}}" data-field="category" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">存储条件</view>
+        <input class="form-input" placeholder="如: 常温/冷藏/冷冻" value="{{form.storage_condition}}" data-field="storage_condition" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">数量</view>
+        <input class="form-input" type="number" placeholder="请输入数量" value="{{form.quantity}}" data-field="quantity" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">单位</view>
+        <input class="form-input" placeholder="如: 件/箱/kg" value="{{form.unit}}" data-field="unit" bindinput="onFormInput" />
+      </view>
+    </block>
+
+    <view class="modal-footer">
+      <button class="btn-default" bindtap="closeModal">取消</button>
+      <button class="btn-primary ml-20" bindtap="submitForm">确定</button>
+    </view>
+  </view>
+</view>

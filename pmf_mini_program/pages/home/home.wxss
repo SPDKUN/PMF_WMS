@@ -1,0 +1,187 @@
+/* 首页样式 */
+.home-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 20rpx;
+}
+
+/* 欢迎卡片 */
+.welcome-card {
+  background: linear-gradient(135deg, #409eff 0%, #2d6cdf 100%);
+  border-radius: 20rpx;
+  padding: 40rpx 36rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+}
+
+.greeting {
+  font-size: 26rpx;
+  opacity: 0.85;
+  margin-bottom: 8rpx;
+}
+
+.user-name {
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+}
+
+.role-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.welcome-date {
+  font-size: 26rpx;
+  opacity: 0.8;
+}
+
+/* 统计卡片 */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: calc(50% - 8rpx);
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx 24rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.04);
+}
+
+.stat-number {
+  font-size: 52rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #909399;
+}
+
+.stat-blue .stat-number { color: #409eff; }
+.stat-green .stat-number { color: #67c23a; }
+.stat-orange .stat-number { color: #e6a23c; }
+.stat-purple .stat-number { color: #9b59b6; }
+
+/* AI助手卡片 */
+.ai-card {
+  border-left: 6rpx solid #409eff;
+}
+
+.ai-input-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.ai-input {
+  flex: 1;
+  height: 76rpx;
+  background: #f5f7fa;
+  border-radius: 10rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  border: 2rpx solid #e4e7ed;
+}
+
+.ai-input:focus {
+  border-color: #409eff;
+}
+
+.ai-send-btn {
+  width: 120rpx;
+  height: 76rpx;
+  background: #409eff;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 10rpx;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 76rpx;
+  padding: 0;
+}
+
+/* 快捷操作 */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.action-item {
+  flex: 1;
+  min-width: calc(50% - 10rpx);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx 20rpx;
+  background: #f5f7fa;
+  border-radius: 16rpx;
+  transition: all 0.2s;
+}
+
+.action-item:active {
+  transform: scale(0.96);
+  background: #ebeef5;
+}
+
+.action-icon {
+  font-size: 56rpx;
+  margin-bottom: 12rpx;
+}
+
+.action-text {
+  font-size: 26rpx;
+  color: #606266;
+  font-weight: 500;
+}
+
+/* 待办列表 */
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.todo-priority {
+  width: 10rpx;
+  height: 56rpx;
+  border-radius: 5rpx;
+  margin-right: 20rpx;
+}
+
+.todo-title {
+  font-size: 28rpx;
+  color: #303133;
+  font-weight: 500;
+  margin-bottom: 4rpx;
+}
+
+.todo-meta {
+  font-size: 24rpx;
+}

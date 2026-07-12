@@ -1,0 +1,95 @@
+<!-- 首页 - 智能仓储驾驶舱 -->
+<scroll-view class="home-page" scroll-y enable-back-to-top>
+  <!-- 欢迎卡片 -->
+  <view class="welcome-card">
+    <view class="welcome-info">
+      <view class="greeting">{{greeting}}</view>
+      <view class="user-name">{{userInfo.real_name || userInfo.username || '用户'}}</view>
+      <view class="role-tag tag-primary">{{userInfo.position || '仓库管理员'}}</view>
+    </view>
+    <view class="welcome-date">{{currentDate}}</view>
+  </view>
+
+  <!-- 统计数据 -->
+  <view class="stats-row">
+    <view class="stat-card stat-blue">
+      <view class="stat-number">{{stats.warehouseCount}}</view>
+      <view class="stat-label">仓库总数</view>
+    </view>
+    <view class="stat-card stat-green">
+      <view class="stat-number">{{stats.goodsCount}}</view>
+      <view class="stat-label">货物种类</view>
+    </view>
+    <view class="stat-card stat-orange">
+      <view class="stat-number">{{stats.userCount}}</view>
+      <view class="stat-label">人员总数</view>
+    </view>
+    <view class="stat-card stat-purple">
+      <view class="stat-number">{{stats.todayTasks}}</view>
+      <view class="stat-label">今日待办</view>
+    </view>
+  </view>
+
+  <!-- AI助手 -->
+  <view class="card ai-card">
+    <view class="card-title">🤖 AI 智能助手</view>
+    <view class="ai-input-row">
+      <input class="ai-input" placeholder="询问仓储相关问题..." value="{{aiQuestion}}" bindinput="onAiInput" confirm-type="send" bindconfirm="sendAiQuestion" />
+      <button class="ai-send-btn" bindtap="sendAiQuestion">发送</button>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="card">
+    <view class="card-title">⚡ 快捷操作</view>
+    <view class="quick-actions">
+      <view class="action-item" bindtap="navigateTo" data-url="/pages/manage/manage">
+        <view class="action-icon action-blue">📦</view>
+        <view class="action-text">入库管理</view>
+      </view>
+      <view class="action-item" bindtap="navigateTo" data-url="/pages/manage/manage">
+        <view class="action-icon action-green">🚚</view>
+        <view class="action-text">出库管理</view>
+      </view>
+      <view class="action-item" bindtap="navigateTo" data-url="/pages/query/query">
+        <view class="action-icon action-orange">📋</view>
+        <view class="action-text">库存查询</view>
+      </view>
+      <view class="action-item" bindtap="navigateTo" data-url="/pages/tasks/tasks">
+        <view class="action-icon action-purple">✅</view>
+        <view class="action-text">任务中心</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 待办列表 -->
+  <view class="card">
+    <view class="card-title flex-between">
+      <text>📝 待办事项</text>
+      <text class="text-primary text-sm" bindtap="navigateTo" data-url="/pages/tasks/tasks">查看全部 →</text>
+    </view>
+    <view wx:if="{{todoList.length === 0}}" class="empty-state">
+      <view class="icon">🎉</view>
+      <view>暂无待办任务</view>
+    </view>
+    <view wx:else>
+      <view class="todo-item" wx:for="{{todoList}}" wx:key="task_id">
+        <view class="todo-left">
+          <view class="todo-priority" style="background: {{item.priority === 'high' ? '#f56c6c' : item.priority === 'medium' ? '#e6a23c' : '#67c23a'}}"></view>
+          <view class="todo-info">
+            <view class="todo-title">{{item.task_type || '待处理任务'}}</view>
+            <view class="todo-meta text-sm text-muted">
+              <text wx:if="{{item.related_order_no}}">单号: {{item.related_order_no}} | </text>
+              <text>截止: {{item.deadline || '-'}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="todo-status tag {{item.task_status === 'completed' ? 'tag-success' : 'tag-warning'}}">
+          {{item.task_status === 'completed' ? '已完成' : '进行中'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view style="height: 40rpx;"></view>
+</scroll-view>

@@ -1,0 +1,107 @@
+<!-- 个人中心页面 -->
+<scroll-view class="profile-page" scroll-y>
+  <!-- 用户信息区 -->
+  <view class="profile-header">
+    <view class="avatar">{{userInfo.real_name ? userInfo.real_name.charAt(0) : 'U'}}</view>
+    <view class="profile-info">
+      <view class="profile-name">{{userInfo.real_name || userInfo.username || '未设置'}}</view>
+      <view class="profile-username text-muted">@{{userInfo.username || '-'}}</view>
+      <view class="mt-10">
+        <text class="tag tag-primary">{{userInfo.position || '仓库管理员'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 基本信息卡片 -->
+  <view class="card">
+    <view class="card-title">基本信息</view>
+    <view class="info-row">
+      <text class="info-label">用户名</text>
+      <text class="info-value">{{userInfo.username || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">真实姓名</text>
+      <text class="info-value">{{userInfo.real_name || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">手机号</text>
+      <text class="info-value">{{userInfo.phone || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">部门</text>
+      <text class="info-value">{{userInfo.department || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">职位</text>
+      <text class="info-value">{{userInfo.position || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">账号状态</text>
+      <text class="info-value">
+        <text class="tag {{userInfo.status === 1 ? 'tag-success' : 'tag-danger'}}">{{userInfo.status === 1 ? '正常' : '冻结'}}</text>
+      </text>
+    </view>
+
+    <button class="btn-primary mt-30" style="width:100%;" bindtap="openEditModal">编辑资料</button>
+  </view>
+
+  <!-- 系统信息 -->
+  <view class="card">
+    <view class="card-title">关于系统</view>
+    <view class="info-row">
+      <text class="info-label">系统名称</text>
+      <text class="info-value">PMF智能仓储管理系统</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">版本号</text>
+      <text class="info-value">v1.0.0</text>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-section">
+    <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+  </view>
+
+  <view style="height: 40rpx;"></view>
+</scroll-view>
+
+<!-- 编辑资料模态框 -->
+<view wx:if="{{showEditModal}}" class="modal-mask" bindtap="closeEditModal">
+  <view class="modal-content" catchtap="noop">
+    <view class="modal-header">编辑个人资料</view>
+
+    <view class="form-group">
+      <view class="form-label">用户名</view>
+      <input class="form-input" placeholder="请输入用户名" value="{{editForm.username}}" data-field="username" bindinput="onEditInput" />
+    </view>
+    <view class="form-group">
+      <view class="form-label">真实姓名</view>
+      <input class="form-input" placeholder="请输入真实姓名" value="{{editForm.real_name}}" data-field="real_name" bindinput="onEditInput" />
+    </view>
+    <view class="form-group">
+      <view class="form-label">手机号</view>
+      <input class="form-input" type="number" placeholder="请输入手机号" value="{{editForm.phone}}" data-field="phone" bindinput="onEditInput" />
+    </view>
+
+    <!-- 密码修改（选填） -->
+    <view class="section-divider mt-30 mb-20 text-sm text-muted">如需修改密码，请填写以下字段</view>
+    <view class="form-group">
+      <view class="form-label">旧密码</view>
+      <input class="form-input" type="password" placeholder="请输入旧密码" value="{{editForm.oldPassword}}" data-field="oldPassword" bindinput="onEditInput" />
+    </view>
+    <view class="form-group">
+      <view class="form-label">新密码</view>
+      <input class="form-input" type="password" placeholder="请输入新密码(至少6位)" value="{{editForm.newPassword}}" data-field="newPassword" bindinput="onEditInput" />
+    </view>
+    <view class="form-group">
+      <view class="form-label">确认新密码</view>
+      <input class="form-input" type="password" placeholder="请确认新密码" value="{{editForm.confirmPassword}}" data-field="confirmPassword" bindinput="onEditInput" />
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-default" bindtap="closeEditModal">取消</button>
+      <button class="btn-primary ml-20" bindtap="submitProfile">保存</button>
+    </view>
+  </view>
+</view>

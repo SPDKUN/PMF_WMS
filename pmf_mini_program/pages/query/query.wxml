@@ -1,0 +1,158 @@
+<!-- 查询页面 - 7个查询Tab -->
+<view class="query-page">
+  <!-- Tab切换 - 可横向滚动 -->
+  <scroll-view class="tabs-scroll" scroll-x enable-flex>
+    <view class="tab-item {{activeTab === 'personnel' ? 'active' : ''}}" bindtap="switchTab" data-tab="personnel">人员</view>
+    <view class="tab-item {{activeTab === 'warehouse' ? 'active' : ''}}" bindtap="switchTab" data-tab="warehouse">仓库</view>
+    <view class="tab-item {{activeTab === 'goods' ? 'active' : ''}}" bindtap="switchTab" data-tab="goods">货物</view>
+    <view class="tab-item {{activeTab === 'inventory' ? 'active' : ''}}" bindtap="switchTab" data-tab="inventory">库存明细</view>
+    <view class="tab-item {{activeTab === 'batch' ? 'active' : ''}}" bindtap="switchTab" data-tab="batch">批次列表</view>
+    <view class="tab-item {{activeTab === 'temperature' ? 'active' : ''}}" bindtap="switchTab" data-tab="temperature">温湿度</view>
+    <view class="tab-item {{activeTab === 'operationLog' ? 'active' : ''}}" bindtap="switchTab" data-tab="operationLog">操作日志</view>
+  </scroll-view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar" wx:if="{{activeTab !== 'temperature'}}">
+    <input placeholder="{{searchPlaceholder}}" value="{{searchKeyword}}" bindinput="onSearchInput" confirm-type="search" bindconfirm="doSearch" />
+    <button class="search-btn" bindtap="doSearch">搜索</button>
+  </view>
+
+  <!-- 人员查询 -->
+  <view wx:if="{{activeTab === 'personnel'}}" class="tab-content">
+    <view wx:if="{{displayList.length === 0}}" class="empty-state">
+      <view class="icon">👤</view>
+      <view>暂无数据</view>
+    </view>
+    <block wx:else>
+      <view class="card" wx:for="{{displayList}}" wx:key="user_id">
+      <view class="detail-row"><text class="detail-label">用户名:</text> {{item.username}}</view>
+      <view class="detail-row"><text class="detail-label">姓名:</text> {{item.real_name}}</view>
+      <view class="detail-row"><text class="detail-label">手机号:</text> {{item.phone || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">部门:</text> {{item.department || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">职位:</text> {{item.position || '-'}}</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 仓库查询 -->
+  <view wx:if="{{activeTab === 'warehouse'}}" class="tab-content">
+    <view wx:if="{{displayList.length === 0}}" class="empty-state">
+      <view class="icon">🏭</view>
+      <view>暂无数据</view>
+    </view>
+    <block wx:else>
+      <view class="card" wx:for="{{displayList}}" wx:key="warehouse_id">
+      <view class="detail-row"><text class="detail-label">名称:</text> {{item.warehouse_name}}</view>
+      <view class="detail-row"><text class="detail-label">类型:</text> {{item.warehouse_type || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">规模:</text> {{item.warehouse_size || '-'}}型</view>
+      <view class="detail-row"><text class="detail-label">库位:</text> {{item.available_slots || 0}}/{{item.total_slots || 0}}</view>
+      <view class="detail-row"><text class="detail-label">位置:</text> {{item.location || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">状态:</text> {{item.status || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">描述:</text> {{item.description || '-'}}</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 货物查询 -->
+  <view wx:if="{{activeTab === 'goods'}}" class="tab-content">
+    <view wx:if="{{displayList.length === 0}}" class="empty-state">
+      <view class="icon">📦</view>
+      <view>暂无数据</view>
+    </view>
+    <block wx:else>
+      <view class="card" wx:for="{{displayList}}" wx:key="goods_id">
+      <view class="detail-row"><text class="detail-label">编码:</text> {{item.goods_code}}</view>
+      <view class="detail-row"><text class="detail-label">名称:</text> {{item.goods_name}}</view>
+      <view class="detail-row"><text class="detail-label">类别:</text> {{item.category || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">存储条件:</text> {{item.storage_condition || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">数量:</text> {{item.quantity || 0}} {{item.unit || ''}}</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 库存明细 -->
+  <view wx:if="{{activeTab === 'inventory'}}" class="tab-content">
+    <!-- 库存筛选 -->
+    <view class="filter-row mb-20">
+      <input class="filter-input" placeholder="货物名称" value="{{inventoryFilter.goodsName}}" data-field="goodsName" bindinput="onInventoryFilter" />
+      <input class="filter-input ml-10" placeholder="库位ID" value="{{inventoryFilter.locationId}}" data-field="locationId" bindinput="onInventoryFilter" />
+      <button class="search-btn" bindtap="loadInventory">筛选</button>
+    </view>
+    <view wx:if="{{displayList.length === 0}}" class="empty-state">
+      <view class="icon">📋</view>
+      <view>暂无库存数据</view>
+    </view>
+    <block wx:else>
+      <view class="card" wx:for="{{displayList}}" wx:key="inventory_id">
+      <view class="detail-row"><text class="detail-label">货物:</text> {{item.goods_name || '-'}} ({{item.unit || ''}})</view>
+      <view class="detail-row"><text class="detail-label">库位:</text> {{item.location_name || item.location_id}}</view>
+      <view class="detail-row"><text class="detail-label">数量:</text> {{item.quantity || 0}}</view>
+      <view class="detail-row"><text class="detail-label">锁定数量:</text> {{item.locked_quantity || 0}}</view>
+      <view class="detail-row"><text class="detail-label">状态:</text>
+        <text class="tag {{item.inventory_status === 'normal' ? 'tag-success' : 'tag-warning'}}">{{item.inventory_status || '-'}}</text>
+      </view>
+      <view class="detail-row"><text class="detail-label">入库时间:</text> {{item.inbound_time || '-'}}</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 批次列表 -->
+  <view wx:if="{{activeTab === 'batch'}}" class="tab-content">
+    <view wx:if="{{displayList.length === 0}}" class="empty-state">
+      <view class="icon">🔢</view>
+      <view>暂无批次数据</view>
+    </view>
+    <block wx:else>
+      <view class="card" wx:for="{{displayList}}" wx:key="batch_id">
+      <view class="detail-row"><text class="detail-label">批次号:</text> {{item.batch_id}}</view>
+      <view class="detail-row"><text class="detail-label">货物ID:</text> {{item.goods_id}}</view>
+      <view class="detail-row"><text class="detail-label">生产日期:</text> {{item.production_date || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">过期日期:</text> {{item.expiry_date || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">初始/剩余:</text> {{item.initial_quantity || 0}} / {{item.remaining_quantity || 0}}</view>
+      <view class="detail-row"><text class="detail-label">状态:</text> {{item.batch_status || '-'}}</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 温湿度记录 -->
+  <view wx:if="{{activeTab === 'temperature'}}" class="tab-content">
+    <view wx:if="{{displayList.length === 0}}" class="empty-state">
+      <view class="icon">🌡️</view>
+      <view>暂无温湿度数据</view>
+    </view>
+    <block wx:else>
+      <view class="card" wx:for="{{displayList}}" wx:key="record_id">
+      <view class="detail-row"><text class="detail-label">仓库ID:</text> {{item.warehouse_id}}</view>
+      <view class="detail-row"><text class="detail-label">温度:</text> {{item.temperature || '-'}}℃</view>
+      <view class="detail-row"><text class="detail-label">湿度:</text> {{item.humidity || '-'}}%</view>
+      <view class="detail-row"><text class="detail-label">记录时间:</text> {{item.recorded_time || '-'}}</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 操作日志 -->
+  <view wx:if="{{activeTab === 'operationLog'}}" class="tab-content">
+    <view class="filter-row mb-20">
+      <input class="filter-input" placeholder="日期(YYYY-MM-DD)" value="{{logFilter.date}}" data-field="date" bindinput="onLogFilter" />
+      <input class="filter-input ml-10" placeholder="操作类型" value="{{logFilter.operationType}}" data-field="operationType" bindinput="onLogFilter" />
+      <button class="search-btn" bindtap="loadOperationLogs">筛选</button>
+    </view>
+    <view wx:if="{{displayList.length === 0}}" class="empty-state">
+      <view class="icon">📝</view>
+      <view>暂无操作日志</view>
+    </view>
+    <block wx:else>
+      <view class="card" wx:for="{{displayList}}" wx:key="log_id">
+      <view class="detail-row"><text class="detail-label">操作人ID:</text> {{item.operator_id}}</view>
+      <view class="detail-row"><text class="detail-label">操作类型:</text>
+        <text class="tag tag-primary">{{item.operation_type || '-'}}</text>
+      </view>
+      <view class="detail-row"><text class="detail-label">内容:</text> {{item.operation_content || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">结果:</text> {{item.operation_result || '-'}}</view>
+      <view class="detail-row"><text class="detail-label">时间:</text> {{item.operation_time || '-'}}</view>
+      </view>
+    </block>
+  </view>
+
+  <view style="height: 40rpx;"></view>
+</view>
