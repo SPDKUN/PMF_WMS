@@ -13,4 +13,5 @@ public interface InboundOrderHeadMapper {
     InboundOrderHead findById(@Param("inbound_no") String inboundNo);
     int update(InboundOrderHead inboundOrderHead);
     int deleteById(@Param("inbound_no") String inboundNo);
+    java.util.List<String> findTodayInboundNos(@Param("prefix") String prefix);
 }

@@ -15,5 +15,6 @@ public interface InventoryMapper {
     Inventory findById(@Param("inventory_id") Integer inventoryId);
     int update(Inventory inventory);
     int deleteById(@Param("inventory_id") Integer inventoryId);
+    int deleteByBatchId(@Param("batch_id") String batchId);
     int updateStatusByBatchId(@Param("batch_id") String batchId, @Param("inventory_status") String inventoryStatus);
 }

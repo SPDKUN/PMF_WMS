@@ -23,6 +23,10 @@
         SELECT * FROM inbound_order_detail WHERE detail_id = #{detail_id}
     </select>
 
+    <select id="findByInboundNo" resultMap="InboundOrderDetailMap">
+        SELECT * FROM inbound_order_detail WHERE inbound_no = #{inbound_no}
+    </select>
+
     <insert id="save" useGeneratedKeys="true" keyProperty="detail_id">
         INSERT INTO inbound_order_detail (inbound_no, goods_id, batch_no, production_date, expiry_date, quantity, warehouse_id, zone_id, location_id)
         VALUES (#{inbound_no}, #{goods_id}, #{batch_no}, #{production_date}, #{expiry_date}, #{quantity}, #{warehouse_id}, #{zone_id}, #{location_id})
@@ -46,6 +50,10 @@
 
     <delete id="deleteById">
         DELETE FROM inbound_order_detail WHERE detail_id = #{detail_id}
+    </delete>
+
+    <delete id="deleteByInboundNo">
+        DELETE FROM inbound_order_detail WHERE inbound_no = #{inbound_no}
     </delete>
 
 </mapper>

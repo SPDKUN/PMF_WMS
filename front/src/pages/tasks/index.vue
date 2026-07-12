@@ -159,6 +159,66 @@
       </div>
     </div>
 
+    <!-- 入库弹窗 -->
+    <div class="dialog-overlay" v-if="inboundDialog.visible" @click.self="inboundDialog.visible = false">
+      <div class="dialog-box">
+        <div class="dialog-header">
+          <h3>新建入库任务</h3>
+          <button class="dialog-close" @click="inboundDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body">
+          <div class="form-item">
+            <label>入库类型 <span class="required">*</span></label>
+            <select v-model="inboundDialog.form.inboundType">
+              <option value="">请选择入库类型</option>
+              <option value="采购入库">采购入库</option>
+              <option value="退货入库">退货入库</option>
+              <option value="生产入库">生产入库</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>批次 <span class="required">*</span></label>
+            <select v-model="inboundDialog.form.batchId">
+              <option value="">请选择批次</option>
+              <option v-for="b in availableBatches" :key="b.batch_id" :value="b.batch_id">
+                {{ b.batch_id }} ({{ getGoodsName(b.goods_id) }})
+              </option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>操作员 <span class="required">*</span></label>
+            <select v-model="inboundDialog.form.operatorId">
+              <option :value="null">请选择操作员</option>
+              <option v-for="u in warehouseStaff" :key="u.user_id" :value="u.user_id">
+                {{ u.real_name || u.username }}
+              </option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>优先级 <span class="required">*</span></label>
+            <select v-model="inboundDialog.form.priority">
+              <option value="">请选择优先级</option>
+              <option value="高">高</option>
+              <option value="中">中</option>
+              <option value="低">低</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>截至时间 <span class="required">*</span></label>
+            <input type="date" v-model="inboundDialog.form.deadline" />
+          </div>
+          <div class="form-item">
+            <label>备注</label>
+            <textarea v-model="inboundDialog.form.remark" placeholder="可选备注" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="inboundDialog.visible = false">取消</button>
+          <button class="btn btn-primary" @click="submitInboundConfirm">确认创建</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 完成任务弹窗 -->
     <div class="dialog-overlay" v-if="completeDialog.visible" @click.self="completeDialog.visible = false">
       <div class="dialog-box">
@@ -206,11 +266,88 @@
           <button class="dialog-close" @click="confirmDialog.visible = false">&times;</button>
         </div>
         <div class="dialog-body">
-          <p style="text-align:center;font-size:14px;color:#303133;">确定要提交质检结果吗？提交后将无法撤回。</p>
+          <p style="text-align:center;font-size:14px;color:#303133;">{{ confirmDialog.message }}</p>
         </div>
         <div class="dialog-footer">
           <button class="btn btn-cancel" @click="confirmDialog.visible = false">取消</button>
-          <button class="btn btn-primary" @click="submitComplete">确认提交</button>
+          <button class="btn btn-primary" @click="confirmDialog.callback">{{ confirmDialog.confirmText }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 入库完成弹窗（仓库可视化选库位） -->
+    <div class="dialog-overlay" v-if="inboundCompleteDialog.visible" @click.self="inboundCompleteDialog.visible = false">
+      <div class="dialog-box view-dialog-box">
+        <div class="dialog-header">
+          <h3>完成入库 - {{ inboundCompleteDialog.task ? inboundCompleteDialog.task.related_order_no : '' }}</h3>
+          <button class="dialog-close" @click="inboundCompleteDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="padding: 12px 20px; flex-direction: column;">
+          <!-- 仓库选择 -->
+          <div class="form-item">
+            <label>选择仓库 <span class="required">*</span></label>
+            <select v-model="inboundCompleteDialog.warehouseId" @change="onInboundWarehouseChange">
+              <option :value="null">请选择仓库</option>
+              <option v-for="w in inboundCompleteDialog.warehouses" :key="w.warehouse_id" :value="w.warehouse_id">
+                {{ w.warehouse_name }}
+              </option>
+            </select>
+          </div>
+          <!-- 进度 -->
+          <div class="progress-bar-wrap" v-if="inboundCompleteDialog.totalNeeded > 0">
+            <div class="progress-text">
+              已选库位：<strong>{{ inboundCompleteDialog.selectedLocationIds.length }}</strong> / {{ inboundCompleteDialog.totalNeeded }}
+              <span v-if="inboundCompleteDialog.selectedLocationIds.length >= inboundCompleteDialog.totalNeeded" style="color:#67c23a;"> ✓ 已满足</span>
+              <span v-else style="color:#f56c6c;">（还需 {{ inboundCompleteDialog.totalNeeded - inboundCompleteDialog.selectedLocationIds.length }} 个）</span>
+            </div>
+          </div>
+        </div>
+        <div class="view-dialog-body" v-if="inboundCompleteDialog.warehouseId">
+          <!-- 库区侧栏 -->
+          <div class="zone-sidebar">
+            <div class="zone-sidebar-title">库区列表</div>
+            <div v-for="zone in inboundCompleteDialog.zones" :key="zone.zone_id"
+                 class="zone-item" :class="{ active: inboundCompleteDialog.selectedZoneId === zone.zone_id }"
+                 @click="selectInboundZone(zone)">
+              <span class="zone-dot" :class="zone.available_slots > 0 ? 'dot-green' : 'dot-red'"></span>
+              <span class="zone-name">{{ zone.zone_name }}</span>
+              <span class="zone-available">可用 {{ zone.available_slots }}/{{ zone.total_slots }}</span>
+            </div>
+            <div v-if="inboundCompleteDialog.zones.length === 0" style="padding:16px;color:#909399;font-size:12px;">
+              该仓库暂无库区
+            </div>
+          </div>
+          <!-- 库位网格 -->
+          <div class="location-main">
+            <div class="location-main-title" v-if="inboundCompleteDialog.selectedZoneId">
+              {{ inboundCompleteDialog.selectedZoneName }} - 选择库位
+            </div>
+            <div class="location-grid" v-if="inboundCompleteDialog.selectedZoneId">
+              <div v-for="loc in inboundCompleteDialog.locations" :key="loc.location_id"
+                   class="location-card"
+                   :class="loc.is_occupied === 1 ? 'loc-occupied' : (isLocationSelected(loc.location_id) ? 'loc-selected' : 'loc-free')"
+                   @click="toggleLocation(loc)">
+                <span class="loc-checkbox" v-if="loc.is_occupied !== 1">
+                  <input type="checkbox" :checked="isLocationSelected(loc.location_id)" />
+                </span>
+                <span class="loc-name">{{ loc.location_name }}</span>
+              </div>
+              <div v-if="inboundCompleteDialog.locations.length === 0" style="width:100%;text-align:center;padding:30px;color:#909399;">
+                该库区暂无库位
+              </div>
+            </div>
+            <div class="location-main-placeholder" v-else>
+              请选择左侧库区查看库位
+            </div>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-danger" @click="rejectInbound">退回入库请求</button>
+          <button class="btn btn-primary"
+                  :disabled="inboundCompleteDialog.selectedLocationIds.length < inboundCompleteDialog.totalNeeded"
+                  @click="confirmCompleteInbound">
+            确认入库
+          </button>
         </div>
       </div>
     </div>
@@ -255,7 +392,29 @@ export default {
         form: { inspectionResult: '', defectReason: '', handlingSuggestion: '', remark: '' }
       },
       confirmDialog: {
-        visible: false
+        visible: false,
+        message: '确定要提交质检结果吗？提交后将无法撤回。',
+        confirmText: '确认提交',
+        callback: null
+      },
+      inboundDialog: {
+        visible: false,
+        form: { inboundType: '', batchId: '', operatorId: null, priority: '', deadline: '', remark: '' }
+      },
+      availableBatches: [],
+      warehouseStaff: [],
+      inboundCompleteDialog: {
+        visible: false,
+        task: null,
+        totalNeeded: 0,
+        warehouseId: null,
+        warehouses: [],
+        zones: [],
+        selectedZoneId: null,
+        selectedZoneName: '',
+        locations: [],
+        selectedLocationIds: [],
+        remark: ''
       }
     }
   },
@@ -302,8 +461,10 @@ export default {
         this.openNewBatchDialog()
       } else if (key === 'quality') {
         this.openQcDialog()
+      } else if (key === 'inbound') {
+        this.openInboundDialog()
       } else {
-        const labels = { inbound: '入库', outbound: '出库', adjust: '库存调整', check: '库存盘点', quality: '质检', defective: '处理次品' }
+        const labels = { outbound: '出库', adjust: '库存调整', check: '库存盘点', defective: '处理次品' }
         alert(labels[key] + '功能开发中...')
       }
     },
@@ -416,19 +577,28 @@ export default {
 
     // --- 完成任务 ---
     openCompleteDialog(task) {
-      this.completeDialog.task = task
-      this.completeDialog.isQc = task.task_type === '质检'
-      this.completeDialog.form = {
-        inspectionResult: '',
-        defectReason: '',
-        handlingSuggestion: '',
-        remark: task.remark || ''
+      if (task.task_type === '质检') {
+        this.completeDialog.task = task
+        this.completeDialog.isQc = true
+        this.completeDialog.form = {
+          inspectionResult: '',
+          defectReason: '',
+          handlingSuggestion: '',
+          remark: task.remark || ''
+        }
+        this.completeDialog.visible = true
+      } else if (task.task_type === '入库') {
+        this.openInboundCompleteDialog(task)
+      } else {
+        alert('该类型任务完成功能开发中...')
       }
-      this.completeDialog.visible = true
     },
     confirmComplete() {
       const f = this.completeDialog.form
       if (!f.inspectionResult) { alert('请选择质检结果'); return }
+      this.confirmDialog.message = '确定要提交质检结果吗？提交后将无法撤回。'
+      this.confirmDialog.confirmText = '确认提交'
+      this.confirmDialog.callback = this.submitComplete
       this.confirmDialog.visible = true
     },
     async submitComplete() {
@@ -446,6 +616,179 @@ export default {
         if (res.code === 200) {
           alert('质检任务已完成')
           this.completeDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '操作失败')
+        }
+      } catch (e) {
+        alert('操作失败')
+      }
+    },
+
+    // --- 入库 ---
+    async fetchAvailableBatches() {
+      try {
+        const res = await request.get('/inbound/availableBatches')
+        if (res.code === 200) { this.availableBatches = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    async fetchWarehouseStaff() {
+      try {
+        const res = await request.get('/user/warehouseStaff')
+        if (res.code === 200) { this.warehouseStaff = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    openInboundDialog() {
+      this.inboundDialog.form = { inboundType: '', batchId: '', operatorId: null, priority: '', deadline: '', remark: '' }
+      this.fetchAvailableBatches()
+      this.fetchWarehouseStaff()
+      this.fetchGoods()
+      this.inboundDialog.visible = true
+    },
+    submitInboundConfirm() {
+      const f = this.inboundDialog.form
+      if (!f.inboundType) { alert('请选择入库类型'); return }
+      if (!f.batchId) { alert('请选择批次'); return }
+      if (!f.operatorId) { alert('请选择操作员'); return }
+      if (!f.priority) { alert('请选择优先级'); return }
+      if (!f.deadline) { alert('请选择截至时间'); return }
+      this.confirmDialog.message = '确定要创建入库任务吗？'
+      this.confirmDialog.confirmText = '确认创建'
+      this.confirmDialog.callback = this.submitInbound
+      this.confirmDialog.visible = true
+    },
+    async submitInbound() {
+      this.confirmDialog.visible = false
+      const f = this.inboundDialog.form
+      try {
+        const res = await request.post('/inbound/create', {
+          inboundType: f.inboundType,
+          batchId: f.batchId,
+          operatorId: f.operatorId,
+          priority: f.priority,
+          deadline: f.deadline,
+          remark: f.remark
+        })
+        if (res.code === 200) {
+          alert('入库任务创建成功')
+          this.inboundDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '创建失败')
+        }
+      } catch (e) {
+        alert('创建失败')
+      }
+    },
+
+    // --- 入库完成（仓库可视化） ---
+    async openInboundCompleteDialog(task) {
+      this.inboundCompleteDialog.task = task
+      this.inboundCompleteDialog.totalNeeded = 0
+      this.inboundCompleteDialog.warehouseId = null
+      this.inboundCompleteDialog.warehouses = []
+      this.inboundCompleteDialog.zones = []
+      this.inboundCompleteDialog.selectedZoneId = null
+      this.inboundCompleteDialog.selectedZoneName = ''
+      this.inboundCompleteDialog.locations = []
+      this.inboundCompleteDialog.selectedLocationIds = []
+      this.inboundCompleteDialog.remark = task.remark || ''
+
+      // 从task获取batch信息计算totalNeeded
+      try {
+        const res = await request.get('/batch/list')
+        if (res.code === 200) {
+          const batches = res.data || []
+          const batch = batches.find(b => b.batch_id === task.related_batch_id)
+          if (batch) {
+            this.inboundCompleteDialog.totalNeeded = Math.ceil(batch.initial_quantity / 10)
+          }
+        }
+      } catch (e) { /* ignore */ }
+
+      // 获取仓库列表
+      try {
+        const res = await request.get('/warehouse/list')
+        if (res.code === 200) {
+          this.inboundCompleteDialog.warehouses = res.data || []
+        }
+      } catch (e) { /* ignore */ }
+
+      this.inboundCompleteDialog.visible = true
+    },
+    async onInboundWarehouseChange() {
+      this.inboundCompleteDialog.zones = []
+      this.inboundCompleteDialog.selectedZoneId = null
+      this.inboundCompleteDialog.locations = []
+      if (!this.inboundCompleteDialog.warehouseId) return
+      try {
+        const res = await request.get('/zone/list', { warehouseId: this.inboundCompleteDialog.warehouseId })
+        if (res.code === 200) {
+          this.inboundCompleteDialog.zones = res.data || []
+        }
+      } catch (e) { /* ignore */ }
+    },
+    async selectInboundZone(zone) {
+      this.inboundCompleteDialog.selectedZoneId = zone.zone_id
+      this.inboundCompleteDialog.selectedZoneName = zone.zone_name
+      this.inboundCompleteDialog.locations = []
+      try {
+        const res = await request.get('/location/list', { zoneId: zone.zone_id })
+        if (res.code === 200) {
+          this.inboundCompleteDialog.locations = res.data || []
+        }
+      } catch (e) { /* ignore */ }
+    },
+    isLocationSelected(locationId) {
+      return this.inboundCompleteDialog.selectedLocationIds.includes(locationId)
+    },
+    toggleLocation(loc) {
+      if (loc.is_occupied === 1) return
+      const idx = this.inboundCompleteDialog.selectedLocationIds.indexOf(loc.location_id)
+      if (idx >= 0) {
+        this.inboundCompleteDialog.selectedLocationIds.splice(idx, 1)
+      } else {
+        this.inboundCompleteDialog.selectedLocationIds.push(loc.location_id)
+      }
+    },
+    rejectInbound() {
+      if (!confirm('确定要退回该入库请求吗？退回后将删除相关入库单。')) return
+      const uid = this.getUserId()
+      request.put('/inbound/reject/' + this.inboundCompleteDialog.task.task_id, { operatorId: uid })
+        .then(res => {
+          if (res.code === 200) {
+            alert('已退回入库请求')
+            this.inboundCompleteDialog.visible = false
+            this.fetchMyTasks()
+          } else {
+            alert(res.msg || '操作失败')
+          }
+        })
+        .catch(() => alert('操作失败'))
+    },
+    confirmCompleteInbound() {
+      if (this.inboundCompleteDialog.selectedLocationIds.length < this.inboundCompleteDialog.totalNeeded) {
+        alert('请选择足够的库位')
+        return
+      }
+      this.confirmDialog.message = '确定要完成入库吗？将按所选库位分配货物。'
+      this.confirmDialog.confirmText = '确认入库'
+      this.confirmDialog.callback = this.submitCompleteInbound
+      this.confirmDialog.visible = true
+    },
+    async submitCompleteInbound() {
+      this.confirmDialog.visible = false
+      const uid = this.getUserId()
+      try {
+        const res = await request.put('/inbound/complete/' + this.inboundCompleteDialog.task.task_id, {
+          warehouseId: this.inboundCompleteDialog.warehouseId,
+          locationIds: this.inboundCompleteDialog.selectedLocationIds,
+          remark: this.inboundCompleteDialog.remark,
+          operatorId: uid
+        })
+        if (res.code === 200) {
+          alert('入库完成')
+          this.inboundCompleteDialog.visible = false
           this.fetchMyTasks()
         } else {
           alert(res.msg || '操作失败')
@@ -685,6 +1028,71 @@ export default {
   display: flex; justify-content: flex-end; gap: 8px;
   padding: 10px 20px 16px; border-top: 1px solid #ebeef5;
 }
+
+/* 入库完成弹窗 - 仓库可视化 */
+.view-dialog-box { width: 900px; }
+.view-dialog-body {
+  display: flex; height: 400px; border-top: 1px solid #ebeef5; border-bottom: 1px solid #ebeef5;
+}
+.progress-bar-wrap {
+  background: #f5f7fa; padding: 8px 12px; border-radius: 4px; margin-bottom: 4px;
+}
+.progress-text { font-size: 13px; color: #606266; }
+
+.zone-sidebar {
+  width: 240px; min-width: 240px; border-right: 1px solid #ebeef5;
+  overflow-y: auto; background: #fafafa;
+}
+.zone-sidebar-title {
+  padding: 12px 14px; font-size: 13px; font-weight: 600; color: #303133;
+  border-bottom: 1px solid #ebeef5; background: #fff; position: sticky; top: 0;
+}
+.zone-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
+}
+.zone-item:hover { background: #ecf5ff; }
+.zone-item.active { background: #d9ecff; }
+.zone-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #67c23a; }
+.dot-red { background: #f56c6c; }
+.zone-name { flex: 1; font-size: 13px; color: #303133; }
+.zone-available { font-size: 11px; color: #909399; }
+.location-main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+.location-main-title {
+  padding: 12px 16px; font-size: 13px; font-weight: 600;
+  border-bottom: 1px solid #ebeef5; background: #fff; position: sticky; top: 0;
+}
+.location-main-placeholder {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: #c0c4cc; font-size: 14px;
+}
+.location-grid {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  padding: 16px; align-content: flex-start;
+}
+.location-card {
+  width: 90px; height: 56px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer; transition: all 0.15s; position: relative;
+}
+.location-card:hover { transform: scale(1.05); }
+.loc-free { background: #f0f9eb; border: 1px solid #b3e19d; }
+.loc-free:hover { border-color: #67c23a; }
+.loc-occupied { background: #fef0f0; border: 1px solid #fab6b6; cursor: not-allowed; }
+.loc-selected { background: #d9ecff; border: 2px solid #409EFF; }
+.loc-name { font-size: 11px; color: #303133; text-align: center; word-break: break-all; }
+.loc-checkbox { font-size: 12px; }
+.loc-checkbox input[type="checkbox"] { cursor: pointer; }
+
+.btn-danger {
+  background: #f56c6c; color: #fff;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 16px; border: none; border-radius: 4px;
+  font-size: 13px; cursor: pointer; transition: all 0.2s;
+}
+.btn-danger:hover { background: #f78989; }
+.btn-primary:disabled { background: #a0cfff; cursor: not-allowed; }
 
 @media (max-width: 768px) {
   .data-table { font-size: 12px; }

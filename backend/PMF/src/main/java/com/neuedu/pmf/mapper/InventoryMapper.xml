@@ -74,6 +74,10 @@
         DELETE FROM inventory WHERE inventory_id = #{inventory_id}
     </delete>
 
+    <delete id="deleteByBatchId">
+        DELETE FROM inventory WHERE batch_id = #{batch_id}
+    </delete>
+
     <update id="updateStatusByBatchId">
         UPDATE inventory SET inventory_status = #{inventory_status} WHERE batch_id = #{batch_id}
     </update>

@@ -91,5 +91,10 @@ public class UserController {
         return ResultData.success(userService.listByPosition("质检员"));
     }
 
+    @GetMapping("/warehouseStaff")
+    public ResultData getWarehouseStaff() {
+        return ResultData.success(userService.listByPosition("仓库员工"));
+    }
+
 }
 

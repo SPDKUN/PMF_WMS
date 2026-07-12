@@ -40,4 +40,8 @@
         DELETE FROM inbound_order_head WHERE inbound_no = #{inbound_no}
     </delete>
 
+    <select id="findTodayInboundNos" resultType="String">
+        SELECT inbound_no FROM inbound_order_head WHERE inbound_no LIKE #{prefix}
+    </select>
+
 </mapper>
