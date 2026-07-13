@@ -259,7 +259,7 @@
     </div>
 
     <!-- 二次确认弹窗 -->
-    <div class="dialog-overlay" v-if="confirmDialog.visible" @click.self="confirmDialog.visible = false">
+    <div class="dialog-overlay confirm-dialog-overlay" v-if="confirmDialog.visible" @click.self="confirmDialog.visible = false">
       <div class="dialog-box" style="width:360px;">
         <div class="dialog-header">
           <h3>确认提交</h3>
@@ -297,7 +297,8 @@
           <div class="progress-bar-wrap" v-if="inboundCompleteDialog.totalNeeded > 0">
             <div class="progress-text">
               已选库位：<strong>{{ inboundCompleteDialog.selectedLocationIds.length }}</strong> / {{ inboundCompleteDialog.totalNeeded }}
-              <span v-if="inboundCompleteDialog.selectedLocationIds.length >= inboundCompleteDialog.totalNeeded" style="color:#67c23a;"> ✓ 已满足</span>
+              <span v-if="inboundCompleteDialog.selectedLocationIds.length === inboundCompleteDialog.totalNeeded" style="color:#67c23a;"> ✓ 已满足</span>
+              <span v-else-if="inboundCompleteDialog.selectedLocationIds.length > inboundCompleteDialog.totalNeeded" style="color:#e6a23c;">（多了 {{ inboundCompleteDialog.selectedLocationIds.length - inboundCompleteDialog.totalNeeded }} 个）</span>
               <span v-else style="color:#f56c6c;">（还需 {{ inboundCompleteDialog.totalNeeded - inboundCompleteDialog.selectedLocationIds.length }} 个）</span>
             </div>
           </div>
@@ -344,7 +345,7 @@
         <div class="dialog-footer">
           <button class="btn btn-danger" @click="rejectInbound">退回入库请求</button>
           <button class="btn btn-primary"
-                  :disabled="inboundCompleteDialog.selectedLocationIds.length < inboundCompleteDialog.totalNeeded"
+                  :disabled="inboundCompleteDialog.selectedLocationIds.length !== inboundCompleteDialog.totalNeeded"
                   @click="confirmCompleteInbound">
             确认入库
           </button>
@@ -767,8 +768,8 @@ export default {
         .catch(() => alert('操作失败'))
     },
     confirmCompleteInbound() {
-      if (this.inboundCompleteDialog.selectedLocationIds.length < this.inboundCompleteDialog.totalNeeded) {
-        alert('请选择足够的库位')
+      if (this.inboundCompleteDialog.selectedLocationIds.length !== this.inboundCompleteDialog.totalNeeded) {
+        alert('请选择恰好 ' + this.inboundCompleteDialog.totalNeeded + ' 个库位，当前已选 ' + this.inboundCompleteDialog.selectedLocationIds.length + ' 个')
         return
       }
       this.confirmDialog.message = '确定要完成入库吗？将按所选库位分配货物。'
@@ -1005,6 +1006,7 @@ export default {
   background: rgba(0,0,0,0.35); z-index: 9999;
   display: flex; align-items: center; justify-content: center;
 }
+.confirm-dialog-overlay { z-index: 99999; }
 .dialog-box {
   background: #fff;
   border: 1px solid #ebeef5;

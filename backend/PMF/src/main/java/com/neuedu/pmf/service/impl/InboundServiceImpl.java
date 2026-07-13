@@ -205,11 +205,14 @@ public class InboundServiceImpl implements InboundService {
         // 3. 验证库位数量
         int totalNeeded = (int) Math.ceil(initialQty / 10.0);
         List<Integer> locationIds = request.getLocationIds();
-        if (locationIds.size() < totalNeeded) {
-            throw new RuntimeException("需要选择至少" + totalNeeded + "个库位，当前仅选择" + locationIds.size() + "个");
+        if (locationIds.size() != totalNeeded) {
+            throw new RuntimeException("需要选择恰好" + totalNeeded + "个库位，当前选择" + locationIds.size() + "个");
         }
 
-        // 4. 遍历库位分配
+        // 4. 先删除旧库存（待入库状态），再创建新库存
+        inventoryMapper.deleteByBatchId(batchId);
+
+        // 5. 遍历库位分配
         Map<Integer, Integer> zoneCounts = new HashMap<>();
         Map<Integer, Integer> whCounts = new HashMap<>();
 
@@ -248,22 +251,19 @@ public class InboundServiceImpl implements InboundService {
             whCounts.merge(whId, 1, Integer::sum);
         }
 
-        // 5. 更新库区可用库位数
+        // 6. 更新库区可用库位数
         for (Map.Entry<Integer, Integer> entry : zoneCounts.entrySet()) {
             Zone zone = zoneMapper.findById(entry.getKey());
             zone.setAvailable_slots(zone.getAvailable_slots() - entry.getValue());
             zoneMapper.update(zone);
         }
 
-        // 6. 更新仓库可用库位数
+        // 7. 更新仓库可用库位数
         for (Map.Entry<Integer, Integer> entry : whCounts.entrySet()) {
             Warehouse wh = warehouseMapper.findById(entry.getKey());
             wh.setAvailable_slots(wh.getAvailable_slots() - entry.getValue());
             warehouseMapper.update(wh);
         }
-
-        // 7. 删除旧库存
-        inventoryMapper.deleteByBatchId(batchId);
 
         // 8. 更新商品数量
         Goods goods = goodsMapper.findById(goodsId);
