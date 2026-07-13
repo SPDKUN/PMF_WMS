@@ -390,7 +390,7 @@
                 v-for="loc in viewDialog.locations"
                 :key="loc.location_id"
                 class="location-card"
-                :class="loc.is_occupied === 1 ? 'loc-occupied' : 'loc-free'"
+                :class="loc.is_occupied === 1 ? 'loc-occupied' : (loc.lock_status === '锁定' ? 'loc-locked' : 'loc-free')"
               >
                 <span class="loc-name">{{ loc.location_name }}</span>
               </div>
@@ -1132,6 +1132,10 @@ export default {
 .loc-occupied {
   background: #fef0f0;
   border: 1px solid #fab6b6;
+}
+.loc-locked {
+  background: #fef6e7;
+  border: 1px solid #f5dab1;
 }
 .loc-name {
   font-size: 11px; color: #303133;

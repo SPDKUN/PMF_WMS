@@ -65,6 +65,8 @@ CREATE TABLE IF NOT EXISTS `location` (
   `zone_id`        INT           NOT NULL                 COMMENT '所属库区ID',
   `goods_id`       INT           DEFAULT NULL             COMMENT '存储货物ID',
   `is_occupied`    TINYINT       NOT NULL DEFAULT 0       COMMENT '是否被占用 0否 1是',
+  `lock_status`    ENUM('未锁定','锁定') NOT NULL DEFAULT '未锁定' COMMENT '锁定状态',
+  `lock_purpose`   ENUM('出库','调整')   DEFAULT NULL             COMMENT '锁定用途（仅lock_status=锁定时有效）',
   `description`    TEXT          DEFAULT NULL             COMMENT '库位描述',
   PRIMARY KEY (`location_id`),
   KEY `idx_location_zone` (`zone_id`),

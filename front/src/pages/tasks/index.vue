@@ -326,7 +326,7 @@
             <div class="location-grid" v-if="inboundCompleteDialog.selectedZoneId">
               <div v-for="loc in inboundCompleteDialog.locations" :key="loc.location_id"
                    class="location-card"
-                   :class="loc.is_occupied === 1 ? 'loc-occupied' : (isLocationSelected(loc.location_id) ? 'loc-selected' : 'loc-free')"
+                   :class="loc.is_occupied === 1 ? 'loc-occupied' : (loc.lock_status === '锁定' ? 'loc-locked' : (isLocationSelected(loc.location_id) ? 'loc-selected' : 'loc-free'))"
                    @click="toggleLocation(loc)">
                 <span class="loc-checkbox" v-if="loc.is_occupied !== 1">
                   <input type="checkbox" :checked="isLocationSelected(loc.location_id)" />
@@ -745,6 +745,7 @@ export default {
     },
     toggleLocation(loc) {
       if (loc.is_occupied === 1) return
+      if (loc.lock_status === '锁定') return
       const idx = this.inboundCompleteDialog.selectedLocationIds.indexOf(loc.location_id)
       if (idx >= 0) {
         this.inboundCompleteDialog.selectedLocationIds.splice(idx, 1)
@@ -1082,6 +1083,7 @@ export default {
 .loc-free { background: #f0f9eb; border: 1px solid #b3e19d; }
 .loc-free:hover { border-color: #67c23a; }
 .loc-occupied { background: #fef0f0; border: 1px solid #fab6b6; cursor: not-allowed; }
+.loc-locked { background: #fef6e7; border: 1px solid #f5dab1; cursor: not-allowed; }
 .loc-selected { background: #d9ecff; border: 2px solid #409EFF; }
 .loc-name { font-size: 11px; color: #303133; text-align: center; word-break: break-all; }
 .loc-checkbox { font-size: 12px; }

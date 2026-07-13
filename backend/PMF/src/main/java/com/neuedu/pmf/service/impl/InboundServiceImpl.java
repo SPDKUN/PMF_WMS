@@ -222,6 +222,9 @@ public class InboundServiceImpl implements InboundService {
             if (loc == null) {
                 throw new RuntimeException("库位不存在: " + locationId);
             }
+            if ("锁定".equals(loc.getLock_status())) {
+                throw new RuntimeException("库位 " + loc.getLocation_name() + " 已被锁定，无法用于入库");
+            }
 
             int qty = (i < totalNeeded - 1) ? 10 : (initialQty - (totalNeeded - 1) * 10);
 

@@ -142,6 +142,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                 location.setLocation_name(zone.getZone_name() + "-" + j);
                 location.setZone_id(zoneId);
                 location.setIs_occupied(0);
+                location.setLock_status("未锁定");
+                location.setLock_purpose(null);
                 locationMapper.save(location);
             }
         }

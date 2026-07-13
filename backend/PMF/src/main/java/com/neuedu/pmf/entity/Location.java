@@ -13,5 +13,7 @@ public class Location {
     private Integer zone_id;
     private Integer goods_id;
     private Integer is_occupied;
+    private String lock_status;
+    private String lock_purpose;
     private String description;
 }

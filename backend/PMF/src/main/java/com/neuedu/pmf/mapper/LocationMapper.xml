@@ -8,6 +8,8 @@
         <result column="zone_id" property="zone_id"/>
         <result column="goods_id" property="goods_id"/>
         <result column="is_occupied" property="is_occupied"/>
+        <result column="lock_status" property="lock_status"/>
+        <result column="lock_purpose" property="lock_purpose"/>
         <result column="description" property="description"/>
     </resultMap>
 
@@ -20,8 +22,8 @@
     </select>
 
     <insert id="save">
-        INSERT INTO location (location_id, location_name, zone_id, goods_id, is_occupied, description)
-        VALUES (#{location_id}, #{location_name}, #{zone_id}, #{goods_id}, #{is_occupied}, #{description})
+        INSERT INTO location (location_id, location_name, zone_id, goods_id, is_occupied, lock_status, lock_purpose, description)
+        VALUES (#{location_id}, #{location_name}, #{zone_id}, #{goods_id}, #{is_occupied}, #{lock_status}, #{lock_purpose}, #{description})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.Location">
@@ -31,6 +33,8 @@
             <if test="zone_id != null">zone_id = #{zone_id},</if>
             <if test="goods_id != null">goods_id = #{goods_id},</if>
             <if test="is_occupied != null">is_occupied = #{is_occupied},</if>
+            <if test="lock_status != null">lock_status = #{lock_status},</if>
+            <if test="lock_purpose != null">lock_purpose = #{lock_purpose},</if>
             <if test="description != null">description = #{description},</if>
         </set>
         WHERE location_id = #{location_id}
