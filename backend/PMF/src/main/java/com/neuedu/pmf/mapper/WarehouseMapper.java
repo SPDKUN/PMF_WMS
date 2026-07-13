@@ -14,4 +14,5 @@ public interface WarehouseMapper {
     int update(Warehouse warehouse);
     int deleteById(@Param("warehouse_id") Integer warehouseId);
     java.util.List<Integer> findAllIds();
+    int updateAvailableSlots(@Param("warehouseId") Integer warehouseId, @Param("delta") Integer delta);
 }

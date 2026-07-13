@@ -13,4 +13,6 @@ public interface AdjustmentOrderDetailMapper {
     AdjustmentOrderDetail findById(@Param("detail_id") Integer detailId);
     int update(AdjustmentOrderDetail adjustmentOrderDetail);
     int deleteById(@Param("detail_id") Integer detailId);
+    java.util.ArrayList<AdjustmentOrderDetail> findByAdjustmentNo(@Param("adjustment_no") String adjustmentNo);
+    int deleteByAdjustmentNo(@Param("adjustment_no") String adjustmentNo);
 }

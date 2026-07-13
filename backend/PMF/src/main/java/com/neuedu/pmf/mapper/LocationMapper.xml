@@ -56,4 +56,20 @@
         SELECT location_id FROM location ORDER BY location_id
     </select>
 
+    <update id="batchUpdateLockStatus">
+        UPDATE location SET lock_status = #{lock_status}, lock_purpose = #{lock_purpose}
+        WHERE location_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="freeLocation">
+        UPDATE location SET is_occupied = 0, goods_id = NULL WHERE location_id = #{location_id}
+    </update>
+
+    <update id="occupyLocation">
+        UPDATE location SET is_occupied = 1, goods_id = #{goods_id} WHERE location_id = #{location_id}
+    </update>
+
 </mapper>

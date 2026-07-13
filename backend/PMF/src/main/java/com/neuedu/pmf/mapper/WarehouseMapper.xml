@@ -50,4 +50,8 @@
         SELECT warehouse_id FROM warehouse ORDER BY warehouse_id
     </select>
 
+    <update id="updateAvailableSlots">
+        UPDATE warehouse SET available_slots = available_slots + #{delta} WHERE warehouse_id = #{warehouseId}
+    </update>
+
 </mapper>

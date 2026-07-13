@@ -82,4 +82,12 @@
         UPDATE inventory SET inventory_status = #{inventory_status} WHERE batch_id = #{batch_id}
     </update>
 
+    <select id="findByLocationId" resultMap="InventoryVOMap">
+        SELECT i.*, g.goods_name, g.unit, l.location_name
+        FROM inventory i
+        LEFT JOIN goods g ON i.goods_id = g.goods_id
+        LEFT JOIN location l ON i.location_id = l.location_id
+        WHERE i.location_id = #{location_id} AND i.inventory_status = '正常'
+    </select>
+
 </mapper>

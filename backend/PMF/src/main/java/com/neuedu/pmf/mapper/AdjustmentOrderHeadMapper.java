@@ -13,4 +13,5 @@ public interface AdjustmentOrderHeadMapper {
     AdjustmentOrderHead findById(@Param("adjustment_no") String adjustmentNo);
     int update(AdjustmentOrderHead adjustmentOrderHead);
     int deleteById(@Param("adjustment_no") String adjustmentNo);
+    java.util.List<String> findTodayAdjustmentNos(@Param("prefix") String prefix);
 }

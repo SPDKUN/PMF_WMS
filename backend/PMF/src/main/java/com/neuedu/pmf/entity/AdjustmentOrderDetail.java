@@ -11,7 +11,7 @@ public class AdjustmentOrderDetail {
     private Integer detail_id;
     private String adjustment_no;
     private Integer goods_id;
-    private Integer batch_id;
+    private String batch_id;
     private Integer quantity;
     private Integer from_warehouse_id;
     private Integer from_zone_id;

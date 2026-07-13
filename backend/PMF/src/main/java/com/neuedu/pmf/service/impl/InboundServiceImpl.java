@@ -229,8 +229,7 @@ public class InboundServiceImpl implements InboundService {
             int qty = (i < totalNeeded - 1) ? 10 : (initialQty - (totalNeeded - 1) * 10);
 
             // a. 标记库位已占用
-            loc.setIs_occupied(1);
-            locationMapper.update(loc);
+            locationMapper.occupyLocation(loc.getLocation_id(), goodsId);
 
             // b. 查库区→仓库
             Zone zone = zoneMapper.findById(loc.getZone_id());
@@ -254,18 +253,14 @@ public class InboundServiceImpl implements InboundService {
             whCounts.merge(whId, 1, Integer::sum);
         }
 
-        // 6. 更新库区可用库位数
+        // 6. 更新库区可用库位数（原子操作）
         for (Map.Entry<Integer, Integer> entry : zoneCounts.entrySet()) {
-            Zone zone = zoneMapper.findById(entry.getKey());
-            zone.setAvailable_slots(zone.getAvailable_slots() - entry.getValue());
-            zoneMapper.update(zone);
+            zoneMapper.updateAvailableSlots(entry.getKey(), -entry.getValue());
         }
 
-        // 7. 更新仓库可用库位数
+        // 7. 更新仓库可用库位数（原子操作）
         for (Map.Entry<Integer, Integer> entry : whCounts.entrySet()) {
-            Warehouse wh = warehouseMapper.findById(entry.getKey());
-            wh.setAvailable_slots(wh.getAvailable_slots() - entry.getValue());
-            warehouseMapper.update(wh);
+            warehouseMapper.updateAvailableSlots(entry.getKey(), -entry.getValue());
         }
 
         // 8. 更新商品数量

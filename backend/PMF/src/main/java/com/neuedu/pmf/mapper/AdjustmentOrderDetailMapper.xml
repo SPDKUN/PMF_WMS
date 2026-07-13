@@ -50,4 +50,12 @@
         DELETE FROM adjustment_order_detail WHERE detail_id = #{detail_id}
     </delete>
 
+    <select id="findByAdjustmentNo" resultMap="AdjustmentOrderDetailMap">
+        SELECT * FROM adjustment_order_detail WHERE adjustment_no = #{adjustment_no}
+    </select>
+
+    <delete id="deleteByAdjustmentNo">
+        DELETE FROM adjustment_order_detail WHERE adjustment_no = #{adjustment_no}
+    </delete>
+
 </mapper>

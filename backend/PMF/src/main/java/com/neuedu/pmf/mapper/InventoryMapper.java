@@ -17,4 +17,5 @@ public interface InventoryMapper {
     int deleteById(@Param("inventory_id") Integer inventoryId);
     int deleteByBatchId(@Param("batch_id") String batchId);
     int updateStatusByBatchId(@Param("batch_id") String batchId, @Param("inventory_status") String inventoryStatus);
+    com.neuedu.pmf.vo.InventoryVO findByLocationId(@Param("location_id") Integer locationId);
 }

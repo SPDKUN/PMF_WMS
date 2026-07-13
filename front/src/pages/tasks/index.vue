@@ -352,6 +352,186 @@
         </div>
       </div>
     </div>
+
+    <!-- 库存调整弹窗 -->
+    <div class="dialog-overlay" v-if="adjustmentDialog.visible" @click.self="adjustmentDialog.visible = false">
+      <div class="dialog-box" style="width:1100px;max-width:98vw;max-height:90vh;overflow-y:auto;">
+        <div class="dialog-header">
+          <h3>新建库存调整任务 — 库位移库</h3>
+          <button class="dialog-close" @click="adjustmentDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="flex-direction:column;padding:8px 16px;gap:8px;">
+          <!-- 上半区域：左右两个仓库可视化面板 -->
+          <div class="adjust-panels">
+            <!-- 左面板：源库位 -->
+            <div class="adjust-panel">
+              <div class="adjust-panel-title">源库位（选择要转移的货物）</div>
+              <div class="form-item" style="margin-bottom:4px;">
+                <select v-model="adjustmentDialog.left.warehouseId" @change="onAdjustLeftWarehouseChange">
+                  <option :value="null">请选择仓库</option>
+                  <option v-for="w in adjustmentDialog.left.warehouses" :key="w.warehouse_id" :value="w.warehouse_id">{{ w.warehouse_name }}</option>
+                </select>
+              </div>
+              <div class="progress-bar-wrap" v-if="adjustmentDialog.left.warehouseId">
+                <div class="progress-text">已选：<strong>{{ adjustmentDialog.left.selectedIds.length }}</strong> 个库位</div>
+              </div>
+              <div class="adjust-panel-body" v-if="adjustmentDialog.left.warehouseId">
+                <div class="zone-sidebar adjust-zone-sidebar">
+                  <div v-for="zone in adjustmentDialog.left.zones" :key="zone.zone_id"
+                       class="zone-item" :class="{ active: adjustmentDialog.left.selectedZoneId === zone.zone_id }"
+                       @click="selectAdjustLeftZone(zone)">
+                    <span class="zone-dot" :class="zone.available_slots > 0 ? 'dot-green' : 'dot-red'"></span>
+                    <span class="zone-name">{{ zone.zone_name }}</span>
+                  </div>
+                </div>
+                <div class="location-main">
+                  <div class="location-grid" v-if="adjustmentDialog.left.selectedZoneId">
+                    <div v-for="loc in adjustmentDialog.left.locations" :key="loc.location_id"
+                         class="location-card adjust-location-card"
+                         :class="loc.lock_status === '锁定' ? 'loc-locked' : (loc.is_occupied === 1 ? (isAdjustLeftSelected(loc.location_id) ? 'loc-selected' : 'loc-occupied') : 'loc-free')"
+                         @click="toggleAdjustLeftLocation(loc)">
+                      <span class="loc-seq-badge" v-if="isAdjustLeftSelected(loc.location_id)">{{ getAdjustLeftSeq(loc.location_id) }}</span>
+                      <span class="loc-name">{{ loc.location_name }}</span>
+                    </div>
+                  </div>
+                  <div class="location-main-placeholder" v-else>请选择左侧库区</div>
+                </div>
+              </div>
+            </div>
+            <!-- 右面板：目标库位 -->
+            <div class="adjust-panel">
+              <div class="adjust-panel-title">目标库位（选择新存放位置）</div>
+              <div class="form-item" style="margin-bottom:4px;">
+                <select v-model="adjustmentDialog.right.warehouseId" @change="onAdjustRightWarehouseChange">
+                  <option :value="null">请选择仓库</option>
+                  <option v-for="w in adjustmentDialog.right.warehouses" :key="w.warehouse_id" :value="w.warehouse_id">{{ w.warehouse_name }}</option>
+                </select>
+              </div>
+              <div class="progress-bar-wrap" v-if="adjustmentDialog.right.warehouseId">
+                <div class="progress-text">已选：<strong>{{ adjustmentDialog.right.selectedIds.length }}</strong> 个库位</div>
+              </div>
+              <div class="adjust-panel-body" v-if="adjustmentDialog.right.warehouseId">
+                <div class="zone-sidebar adjust-zone-sidebar">
+                  <div v-for="zone in adjustmentDialog.right.zones" :key="zone.zone_id"
+                       class="zone-item" :class="{ active: adjustmentDialog.right.selectedZoneId === zone.zone_id }"
+                       @click="selectAdjustRightZone(zone)">
+                    <span class="zone-dot" :class="zone.available_slots > 0 ? 'dot-green' : 'dot-red'"></span>
+                    <span class="zone-name">{{ zone.zone_name }}</span>
+                  </div>
+                </div>
+                <div class="location-main">
+                  <div class="location-grid" v-if="adjustmentDialog.right.selectedZoneId">
+                    <div v-for="loc in adjustmentDialog.right.locations" :key="loc.location_id"
+                         class="location-card adjust-location-card"
+                         :class="loc.is_occupied === 1 || loc.lock_status === '锁定' ? (loc.lock_status === '锁定' ? 'loc-locked' : 'loc-occupied') : (isAdjustRightSelected(loc.location_id) ? 'loc-selected' : 'loc-free')"
+                         @click="toggleAdjustRightLocation(loc)">
+                      <span class="loc-seq-badge" v-if="isAdjustRightSelected(loc.location_id)">{{ getAdjustRightSeq(loc.location_id) }}</span>
+                      <span class="loc-name">{{ loc.location_name }}</span>
+                    </div>
+                  </div>
+                  <div class="location-main-placeholder" v-else>请选择右侧库区</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 下半区域：选中库位明细表 -->
+          <div class="adjust-table-wrap" v-if="adjustmentDialog.matchedItems.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>编号</th>
+                  <th>批次号</th>
+                  <th>货物名称</th>
+                  <th>数量</th>
+                  <th>原位置</th>
+                  <th>新位置</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, idx) in adjustmentDialog.matchedItems" :key="idx">
+                  <td>{{ idx + 1 }}</td>
+                  <td>{{ item.batchId || '-' }}</td>
+                  <td>{{ item.goodsName || '-' }}</td>
+                  <td>{{ item.quantity || '-' }}</td>
+                  <td>{{ item.fromLocationName || '-' }}</td>
+                  <td>{{ item.toLocationName || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else style="text-align:center;color:#c0c4cc;font-size:13px;padding:8px;">
+            请在左右两侧选择库位，系统将按顺序自动匹配
+          </div>
+
+          <!-- 表单 -->
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div class="form-item" style="flex:1;min-width:150px;">
+              <label>负责人 <span class="required">*</span></label>
+              <select v-model="adjustmentDialog.assigneeId">
+                <option :value="null">请选择负责人</option>
+                <option v-for="u in warehouseStaff" :key="u.user_id" :value="u.user_id">{{ u.real_name || u.username }}</option>
+              </select>
+            </div>
+            <div class="form-item" style="flex:1;min-width:120px;">
+              <label>优先级 <span class="required">*</span></label>
+              <select v-model="adjustmentDialog.priority">
+                <option value="">请选择</option>
+                <option value="高">高</option>
+                <option value="中">中</option>
+                <option value="低">低</option>
+              </select>
+            </div>
+            <div class="form-item" style="flex:1;min-width:150px;">
+              <label>截至日期 <span class="required">*</span></label>
+              <input type="date" v-model="adjustmentDialog.deadline" />
+            </div>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="adjustmentDialog.visible = false">取消</button>
+          <button class="btn btn-primary"
+                  :disabled="!canSubmitAdjustment"
+                  @click="confirmCreateAdjustment">
+            确认创建
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库存调整完成弹窗 -->
+    <div class="dialog-overlay" v-if="adjustmentCompleteDialog.visible" @click.self="adjustmentCompleteDialog.visible = false">
+      <div class="dialog-box" style="width:700px;">
+        <div class="dialog-header">
+          <h3>完成库存调整</h3>
+          <button class="dialog-close" @click="adjustmentCompleteDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="flex-direction:column;">
+          <p style="font-size:13px;color:#606266;">截至日期：<strong>{{ formatDeadline(adjustmentCompleteDialog.task.deadline) }}</strong></p>
+          <table class="data-table" style="margin-top:8px;">
+            <thead>
+              <tr><th>批次</th><th>货物名称</th><th>数量</th><th>原库位</th><th>新库位</th></tr>
+            </thead>
+            <tbody>
+              <tr v-if="adjustmentCompleteDialog.details.length === 0">
+                <td colspan="5" class="empty-cell">加载中...</td>
+              </tr>
+              <tr v-for="(d, idx) in adjustmentCompleteDialog.details" :key="idx">
+                <td>{{ d.batchId }}</td>
+                <td>{{ d.goodsName }}</td>
+                <td>{{ d.quantity }}</td>
+                <td>{{ d.fromLocationName }}</td>
+                <td>{{ d.toLocationName }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-danger" @click="rejectAdjustment">退回调整申请</button>
+          <button class="btn btn-primary" @click="confirmCompleteAdjustment">完成调整</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -416,6 +596,20 @@ export default {
         locations: [],
         selectedLocationIds: [],
         remark: ''
+      },
+      adjustmentDialog: {
+        visible: false,
+        left: { warehouseId: null, warehouses: [], zones: [], selectedZoneId: null, locations: [], selectedIds: [], selectedDetails: {} },
+        right: { warehouseId: null, warehouses: [], zones: [], selectedZoneId: null, locations: [], selectedIds: [], selectedDetails: {} },
+        matchedItems: [],
+        assigneeId: null,
+        priority: '',
+        deadline: ''
+      },
+      adjustmentCompleteDialog: {
+        visible: false,
+        task: null,
+        details: []
       }
     }
   },
@@ -425,6 +619,14 @@ export default {
       const statusMap = { '来料检': '待检', '成品检': '锁定', '日常抽检': '正常' }
       const status = statusMap[this.qcDialog.form.checkType]
       return this.allBatches.filter(b => b.batch_status === status)
+    },
+    canSubmitAdjustment() {
+      const left = this.adjustmentDialog.left.selectedIds.length
+      const right = this.adjustmentDialog.right.selectedIds.length
+      return left > 0 && left === right
+        && this.adjustmentDialog.assigneeId
+        && this.adjustmentDialog.priority
+        && this.adjustmentDialog.deadline
     }
   },
   mounted() {
@@ -464,8 +666,10 @@ export default {
         this.openQcDialog()
       } else if (key === 'inbound') {
         this.openInboundDialog()
+      } else if (key === 'adjust') {
+        this.openAdjustmentDialog()
       } else {
-        const labels = { outbound: '出库', adjust: '库存调整', check: '库存盘点', defective: '处理次品' }
+        const labels = { outbound: '出库', check: '库存盘点', defective: '处理次品' }
         alert(labels[key] + '功能开发中...')
       }
     },
@@ -590,6 +794,8 @@ export default {
         this.completeDialog.visible = true
       } else if (task.task_type === '入库') {
         this.openInboundCompleteDialog(task)
+      } else if (task.task_type === '库存调整') {
+        this.openAdjustmentCompleteDialog(task)
       } else {
         alert('该类型任务完成功能开发中...')
       }
@@ -791,6 +997,268 @@ export default {
         if (res.code === 200) {
           alert('入库完成')
           this.inboundCompleteDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '操作失败')
+        }
+      } catch (e) {
+        alert('操作失败')
+      }
+    },
+
+    // --- 库存调整 ---
+    async openAdjustmentDialog() {
+      this.fetchWarehouseStaff()
+      this.fetchGoods()
+      // 初始化左右面板
+      const initPanel = () => ({ warehouseId: null, warehouses: [], zones: [], selectedZoneId: null, locations: [], selectedIds: [], selectedDetails: {} })
+      this.adjustmentDialog = {
+        visible: true,
+        left: initPanel(),
+        right: initPanel(),
+        matchedItems: [],
+        assigneeId: null,
+        priority: '',
+        deadline: ''
+      }
+      // 获取仓库列表
+      try {
+        const res = await request.get('/warehouse/list')
+        if (res.code === 200) {
+          const warehouses = res.data || []
+          this.adjustmentDialog.left.warehouses = warehouses
+          this.adjustmentDialog.right.warehouses = warehouses
+        }
+      } catch (e) { /* ignore */ }
+    },
+
+    async onAdjustLeftWarehouseChange() {
+      const panel = this.adjustmentDialog.left
+      panel.zones = []; panel.selectedZoneId = null; panel.locations = []
+      if (!panel.warehouseId) return
+      try {
+        const res = await request.get('/zone/list', { warehouseId: panel.warehouseId })
+        if (res.code === 200) { panel.zones = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    async selectAdjustLeftZone(zone) {
+      const panel = this.adjustmentDialog.left
+      panel.selectedZoneId = zone.zone_id
+      panel.locations = []
+      try {
+        const res = await request.get('/location/list', { zoneId: zone.zone_id })
+        if (res.code === 200) { panel.locations = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    isAdjustLeftSelected(locId) { return this.adjustmentDialog.left.selectedIds.includes(locId) },
+    getAdjustLeftSeq(locId) { return this.adjustmentDialog.left.selectedIds.indexOf(locId) + 1 },
+    async toggleAdjustLeftLocation(loc) {
+      // 只能选已占用且未锁定的库位
+      if (loc.is_occupied !== 1) return
+      if (loc.lock_status === '锁定') return
+      const panel = this.adjustmentDialog.left
+      const idx = panel.selectedIds.indexOf(loc.location_id)
+      if (idx >= 0) {
+        panel.selectedIds.splice(idx, 1)
+        delete panel.selectedDetails[loc.location_id]
+      } else {
+        // 查询库位上的库存信息
+        await this.fetchLocationInventory(loc, 'left')
+      }
+      this.updateAdjustmentMatchedItems()
+    },
+
+    async onAdjustRightWarehouseChange() {
+      const panel = this.adjustmentDialog.right
+      panel.zones = []; panel.selectedZoneId = null; panel.locations = []
+      if (!panel.warehouseId) return
+      try {
+        const res = await request.get('/zone/list', { warehouseId: panel.warehouseId })
+        if (res.code === 200) { panel.zones = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    async selectAdjustRightZone(zone) {
+      const panel = this.adjustmentDialog.right
+      panel.selectedZoneId = zone.zone_id
+      panel.locations = []
+      try {
+        const res = await request.get('/location/list', { zoneId: zone.zone_id })
+        if (res.code === 200) { panel.locations = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    isAdjustRightSelected(locId) { return this.adjustmentDialog.right.selectedIds.includes(locId) },
+    getAdjustRightSeq(locId) { return this.adjustmentDialog.right.selectedIds.indexOf(locId) + 1 },
+    toggleAdjustRightLocation(loc) {
+      // 只能选空闲且未锁定的库位
+      if (loc.is_occupied === 1) return
+      if (loc.lock_status === '锁定') return
+      const panel = this.adjustmentDialog.right
+      const idx = panel.selectedIds.indexOf(loc.location_id)
+      if (idx >= 0) {
+        panel.selectedIds.splice(idx, 1)
+      } else {
+        panel.selectedIds.push(loc.location_id)
+      }
+      this.updateAdjustmentMatchedItems()
+    },
+
+    async fetchLocationInventory(loc, side) {
+      try {
+        const res = await request.get('/inventory/listWithDetails')
+        if (res.code === 200) {
+          const list = res.data || []
+          const inv = list.find(i => i.location_id === loc.location_id && i.inventory_status === '正常')
+          const panel = this.adjustmentDialog.left
+          panel.selectedIds.push(loc.location_id)
+          if (inv) {
+            panel.selectedDetails[loc.location_id] = {
+              goodsId: inv.goods_id,
+              goodsName: inv.goods_name || '-',
+              batchId: inv.batch_id,
+              quantity: inv.quantity,
+              fromLocationName: loc.location_name,
+              fromWarehouseId: inv.warehouse_id,
+              fromZoneId: inv.zone_id,
+              fromLocationId: loc.location_id
+            }
+          } else {
+            panel.selectedDetails[loc.location_id] = {
+              goodsId: null, goodsName: '?', batchId: '?', quantity: 0,
+              fromLocationName: loc.location_name,
+              fromWarehouseId: null, fromZoneId: null, fromLocationId: loc.location_id
+            }
+          }
+        }
+      } catch (e) {
+        const panel = this.adjustmentDialog.left
+        panel.selectedIds.push(loc.location_id)
+        panel.selectedDetails[loc.location_id] = {
+          goodsId: null, goodsName: '?', batchId: '?', quantity: 0,
+          fromLocationName: loc.location_name,
+          fromWarehouseId: null, fromZoneId: null, fromLocationId: loc.location_id
+        }
+      }
+    },
+
+    updateAdjustmentMatchedItems() {
+      const left = this.adjustmentDialog.left
+      const right = this.adjustmentDialog.right
+      const items = []
+      const maxLen = Math.max(left.selectedIds.length, right.selectedIds.length)
+      for (let i = 0; i < maxLen; i++) {
+        const leftId = left.selectedIds[i]
+        const rightId = right.selectedIds[i]
+        const leftDetail = leftId ? left.selectedDetails[leftId] : null
+        const rightLoc = rightId ? right.locations.find(l => l.location_id === rightId) : null
+        // 查询右库位的 warehouse/zone
+        let toWhId = null, toZoneId = null
+        if (rightLoc) {
+          toZoneId = rightLoc.zone_id
+          // 从 zones 中查找 warehouse_id
+          const zone = right.zones.find(z => z.zone_id === rightLoc.zone_id)
+          if (zone) toWhId = zone.warehouse_id
+        }
+        items.push({
+          goodsId: leftDetail ? leftDetail.goodsId : null,
+          goodsName: leftDetail ? leftDetail.goodsName : '-',
+          batchId: leftDetail ? leftDetail.batchId : '-',
+          quantity: leftDetail ? leftDetail.quantity : 0,
+          fromLocationName: leftDetail ? leftDetail.fromLocationName : '-',
+          fromWarehouseId: leftDetail ? leftDetail.fromWarehouseId : null,
+          fromZoneId: leftDetail ? leftDetail.fromZoneId : null,
+          fromLocationId: leftDetail ? leftDetail.fromLocationId : null,
+          toLocationName: rightLoc ? rightLoc.location_name : '-',
+          toWarehouseId: toWhId,
+          toZoneId: toZoneId,
+          toLocationId: rightId || null
+        })
+      }
+      this.adjustmentDialog.matchedItems = items
+    },
+
+    confirmCreateAdjustment() {
+      this.confirmDialog.message = '确定要创建库存调整任务吗？将锁定所有涉及的库位。'
+      this.confirmDialog.confirmText = '确认创建'
+      this.confirmDialog.callback = this.submitCreateAdjustment
+      this.confirmDialog.visible = true
+    },
+    async submitCreateAdjustment() {
+      this.confirmDialog.visible = false
+      const items = this.adjustmentDialog.matchedItems
+        .filter(item => item.fromLocationId && item.toLocationId)
+        .map(item => ({
+          goodsId: item.goodsId,
+          batchId: item.batchId,
+          quantity: item.quantity,
+          fromWarehouseId: item.fromWarehouseId,
+          fromZoneId: item.fromZoneId,
+          fromLocationId: item.fromLocationId,
+          toWarehouseId: item.toWarehouseId,
+          toZoneId: item.toZoneId,
+          toLocationId: item.toLocationId
+        }))
+      const uid = this.getUserId()
+      try {
+        const res = await request.post('/adjustment/create', {
+          items: items,
+          assigneeId: this.adjustmentDialog.assigneeId,
+          priority: this.adjustmentDialog.priority,
+          deadline: this.adjustmentDialog.deadline,
+          operatorId: uid
+        })
+        if (res.code === 200) {
+          alert('库存调整任务创建成功')
+          this.adjustmentDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '创建失败')
+        }
+      } catch (e) {
+        alert('创建失败')
+      }
+    },
+
+    // --- 库存调整完成 ---
+    async openAdjustmentCompleteDialog(task) {
+      this.adjustmentCompleteDialog.task = task
+      this.adjustmentCompleteDialog.details = []
+      this.adjustmentCompleteDialog.visible = true
+      try {
+        const res = await request.get('/adjustment/detail/' + task.task_id)
+        if (res.code === 200) {
+          this.adjustmentCompleteDialog.details = res.data || []
+        }
+      } catch (e) { /* ignore */ }
+    },
+    rejectAdjustment() {
+      if (!confirm('确定要退回该调整申请吗？退回后将解锁所有库位并删除相关单据。')) return
+      const uid = this.getUserId()
+      request.put('/adjustment/reject/' + this.adjustmentCompleteDialog.task.task_id, { operatorId: uid })
+        .then(res => {
+          if (res.code === 200) {
+            alert('已退回调整申请')
+            this.adjustmentCompleteDialog.visible = false
+            this.fetchMyTasks()
+          } else {
+            alert(res.msg || '操作失败')
+          }
+        })
+        .catch(() => alert('操作失败'))
+    },
+    confirmCompleteAdjustment() {
+      this.confirmDialog.message = '确定要完成调整吗？货物将转移到新库位，原库位将被释放。'
+      this.confirmDialog.confirmText = '确认完成'
+      this.confirmDialog.callback = this.submitCompleteAdjustment
+      this.confirmDialog.visible = true
+    },
+    async submitCompleteAdjustment() {
+      this.confirmDialog.visible = false
+      const uid = this.getUserId()
+      try {
+        const res = await request.put('/adjustment/complete/' + this.adjustmentCompleteDialog.task.task_id, { operatorId: uid })
+        if (res.code === 200) {
+          alert('调整完成')
+          this.adjustmentCompleteDialog.visible = false
           this.fetchMyTasks()
         } else {
           alert(res.msg || '操作失败')
@@ -1098,10 +1566,33 @@ export default {
 .btn-danger:hover { background: #f78989; }
 .btn-primary:disabled { background: #a0cfff; cursor: not-allowed; }
 
+/* 库存调整弹窗 */
+.adjust-panels { display: flex; gap: 12px; }
+.adjust-panel { flex: 1; border: 1px solid #ebeef5; border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; }
+.adjust-panel-title { padding: 8px 12px; font-size: 13px; font-weight: 600; color: #303133; background: #f5f7fa; border-bottom: 1px solid #ebeef5; }
+.adjust-panel .form-item { padding: 4px 8px; margin: 0; }
+.adjust-panel .progress-bar-wrap { margin: 0 8px 4px; }
+.adjust-panel-body { display: flex; flex: 1; height: 200px; border-top: 1px solid #ebeef5; }
+.adjust-zone-sidebar { width: 140px; min-width: 140px; }
+.adjust-location-card { width: 72px; height: 46px; font-size: 10px; position: relative; }
+.adjust-location-card.loc-occupied { cursor: pointer; }
+.adjust-location-card.loc-occupied:hover { border-color: #409EFF; }
+.loc-seq-badge {
+  position: absolute; top: 2px; right: 4px;
+  background: #409EFF; color: #fff; font-size: 10px; font-weight: 700;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.adjust-table-wrap { max-height: 200px; overflow-y: auto; }
+.adjust-table-wrap .data-table { font-size: 12px; }
+.adjust-table-wrap .data-table th, .adjust-table-wrap .data-table td { padding: 6px 8px; }
+
 @media (max-width: 768px) {
   .data-table { font-size: 12px; }
   .data-table th, .data-table td { padding: 8px; }
   .op-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 100%; }
   .op-card { padding: 16px 12px 14px; }
+  .adjust-panels { flex-direction: column; }
+  .adjust-panel-body { height: 180px; }
 }
 </style>

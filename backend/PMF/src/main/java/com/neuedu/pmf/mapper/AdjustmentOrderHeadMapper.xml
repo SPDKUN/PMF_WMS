@@ -38,4 +38,8 @@
         DELETE FROM adjustment_order_head WHERE adjustment_no = #{adjustment_no}
     </delete>
 
+    <select id="findTodayAdjustmentNos" resultType="string">
+        SELECT adjustment_no FROM adjustment_order_head WHERE adjustment_no LIKE #{prefix}
+    </select>
+
 </mapper>

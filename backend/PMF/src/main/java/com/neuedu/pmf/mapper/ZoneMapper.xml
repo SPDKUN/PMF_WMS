@@ -52,4 +52,8 @@
         SELECT zone_id FROM `zone` ORDER BY zone_id
     </select>
 
+    <update id="updateAvailableSlots">
+        UPDATE `zone` SET available_slots = available_slots + #{delta} WHERE zone_id = #{zoneId}
+    </update>
+
 </mapper>

@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `adjustment_order_detail` (
 -- 15. 盘点单头表
 CREATE TABLE IF NOT EXISTS `inventory_check_head` (
   `check_no`       VARCHAR(50)   NOT NULL                 COMMENT '盘点单号',
-  `check_type`     ENUM('全盘','抽盘','动碰盘点') NOT NULL COMMENT '盘点类型',
+  `check_type`     ENUM('按库位盘点','按商品盘点','按批次盘点') NOT NULL COMMENT '盘点类型',
   `order_status`   ENUM('草稿','进行中','已完成') NOT NULL DEFAULT '草稿' COMMENT '单据状态',
   `operator_id`    INT           NOT NULL                 COMMENT '操作人ID',
   `created_time`   DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
