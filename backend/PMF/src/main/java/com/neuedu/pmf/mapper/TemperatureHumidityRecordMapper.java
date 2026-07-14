@@ -11,6 +11,7 @@ public interface TemperatureHumidityRecordMapper {
     ArrayList<TemperatureHumidityRecord> list();
     int save(TemperatureHumidityRecord temperatureHumidityRecord);
     TemperatureHumidityRecord findById(@Param("record_id") Integer recordId);
+    TemperatureHumidityRecord findByWarehouseId(@Param("warehouse_id") Integer warehouseId);
     int update(TemperatureHumidityRecord temperatureHumidityRecord);
     int deleteById(@Param("record_id") Integer recordId);
 }

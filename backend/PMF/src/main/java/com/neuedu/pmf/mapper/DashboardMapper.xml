@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.pmf.mapper.DashboardMapper">
+
+    <select id="weeklyInbound" resultType="java.util.HashMap">
+        SELECT DATE(h.inbound_time) AS record_date, COALESCE(SUM(d.quantity), 0) AS total_quantity
+        FROM inbound_order_head h
+        JOIN inbound_order_detail d ON h.inbound_no = d.inbound_no
+        WHERE h.inbound_time >= #{startDate}
+        GROUP BY DATE(h.inbound_time)
+        ORDER BY record_date
+    </select>
+
+    <select id="weeklyOutbound" resultType="java.util.HashMap">
+        SELECT DATE(h.outbound_time) AS record_date, COALESCE(SUM(d.quantity), 0) AS total_quantity
+        FROM outbound_order_head h
+        JOIN outbound_order_detail d ON h.outbound_no = d.outbound_no
+        WHERE h.outbound_time >= #{startDate}
+        GROUP BY DATE(h.outbound_time)
+        ORDER BY record_date
+    </select>
+
+    <select id="latestTempHumidityPerWarehouse" resultType="java.util.HashMap">
+        SELECT w.warehouse_name, t.temperature, t.humidity, t.recorded_time
+        FROM temperature_humidity_record t
+        JOIN warehouse w ON t.warehouse_id = w.warehouse_id
+        WHERE t.recorded_time = (
+            SELECT MAX(t2.recorded_time)
+            FROM temperature_humidity_record t2
+            WHERE t2.warehouse_id = t.warehouse_id
+        )
+        ORDER BY w.warehouse_name
+    </select>
+
+</mapper>

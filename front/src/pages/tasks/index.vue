@@ -3,7 +3,7 @@
     <!-- 选项卡 -->
     <div class="tab-row">
       <button :class="{ active: activeTab === 'todo' }" @click="activeTab = 'todo'">我的待办</button>
-      <button :class="{ active: activeTab === 'assign' }" @click="activeTab = 'assign'">布置任务</button>
+      <button :class="{ active: activeTab === 'assign' }" @click="activeTab = 'assign'">操作中心</button>
     </div>
 
     <!-- 我的待办 -->
@@ -825,6 +825,39 @@
       </div>
     </div>
 
+    <!-- 上传温湿度弹窗 -->
+    <div class="dialog-overlay" v-if="tempHumidityDialog.visible" @click.self="tempHumidityDialog.visible = false">
+      <div class="dialog-box">
+        <div class="dialog-header">
+          <h3>上传温湿度</h3>
+          <button class="dialog-close" @click="tempHumidityDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body">
+          <div class="form-item">
+            <label>选择库房 <span class="required">*</span></label>
+            <select v-model="tempHumidityDialog.form.warehouseId">
+              <option :value="null">请选择库房</option>
+              <option v-for="w in warehouseList" :key="w.warehouse_id" :value="w.warehouse_id">
+                {{ w.warehouse_name }}
+              </option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>温度 (°C) <span class="required">*</span></label>
+            <input type="number" v-model="tempHumidityDialog.form.temperature" step="0.1" placeholder="请输入温度，如 25.0" />
+          </div>
+          <div class="form-item">
+            <label>湿度 (%) <span class="required">*</span></label>
+            <input type="number" v-model="tempHumidityDialog.form.humidity" step="0.1" placeholder="请输入湿度，如 60.0" />
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="tempHumidityDialog.visible = false">取消</button>
+          <button class="btn btn-primary" @click="submitTempHumidity">确认上传</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 库存盘点完成弹窗 -->
     <div class="dialog-overlay" v-if="invCheckCompleteDialog.visible" @click.self="invCheckCompleteDialog.visible = false">
       <div class="dialog-box" style="width:700px;">
@@ -902,6 +935,7 @@ export default {
         { key: 'check',     label: '库存盘点', color: '#20a0ff', icon: '&#128203;', desc: '对库位货物进行盘点核对' },
         { key: 'quality',   label: '质检',     color: '#f56c6c', icon: '&#128270;', desc: '对入库货物进行质量检验' },
         { key: 'defective', label: '处理次品', color: '#f39c12', icon: '&#128465;', desc: '登记并处理不合格或报废货物' },
+        { key: 'uploadTempHumidity', label: '上传温湿度', color: '#00b4d8', icon: '&#127777;', desc: '上传库房温度和湿度记录' },
       ],
       taskList: [],
       userId: null,
@@ -997,6 +1031,11 @@ export default {
         details: [],
         remark: ''
       },
+      tempHumidityDialog: {
+        visible: false,
+        form: { warehouseId: null, temperature: '', humidity: '' }
+      },
+      warehouseList: [],
       checkerList: [],
       warehouseListForCheck: [],
       goodsInInventory: [],
@@ -1069,6 +1108,8 @@ export default {
         this.openOutboundDialog()
       } else if (key === 'defective') {
         this.openDefectiveDialog()
+      } else if (key === 'uploadTempHumidity') {
+        this.openTempHumidityDialog()
       } else if (key === 'check') {
         this.openInventoryCheckDialog()
       } else {
@@ -1997,6 +2038,40 @@ export default {
       }
     },
 
+    // --- 上传温湿度 ---
+    async fetchWarehouseList() {
+      try {
+        const res = await request.get('/warehouse/list')
+        if (res.code === 200) { this.warehouseList = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    openTempHumidityDialog() {
+      this.tempHumidityDialog.form = { warehouseId: null, temperature: '', humidity: '' }
+      this.fetchWarehouseList()
+      this.tempHumidityDialog.visible = true
+    },
+    async submitTempHumidity() {
+      const f = this.tempHumidityDialog.form
+      if (!f.warehouseId) { alert('请选择库房'); return }
+      if (f.temperature === '' || f.temperature == null) { alert('请输入温度'); return }
+      if (f.humidity === '' || f.humidity == null) { alert('请输入湿度'); return }
+      try {
+        const res = await request.post('/temperatureHumidityRecord/upload', {
+          warehouseId: f.warehouseId,
+          temperature: parseFloat(f.temperature),
+          humidity: parseFloat(f.humidity)
+        })
+        if (res.code === 200) {
+          alert('温湿度上传成功')
+          this.tempHumidityDialog.visible = false
+        } else {
+          alert(res.msg || '上传失败')
+        }
+      } catch (e) {
+        alert('上传失败')
+      }
+    },
+
     // --- 库存盘点 ---
     async fetchCheckers() {
       try {
@@ -2225,8 +2300,9 @@ export default {
 
 .op-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+  max-width: 900px;
 }
 .op-card {
   --card-color: #409EFF;
@@ -2242,6 +2318,7 @@ export default {
   text-align: center;
   position: relative;
   overflow: hidden;
+  aspect-ratio: 1;
 }
 .op-card::before {
   content: '';

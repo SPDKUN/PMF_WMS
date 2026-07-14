@@ -1,0 +1,395 @@
+<template>
+  <div class="dashboard">
+    <!-- 上半部分：图表视图切换 -->
+    <div class="chart-card">
+      <div class="chart-tab-row">
+        <button :class="{ active: activeChart === 'trend' }" @click="switchChart('trend')">出入库趋势</button>
+        <button :class="{ active: activeChart === 'goods' }" @click="switchChart('goods')">货物库存分布</button>
+      </div>
+      <div v-show="activeChart === 'trend'" ref="lineChartRef" class="chart-container"></div>
+      <div v-show="activeChart === 'goods'" ref="barChartRef" class="chart-container"></div>
+    </div>
+
+    <!-- 下半部分：温湿度 + 容量饱和度 -->
+    <div class="bottom-section">
+      <div class="dashboard-card">
+        <h3 class="card-title">仓库温湿度记录</h3>
+        <div ref="tempHumidityChartRef" class="chart-container chart-sm"></div>
+      </div>
+      <div class="dashboard-card">
+        <h3 class="card-title">仓库容量饱和度</h3>
+        <div class="capacity-list">
+          <div v-for="item in capacityList" :key="item.warehouseName" class="capacity-item">
+            <div class="capacity-label">
+              <span>{{ item.warehouseName }}</span>
+              <span>{{ item.usedSlots }} / {{ item.totalSlots }}</span>
+            </div>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                :style="{ width: item.saturation + '%', backgroundColor: getCapacityColor(item.saturation) }"
+              ></div>
+            </div>
+            <span class="capacity-percent">{{ item.saturation }}%</span>
+          </div>
+          <div v-if="capacityList.length === 0" class="empty-hint">暂无仓库数据</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import * as echarts from 'echarts'
+import request from '@/utils/request.js'
+
+export default {
+  name: 'Dashboard',
+  data() {
+    return {
+      activeChart: 'trend',
+      lineChart: null,
+      barChart: null,
+      tempHumidityChart: null,
+      lineChartData: null,
+      barChartData: null,
+      tempHumidityData: null,
+      capacityList: [],
+      barChartReady: false,
+    }
+  },
+  mounted() {
+    this.fetchAllData()
+    window.addEventListener('resize', this.handleResize)
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.handleResize)
+    if (this.lineChart) this.lineChart.dispose()
+    if (this.barChart) this.barChart.dispose()
+    if (this.tempHumidityChart) this.tempHumidityChart.dispose()
+  },
+  methods: {
+    async fetchAllData() {
+      try {
+        const [lineRes, barRes, tempRes, capRes] = await Promise.all([
+          request.get('/dashboard/weeklyInboundOutbound'),
+          request.get('/dashboard/goodsQuantity'),
+          request.get('/dashboard/warehouseTempHumidity'),
+          request.get('/dashboard/warehouseCapacity'),
+        ])
+
+        if (lineRes.code === 200) {
+          this.lineChartData = lineRes.data
+          this.$nextTick(() => this.initLineChart())
+        }
+        if (barRes.code === 200) {
+          this.barChartData = barRes.data
+        }
+        if (tempRes.code === 200) {
+          this.tempHumidityData = tempRes.data
+          this.$nextTick(() => this.initTempHumidityChart())
+        }
+        if (capRes.code === 200) {
+          this.capacityList = capRes.data.warehouses || []
+        }
+      } catch (e) {
+        console.error('获取看板数据失败:', e)
+      }
+    },
+
+    initLineChart() {
+      if (!this.lineChartData) return
+      const container = this.$refs.lineChartRef
+      if (!container) return
+
+      if (this.lineChart) this.lineChart.dispose()
+      this.lineChart = echarts.init(container)
+
+      const { dates, inbound, outbound } = this.lineChartData
+      this.lineChart.setOption({
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['入库数量', '出库数量'], top: 0 },
+        grid: { left: 40, right: 10, top: 28, bottom: 10 },
+        xAxis: {
+          type: 'category',
+          data: dates,
+          axisLabel: { formatter: (v) => v.slice(5) },
+        },
+        yAxis: { type: 'value', name: '数量' },
+        series: [
+          {
+            name: '入库数量',
+            type: 'line',
+            data: inbound,
+            smooth: true,
+            lineStyle: { color: '#409EFF', width: 2 },
+            itemStyle: { color: '#409EFF' },
+            areaStyle: { color: 'rgba(64,158,255,0.1)' },
+          },
+          {
+            name: '出库数量',
+            type: 'line',
+            data: outbound,
+            smooth: true,
+            lineStyle: { color: '#67C23A', width: 2 },
+            itemStyle: { color: '#67C23A' },
+            areaStyle: { color: 'rgba(103,194,58,0.1)' },
+          },
+        ],
+      })
+    },
+
+    initBarChart() {
+      if (!this.barChartData) return
+      const container = this.$refs.barChartRef
+      if (!container) return
+
+      if (this.barChart) this.barChart.dispose()
+      this.barChart = echarts.init(container)
+
+      const { names, quantities } = this.barChartData
+      this.barChart.setOption({
+        tooltip: { trigger: 'axis' },
+        grid: { left: 40, right: 10, top: 15, bottom: 35 },
+        xAxis: {
+          type: 'category',
+          data: names,
+          axisLabel: { rotate: names.length > 6 ? 30 : 0, fontSize: 12 },
+        },
+        yAxis: { type: 'value', name: '数量' },
+        series: [
+          {
+            name: '库存数量',
+            type: 'bar',
+            data: quantities,
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#409EFF' },
+                { offset: 1, color: '#79bbff' },
+              ]),
+              borderRadius: [4, 4, 0, 0],
+            },
+          },
+        ],
+      })
+      this.barChartReady = true
+    },
+
+    initTempHumidityChart() {
+      if (!this.tempHumidityData) return
+      const container = this.$refs.tempHumidityChartRef
+      if (!container) return
+
+      if (this.tempHumidityChart) this.tempHumidityChart.dispose()
+      this.tempHumidityChart = echarts.init(container)
+
+      const { names, temperatures, humidities } = this.tempHumidityData
+      this.tempHumidityChart.setOption({
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['温度(°C)', '湿度(%)'], top: 0 },
+        grid: { left: 40, right: 40, top: 30, bottom: 15 },
+        xAxis: { type: 'category', data: names },
+        yAxis: [
+          { type: 'value', name: '°C' },
+          { type: 'value', name: '%' },
+        ],
+        series: [
+          {
+            name: '温度(°C)',
+            type: 'bar',
+            yAxisIndex: 0,
+            barWidth: '35%',
+            barGap: '30%',
+            data: temperatures,
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#e6a23c' },
+                { offset: 1, color: '#f5dab1' },
+              ]),
+              borderRadius: [4, 4, 0, 0],
+            },
+          },
+          {
+            name: '湿度(%)',
+            type: 'bar',
+            barWidth: '35%',
+            yAxisIndex: 1,
+            data: humidities,
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#409EFF' },
+                { offset: 1, color: '#a0cfff' },
+              ]),
+              borderRadius: [4, 4, 0, 0],
+            },
+          },
+        ],
+      })
+    },
+
+    switchChart(name) {
+      this.activeChart = name
+      if (name === 'trend') {
+        this.$nextTick(() => {
+          if (this.lineChart) this.lineChart.resize()
+        })
+      } else if (name === 'goods') {
+        if (!this.barChartReady) {
+          this.$nextTick(() => this.initBarChart())
+        } else {
+          this.$nextTick(() => {
+            if (this.barChart) this.barChart.resize()
+          })
+        }
+      }
+    },
+
+    handleResize() {
+      if (this.lineChart) this.lineChart.resize()
+      if (this.barChart) this.barChart.resize()
+      if (this.tempHumidityChart) this.tempHumidityChart.resize()
+    },
+
+    getCapacityColor(saturation) {
+      if (saturation < 25) return '#67C23A'
+      if (saturation < 50) return '#e6c200'
+      if (saturation < 75) return '#e6a23c'
+      return '#f56c6c'
+    },
+  },
+}
+</script>
+
+<style scoped>
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 上半部分 */
+.chart-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.chart-tab-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 4px;
+}
+
+.chart-tab-row button {
+  padding: 4px 14px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #606266;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chart-tab-row button.active {
+  background: #ecf5ff;
+  color: #409EFF;
+}
+
+.chart-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.chart-sm {
+  height: 240px;
+}
+
+/* 下半部分 */
+.bottom-section {
+  display: flex;
+  gap: 12px;
+}
+
+.dashboard-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+/* 容量饱和度 */
+.capacity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.capacity-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.capacity-label {
+  width: 120px;
+  font-size: 13px;
+  color: #606266;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.capacity-label span:last-child {
+  font-size: 11px;
+  color: #909399;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.6s ease;
+}
+
+.capacity-percent {
+  width: 50px;
+  font-size: 13px;
+  color: #606266;
+  text-align: right;
+}
+
+.empty-hint {
+  text-align: center;
+  color: #909399;
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .bottom-section {
+    flex-direction: column;
+  }
+  .capacity-label {
+    width: 90px;
+  }
+}
+</style>

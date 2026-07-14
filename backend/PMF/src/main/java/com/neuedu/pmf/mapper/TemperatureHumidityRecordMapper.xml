@@ -18,6 +18,10 @@
         SELECT * FROM temperature_humidity_record WHERE record_id = #{record_id}
     </select>
 
+    <select id="findByWarehouseId" resultMap="TemperatureHumidityRecordMap">
+        SELECT * FROM temperature_humidity_record WHERE warehouse_id = #{warehouse_id}
+    </select>
+
     <insert id="save" useGeneratedKeys="true" keyProperty="record_id">
         INSERT INTO temperature_humidity_record (warehouse_id, temperature, humidity, recorded_time)
         VALUES (#{warehouse_id}, #{temperature}, #{humidity}, #{recorded_time})

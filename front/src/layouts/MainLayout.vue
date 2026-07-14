@@ -15,6 +15,10 @@
           <el-icon><Setting /></el-icon>
           <span>我的管理</span>
         </a>
+        <a href="#" :class="{ active: currentRoute === 'Dashboard' }" @click.prevent="navigate('Dashboard')">
+          <el-icon><DataAnalysis /></el-icon>
+          <span>数据看板</span>
+        </a>
         <a href="#" :class="{ active: currentRoute === 'Query' }" @click.prevent="navigate('Query')">
           <el-icon><Search /></el-icon>
           <span>明细查询</span>
@@ -55,14 +59,14 @@
 
 <script>
 import {
-  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar
+  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 
 export default {
   name: 'MainLayout',
   components: {
-    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar,
+    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis,
     ElIcon
   },
   data() {
@@ -78,6 +82,7 @@ export default {
       const titles = {
         Home: '智能仓储驾驶舱',
         Manage: '我的管理',
+        Dashboard: '数据看板',
         Query: '明细查询',
         Tasks: '工作任务',
         AiChat: 'AI助手',

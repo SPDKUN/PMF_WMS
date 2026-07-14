@@ -39,6 +39,12 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: 'dashboard',
+        name: 'Dashboard',
+        component: () => import('@/pages/dashboard/index.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: 'query',
         name: 'Query',
         component: Query,

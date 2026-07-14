@@ -3,7 +3,7 @@
     <!-- 对话区域 -->
     <div class="chat-messages" ref="chatContainer">
       <div v-if="messages.length === 0" class="chat-welcome">
-        <div class="welcome-icon"><img src="/ai_image.png" alt="AI" class="ai-avatar-img" /></div>
+        <div class="welcome-icon"><img src="/ai_image.png" alt="AI" class="ai-avatar-img" style = "width:150px; height:auto;" /></div>
         <div class="welcome-text">您好！我是AI助手，有什么仓储管理问题可以帮您？</div>
         <div class="welcome-hint">您可以询问出入库、盘点、质检、批次管理等相关问题</div>
       </div>

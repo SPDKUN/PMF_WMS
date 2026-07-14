@@ -38,4 +38,22 @@ public class TemperatureHumidityRecordServiceImpl implements TemperatureHumidity
     public boolean update(TemperatureHumidityRecord temperatureHumidityRecord) {
         return temperatureHumidityRecordMapper.update(temperatureHumidityRecord) > 0;
     }
+
+    @Override
+    public boolean saveOrUpdateByWarehouse(Integer warehouseId, java.math.BigDecimal temperature, java.math.BigDecimal humidity) {
+        TemperatureHumidityRecord existing = temperatureHumidityRecordMapper.findByWarehouseId(warehouseId);
+        if (existing != null) {
+            existing.setTemperature(temperature);
+            existing.setHumidity(humidity);
+            existing.setRecorded_time(java.time.LocalDateTime.now());
+            return temperatureHumidityRecordMapper.update(existing) > 0;
+        } else {
+            TemperatureHumidityRecord record = new TemperatureHumidityRecord();
+            record.setWarehouse_id(warehouseId);
+            record.setTemperature(temperature);
+            record.setHumidity(humidity);
+            record.setRecorded_time(java.time.LocalDateTime.now());
+            return temperatureHumidityRecordMapper.save(record) > 0;
+        }
+    }
 }

@@ -13,4 +13,6 @@ public interface TemperatureHumidityRecordService {
     boolean save(TemperatureHumidityRecord temperatureHumidityRecord);
 
     boolean update(TemperatureHumidityRecord temperatureHumidityRecord);
+
+    boolean saveOrUpdateByWarehouse(Integer warehouseId, java.math.BigDecimal temperature, java.math.BigDecimal humidity);
 }
