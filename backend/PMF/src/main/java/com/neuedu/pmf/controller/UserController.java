@@ -96,5 +96,10 @@ public class UserController {
         return ResultData.success(userService.listByPosition("仓库员工"));
     }
 
+    @GetMapping("/checkers")
+    public ResultData getCheckers() {
+        return ResultData.success(userService.listByPosition("仓库员工"));
+    }
+
 }
 

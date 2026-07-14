@@ -13,4 +13,5 @@ public interface InventoryCheckHeadMapper {
     InventoryCheckHead findById(@Param("check_no") String checkNo);
     int update(InventoryCheckHead inventoryCheckHead);
     int deleteById(@Param("check_no") String checkNo);
+    ArrayList<String> findTodayCheckNos(@Param("prefix") String prefix);
 }

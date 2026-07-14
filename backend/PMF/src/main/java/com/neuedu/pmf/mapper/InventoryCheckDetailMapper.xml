@@ -50,4 +50,12 @@
         DELETE FROM inventory_check_detail WHERE detail_id = #{detail_id}
     </delete>
 
+    <delete id="deleteByBatchId">
+        DELETE FROM inventory_check_detail WHERE batch_id = #{batch_id}
+    </delete>
+
+    <select id="findByCheckNo" resultMap="InventoryCheckDetailMap">
+        SELECT * FROM inventory_check_detail WHERE check_no = #{check_no}
+    </select>
+
 </mapper>

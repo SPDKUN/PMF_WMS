@@ -42,4 +42,12 @@
         DELETE FROM defective_handling_detail WHERE detail_id = #{detail_id}
     </delete>
 
+    <select id="findByHandlingNo" resultMap="DefectiveHandlingDetailMap">
+        SELECT * FROM defective_handling_detail WHERE handling_no = #{handling_no}
+    </select>
+
+    <delete id="deleteByHandlingNo">
+        DELETE FROM defective_handling_detail WHERE handling_no = #{handling_no}
+    </delete>
+
 </mapper>

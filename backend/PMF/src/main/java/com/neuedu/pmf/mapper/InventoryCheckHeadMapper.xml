@@ -42,4 +42,8 @@
         DELETE FROM inventory_check_head WHERE check_no = #{check_no}
     </delete>
 
+    <select id="findTodayCheckNos" resultType="string">
+        SELECT check_no FROM inventory_check_head WHERE check_no LIKE #{prefix}
+    </select>
+
 </mapper>

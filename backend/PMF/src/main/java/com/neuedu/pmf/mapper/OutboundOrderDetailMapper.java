@@ -13,4 +13,7 @@ public interface OutboundOrderDetailMapper {
     OutboundOrderDetail findById(@Param("detail_id") Integer detailId);
     int update(OutboundOrderDetail outboundOrderDetail);
     int deleteById(@Param("detail_id") Integer detailId);
+    ArrayList<OutboundOrderDetail> findByOutboundNo(@Param("outbound_no") String outboundNo);
+    int deleteByOutboundNo(@Param("outbound_no") String outboundNo);
+    int deleteByBatchId(@Param("batch_id") String batchId);
 }

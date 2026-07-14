@@ -7,8 +7,11 @@
         <result column="outbound_type" property="outbound_type"/>
         <result column="order_status" property="order_status"/>
         <result column="operator_id" property="operator_id"/>
+        <result column="priority" property="priority"/>
+        <result column="deadline" property="deadline"/>
         <result column="outbound_time" property="outbound_time"/>
         <result column="remark" property="remark"/>
+        <result column="create_time" property="create_time"/>
     </resultMap>
 
     <select id="list" resultMap="OutboundOrderHeadMap">
@@ -20,8 +23,8 @@
     </select>
 
     <insert id="save">
-        INSERT INTO outbound_order_head (outbound_no, outbound_type, order_status, operator_id, outbound_time, remark)
-        VALUES (#{outbound_no}, #{outbound_type}, #{order_status}, #{operator_id}, #{outbound_time}, #{remark})
+        INSERT INTO outbound_order_head (outbound_no, outbound_type, order_status, operator_id, priority, deadline, outbound_time, remark, create_time)
+        VALUES (#{outbound_no}, #{outbound_type}, #{order_status}, #{operator_id}, #{priority}, #{deadline}, #{outbound_time}, #{remark}, #{create_time})
     </insert>
 
     <update id="update" parameterType="com.neuedu.pmf.entity.OutboundOrderHead">
@@ -30,6 +33,8 @@
             <if test="outbound_type != null">outbound_type = #{outbound_type},</if>
             <if test="order_status != null">order_status = #{order_status},</if>
             <if test="operator_id != null">operator_id = #{operator_id},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="deadline != null">deadline = #{deadline},</if>
             <if test="outbound_time != null">outbound_time = #{outbound_time},</if>
             <if test="remark != null">remark = #{remark},</if>
         </set>
@@ -39,5 +44,9 @@
     <delete id="deleteById">
         DELETE FROM outbound_order_head WHERE outbound_no = #{outbound_no}
     </delete>
+
+    <select id="findTodayOutboundNos" resultType="string">
+        SELECT outbound_no FROM outbound_order_head WHERE outbound_no LIKE #{prefix}
+    </select>
 
 </mapper>

@@ -11,7 +11,7 @@ public class OutboundOrderDetail {
     private Integer detail_id;
     private String outbound_no;
     private Integer goods_id;
-    private Integer batch_id;
+    private String batch_id;
     private Integer quantity;
     private Integer warehouse_id;
     private Integer zone_id;

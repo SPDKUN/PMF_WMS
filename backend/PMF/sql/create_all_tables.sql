@@ -177,11 +177,14 @@ CREATE TABLE IF NOT EXISTS `inbound_order_detail` (
 -- 11. 出库单头表
 CREATE TABLE IF NOT EXISTS `outbound_order_head` (
   `outbound_no`    VARCHAR(50)   NOT NULL                 COMMENT '出库单号',
-  `outbound_type`  ENUM('销售出库','领料出库','报废出库') NOT NULL COMMENT '出库类型',
+  `outbound_type`  VARCHAR(50)   NOT NULL                 COMMENT '出库类型',
   `order_status`   ENUM('草稿','已审核','已完成') NOT NULL DEFAULT '草稿' COMMENT '单据状态',
   `operator_id`    INT           NOT NULL                 COMMENT '操作人ID',
+  `priority`       VARCHAR(10)   DEFAULT NULL             COMMENT '优先级 普通/紧急/特急',
+  `deadline`       DATETIME      DEFAULT NULL             COMMENT '截止时间',
   `outbound_time`  DATETIME      DEFAULT NULL             COMMENT '出库时间',
   `remark`         TEXT          DEFAULT NULL             COMMENT '备注',
+  `create_time`    DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`outbound_no`),
   KEY `idx_outbound_head_operator` (`operator_id`),
   CONSTRAINT `fk_outbound_head_operator` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`)

@@ -13,4 +13,5 @@ public interface OutboundOrderHeadMapper {
     OutboundOrderHead findById(@Param("outbound_no") String outboundNo);
     int update(OutboundOrderHead outboundOrderHead);
     int deleteById(@Param("outbound_no") String outboundNo);
+    java.util.List<String> findTodayOutboundNos(@Param("prefix") String prefix);
 }

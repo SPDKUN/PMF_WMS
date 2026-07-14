@@ -90,4 +90,47 @@
         WHERE i.location_id = #{location_id} AND i.inventory_status = '正常'
     </select>
 
+    <select id="findByLocationIdAllStatus" resultMap="InventoryVOMap">
+        SELECT i.*, g.goods_name, g.unit, l.location_name
+        FROM inventory i
+        LEFT JOIN goods g ON i.goods_id = g.goods_id
+        LEFT JOIN location l ON i.location_id = l.location_id
+        WHERE i.location_id = #{location_id}
+    </select>
+
+    <select id="findByGoodsId" resultMap="InventoryVOMap">
+        SELECT i.*, g.goods_name, g.unit, l.location_name
+        FROM inventory i
+        LEFT JOIN goods g ON i.goods_id = g.goods_id
+        LEFT JOIN location l ON i.location_id = l.location_id
+        WHERE i.goods_id = #{goods_id} AND i.inventory_status = '正常' AND i.quantity > i.locked_quantity
+        ORDER BY i.inventory_id ASC
+    </select>
+
+    <select id="findInventoryByLocationId" resultMap="InventoryMap">
+        SELECT * FROM inventory WHERE location_id = #{location_id} AND quantity > 0
+    </select>
+
+    <select id="findInventoryByWarehouseId" resultMap="InventoryMap">
+        SELECT * FROM inventory WHERE warehouse_id = #{warehouse_id} AND quantity > 0
+    </select>
+
+    <select id="findInventoryByGoodsId" resultMap="InventoryMap">
+        SELECT * FROM inventory WHERE goods_id = #{goods_id} AND quantity > 0
+    </select>
+
+    <select id="findInventoryByBatchId" resultMap="InventoryMap">
+        SELECT * FROM inventory WHERE batch_id = #{batch_id} AND quantity > 0
+    </select>
+
+    <select id="findInventoryByKey" resultMap="InventoryMap">
+        SELECT * FROM inventory
+        WHERE goods_id = #{goods_id}
+          AND batch_id = #{batch_id}
+          AND warehouse_id = #{warehouse_id}
+          AND zone_id = #{zone_id}
+          AND location_id = #{location_id}
+        LIMIT 1
+    </select>
+
 </mapper>

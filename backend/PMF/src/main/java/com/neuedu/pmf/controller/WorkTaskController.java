@@ -41,4 +41,9 @@ public class WorkTaskController {
         boolean flag = workTaskService.delete(id);
         return flag ? ResultData.success() : ResultData.fail(ResultCode.FAILED);
     }
+
+    @GetMapping("/myTasks")
+    public ResultData myTasks(@RequestParam Integer assigneeId) {
+        return ResultData.success(workTaskService.listByAssigneeId(assigneeId));
+    }
 }

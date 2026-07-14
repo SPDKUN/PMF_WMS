@@ -13,5 +13,6 @@ public interface QualityCheckDetailMapper {
     QualityCheckDetail findById(@Param("detail_id") Integer detailId);
     int update(QualityCheckDetail qualityCheckDetail);
     int deleteById(@Param("detail_id") Integer detailId);
+    int deleteByBatchId(@Param("batch_id") String batchId);
     QualityCheckDetail findByCheckNo(@Param("quality_check_no") String qualityCheckNo);
 }

@@ -44,4 +44,16 @@
         DELETE FROM outbound_order_detail WHERE detail_id = #{detail_id}
     </delete>
 
+    <select id="findByOutboundNo" resultMap="OutboundOrderDetailMap">
+        SELECT * FROM outbound_order_detail WHERE outbound_no = #{outbound_no}
+    </select>
+
+    <delete id="deleteByOutboundNo">
+        DELETE FROM outbound_order_detail WHERE outbound_no = #{outbound_no}
+    </delete>
+
+    <delete id="deleteByBatchId">
+        DELETE FROM outbound_order_detail WHERE batch_id = #{batch_id}
+    </delete>
+
 </mapper>

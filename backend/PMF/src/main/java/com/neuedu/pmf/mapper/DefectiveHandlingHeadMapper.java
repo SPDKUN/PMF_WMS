@@ -13,4 +13,5 @@ public interface DefectiveHandlingHeadMapper {
     DefectiveHandlingHead findById(@Param("handling_no") String handlingNo);
     int update(DefectiveHandlingHead defectiveHandlingHead);
     int deleteById(@Param("handling_no") String handlingNo);
+    java.util.List<String> findTodayHandlingNos(@Param("prefix") String prefix);
 }

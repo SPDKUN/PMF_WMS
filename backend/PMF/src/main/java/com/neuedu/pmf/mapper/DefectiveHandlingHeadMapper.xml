@@ -40,4 +40,8 @@
         DELETE FROM defective_handling_head WHERE handling_no = #{handling_no}
     </delete>
 
+    <select id="findTodayHandlingNos" resultType="string">
+        SELECT handling_no FROM defective_handling_head WHERE handling_no LIKE #{prefix}
+    </select>
+
 </mapper>

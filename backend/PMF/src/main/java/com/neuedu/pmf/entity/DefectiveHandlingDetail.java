@@ -11,7 +11,7 @@ public class DefectiveHandlingDetail {
     private Integer detail_id;
     private String handling_no;
     private Integer goods_id;
-    private Integer batch_id;
+    private String batch_id;
     private Integer quantity;
     private Integer source_location_id;
     private Integer target_location_id;

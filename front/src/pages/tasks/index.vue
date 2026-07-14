@@ -532,6 +532,357 @@
         </div>
       </div>
     </div>
+
+    <!-- 出库弹窗 -->
+    <div class="dialog-overlay" v-if="outboundDialog.visible" @click.self="outboundDialog.visible = false">
+      <div class="dialog-box" style="width:750px;max-width:98vw;max-height:90vh;overflow-y:auto;">
+        <div class="dialog-header">
+          <h3>新建出库任务</h3>
+          <button class="dialog-close" @click="outboundDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="flex-direction:column;">
+          <div class="form-item">
+            <label>选择货物 <span class="required">*</span></label>
+            <select v-model="outboundDialog.goodsId" @change="onOutboundGoodsChange">
+              <option :value="null">请选择货物</option>
+              <option v-for="g in goodsList" :key="g.goods_id" :value="g.goods_id">
+                {{ g.goods_name }} (剩余 {{ g.quantity || 0 }} {{ g.unit || '' }})
+              </option>
+            </select>
+          </div>
+
+          <div v-if="outboundDialog.inventoryRows.length > 0" style="margin-top:8px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>批次</th>
+                  <th>存储位置</th>
+                  <th>到期日期</th>
+                  <th>剩余数量</th>
+                  <th>选择数量</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in outboundDialog.inventoryRows" :key="idx">
+                  <td>{{ row.batch_id }}</td>
+                  <td>{{ row.location_name }}</td>
+                  <td>{{ row.expiry_date || '-' }}</td>
+                  <td>{{ row.available }}</td>
+                  <td>
+                    <input type="number" :min="0" :max="row.available" :value="row.selectQty"
+                           @input="onOutboundQtyInput(row, $event)"
+                           style="width:80px;padding:4px 8px;border:1px solid #dcdfe6;border-radius:4px;" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="text-align:right;margin-top:8px;font-size:14px;font-weight:600;color:#303133;">
+              已选总数量：<span style="color:#409EFF;">{{ outboundTotalSelected }}</span>
+            </div>
+          </div>
+          <div v-else-if="outboundDialog.goodsId" style="text-align:center;color:#c0c4cc;font-size:13px;padding:12px;">
+            该货物暂无可用库存
+          </div>
+
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;">
+            <div class="form-item" style="flex:1;min-width:150px;">
+              <label>负责人 <span class="required">*</span></label>
+              <select v-model="outboundDialog.assigneeId">
+                <option :value="null">请选择负责人</option>
+                <option v-for="u in warehouseStaff" :key="u.user_id" :value="u.user_id">{{ u.real_name || u.username }}</option>
+              </select>
+            </div>
+            <div class="form-item" style="flex:1;min-width:120px;">
+              <label>优先级 <span class="required">*</span></label>
+              <select v-model="outboundDialog.priority">
+                <option value="">请选择</option>
+                <option value="高">高</option>
+                <option value="中">中</option>
+                <option value="低">低</option>
+              </select>
+            </div>
+            <div class="form-item" style="flex:1;min-width:150px;">
+              <label>截至日期 <span class="required">*</span></label>
+              <input type="date" v-model="outboundDialog.deadline" />
+            </div>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="outboundDialog.visible = false">取消</button>
+          <button class="btn btn-primary"
+                  :disabled="outboundTotalSelected <= 0"
+                  @click="submitOutbound">
+            确认创建
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 出库完成弹窗 -->
+    <div class="dialog-overlay" v-if="outboundCompleteDialog.visible" @click.self="outboundCompleteDialog.visible = false">
+      <div class="dialog-box" style="width:650px;">
+        <div class="dialog-header">
+          <h3>完成出库</h3>
+          <button class="dialog-close" @click="outboundCompleteDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="flex-direction:column;">
+          <p style="font-size:13px;color:#606266;">截至日期：<strong>{{ formatDeadline(outboundCompleteDialog.task.deadline) }}</strong></p>
+          <p style="font-size:13px;color:#606266;margin-top:4px;" v-if="outboundCompleteDialog.details.length > 0">
+            货物名称：<strong>{{ outboundCompleteDialog.details[0].goodsName }}</strong>
+          </p>
+          <table class="data-table" style="margin-top:8px;">
+            <thead>
+              <tr><th>批次</th><th>位置</th><th>数量</th></tr>
+            </thead>
+            <tbody>
+              <tr v-if="outboundCompleteDialog.details.length === 0">
+                <td colspan="3" class="empty-cell">加载中...</td>
+              </tr>
+              <tr v-for="(d, idx) in outboundCompleteDialog.details" :key="idx">
+                <td>{{ d.batchId }}</td>
+                <td>{{ d.locationName }}</td>
+                <td>{{ d.quantity }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-danger" @click="rejectOutbound">退回出库请求</button>
+          <button class="btn btn-primary" @click="confirmCompleteOutbound">确认出库</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 处理次品弹窗 -->
+    <div class="dialog-overlay" v-if="defectiveDialog.visible" @click.self="defectiveDialog.visible = false">
+      <div class="dialog-box" style="width:700px;max-width:98vw;max-height:90vh;overflow-y:auto;">
+        <div class="dialog-header">
+          <h3>新建处理次品任务</h3>
+          <button class="dialog-close" @click="defectiveDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="flex-direction:column;">
+          <div v-if="defectiveDialog.batches.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>批次号</th>
+                  <th>货物名称</th>
+                  <th>是否选中</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(b, idx) in defectiveDialog.batches" :key="idx">
+                  <td>{{ b.batch_id }}</td>
+                  <td>{{ b.goods_name }}</td>
+                  <td>
+                    <input type="checkbox" v-model="b.checked" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else style="text-align:center;color:#c0c4cc;font-size:13px;padding:12px;">
+            暂无待报废的批次
+          </div>
+
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;">
+            <div class="form-item" style="flex:1;min-width:150px;">
+              <label>负责人 <span class="required">*</span></label>
+              <select v-model="defectiveDialog.assigneeId">
+                <option :value="null">请选择负责人</option>
+                <option v-for="u in warehouseStaff" :key="u.user_id" :value="u.user_id">{{ u.real_name || u.username }}</option>
+              </select>
+            </div>
+            <div class="form-item" style="flex:1;min-width:120px;">
+              <label>优先级 <span class="required">*</span></label>
+              <select v-model="defectiveDialog.priority">
+                <option value="">请选择</option>
+                <option value="高">高</option>
+                <option value="中">中</option>
+                <option value="低">低</option>
+              </select>
+            </div>
+            <div class="form-item" style="flex:1;min-width:150px;">
+              <label>截至日期 <span class="required">*</span></label>
+              <input type="date" v-model="defectiveDialog.deadline" />
+            </div>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="defectiveDialog.visible = false">取消</button>
+          <button class="btn btn-primary"
+                  :disabled="!defectiveDialog.batches.some(b => b.checked)"
+                  @click="submitDefective">
+            确认创建
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库存盘点弹窗 -->
+    <div class="dialog-overlay" v-if="invCheckDialog.visible" @click.self="invCheckDialog.visible = false">
+      <div class="dialog-box">
+        <div class="dialog-header">
+          <h3>新建盘点任务</h3>
+          <button class="dialog-close" @click="invCheckDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body">
+          <div class="form-item">
+            <label>盘点类型 <span class="required">*</span></label>
+            <select v-model="invCheckDialog.form.checkType" @change="onInvCheckTypeChange">
+              <option value="">请选择盘点类型</option>
+              <option value="按仓库盘点">按仓库盘点</option>
+              <option value="按商品盘点">按商品盘点</option>
+              <option value="按批次盘点">按批次盘点</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>盘点范围 <span class="required">*</span></label>
+            <select v-if="invCheckDialog.form.checkType === '按仓库盘点'" v-model="invCheckDialog.form.scopeValue">
+              <option value="">请选择仓库</option>
+              <option v-for="wh in warehouseListForCheck" :key="wh.warehouse_id" :value="wh.warehouse_id">
+                {{ wh.warehouse_name }} (可用:{{ wh.available_slots }}/{{ wh.total_slots }})
+              </option>
+            </select>
+            <select v-else-if="invCheckDialog.form.checkType === '按商品盘点'" v-model="invCheckDialog.form.scopeValue">
+              <option value="">请选择货物</option>
+              <option v-for="g in goodsInInventory" :key="g.goods_id" :value="g.goods_id">
+                {{ g.goods_name }} ({{ g.goods_code }})
+              </option>
+            </select>
+            <select v-else-if="invCheckDialog.form.checkType === '按批次盘点'" v-model="invCheckDialog.form.scopeValue">
+              <option value="">请选择批次</option>
+              <option v-for="b in normalBatchesInInventory" :key="b.batch_id" :value="b.batch_id">
+                {{ b.batch_id }} ({{ getGoodsName(b.goods_id) }})
+              </option>
+            </select>
+            <span v-else style="color:#909399;font-size:12px;">请先选择盘点类型</span>
+          </div>
+          <div class="form-item">
+            <label>盘点员 <span class="required">*</span></label>
+            <select v-model="invCheckDialog.form.operatorId">
+              <option :value="null">请选择盘点员</option>
+              <option v-for="u in checkerList" :key="u.user_id" :value="u.user_id">
+                {{ u.real_name || u.username }}
+              </option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>优先级 <span class="required">*</span></label>
+            <select v-model="invCheckDialog.form.priority">
+              <option value="">请选择优先级</option>
+              <option value="高">高</option>
+              <option value="中">中</option>
+              <option value="低">低</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>截至时间 <span class="required">*</span></label>
+            <input type="date" v-model="invCheckDialog.form.deadline" />
+          </div>
+          <div class="form-item">
+            <label>备注</label>
+            <textarea v-model="invCheckDialog.form.remark" placeholder="可选备注" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="invCheckDialog.visible = false">取消</button>
+          <button class="btn btn-primary" @click="submitInvCheck">确认创建</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 处理次品完成弹窗 -->
+    <div class="dialog-overlay" v-if="defectiveCompleteDialog.visible" @click.self="defectiveCompleteDialog.visible = false">
+      <div class="dialog-box" style="width:650px;">
+        <div class="dialog-header">
+          <h3>完成次品处理</h3>
+          <button class="dialog-close" @click="defectiveCompleteDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="flex-direction:column;">
+          <p style="font-size:13px;color:#606266;">截至日期：<strong>{{ formatDeadline(defectiveCompleteDialog.task.deadline) }}</strong></p>
+          <table class="data-table" style="margin-top:8px;">
+            <thead>
+              <tr><th>批次</th><th>货物名称</th><th>位置</th><th>数量</th></tr>
+            </thead>
+            <tbody>
+              <tr v-if="defectiveCompleteDialog.details.length === 0">
+                <td colspan="4" class="empty-cell">加载中...</td>
+              </tr>
+              <tr v-for="(d, idx) in defectiveCompleteDialog.details" :key="idx">
+                <td>{{ d.batchId }}</td>
+                <td>{{ d.goodsName }}</td>
+                <td>{{ d.locationName || '未入库' }}</td>
+                <td>{{ d.quantity }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-danger" @click="rejectDefective">退回处理请求</button>
+          <button class="btn btn-primary" @click="confirmCompleteDefective">完成处理</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库存盘点完成弹窗 -->
+    <div class="dialog-overlay" v-if="invCheckCompleteDialog.visible" @click.self="invCheckCompleteDialog.visible = false">
+      <div class="dialog-box" style="width:700px;">
+        <div class="dialog-header">
+          <h3>完成盘点</h3>
+          <button class="dialog-close" @click="invCheckCompleteDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="flex-direction:column;">
+          <p style="font-size:13px;color:#606266;margin-bottom:8px;">
+            盘点单号：<strong>{{ invCheckCompleteDialog.task ? invCheckCompleteDialog.task.related_order_no : '' }}</strong>
+          </p>
+          <div class="table-wrapper" style="max-height:300px;overflow-y:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>货物</th>
+                  <th>库位</th>
+                  <th>批次</th>
+                  <th>账面数量</th>
+                  <th>实盘数量</th>
+                  <th>差异</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(d, i) in invCheckCompleteDialog.details" :key="d.detail_id">
+                  <td>{{ getGoodsName(d.goods_id) }}</td>
+                  <td>{{ d.location_id || '-' }}</td>
+                  <td>{{ d.batch_id || '-' }}</td>
+                  <td>{{ d.book_quantity }}</td>
+                  <td>
+                    <input type="number" v-model.number="invCheckCompleteDialog.details[i].actual_quantity"
+                      min="0" style="width:80px;padding:4px 6px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px;" />
+                  </td>
+                  <td :class="invCheckDiffClass(d)">
+                    {{ d.actual_quantity != null ? (d.actual_quantity - d.book_quantity > 0 ? '+' : '') + (d.actual_quantity - d.book_quantity) : '-' }}
+                  </td>
+                  <td>
+                    <span v-if="d.actual_quantity != null" class="priority-tag" :class="invCheckStatusClass(d)">
+                      {{ invCheckStatusLabel(d) }}
+                    </span>
+                    <span v-else>-</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="form-item" style="margin-top:12px;">
+            <label>备注</label>
+            <textarea v-model="invCheckCompleteDialog.remark" placeholder="备注" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn btn-cancel" @click="invCheckCompleteDialog.visible = false">取消</button>
+          <button class="btn btn-primary" @click="confirmInvCheckComplete">提交</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -610,7 +961,46 @@ export default {
         visible: false,
         task: null,
         details: []
-      }
+      },
+      outboundDialog: {
+        visible: false,
+        goodsId: null,
+        inventoryRows: [],
+        assigneeId: null,
+        priority: '',
+        deadline: ''
+      },
+      outboundCompleteDialog: {
+        visible: false,
+        task: null,
+        details: []
+      },
+      defectiveDialog: {
+        visible: false,
+        batches: [],
+        assigneeId: null,
+        priority: '',
+        deadline: ''
+      },
+      defectiveCompleteDialog: {
+        visible: false,
+        task: null,
+        details: []
+      },
+      invCheckDialog: {
+        visible: false,
+        form: { checkType: '', scopeValue: '', operatorId: null, priority: '', deadline: '', remark: '' }
+      },
+      invCheckCompleteDialog: {
+        visible: false,
+        task: null,
+        details: [],
+        remark: ''
+      },
+      checkerList: [],
+      warehouseListForCheck: [],
+      goodsInInventory: [],
+      normalBatchesInInventory: []
     }
   },
   computed: {
@@ -627,6 +1017,13 @@ export default {
         && this.adjustmentDialog.assigneeId
         && this.adjustmentDialog.priority
         && this.adjustmentDialog.deadline
+    },
+    outboundTotalSelected() {
+      let total = 0
+      for (const row of this.outboundDialog.inventoryRows) {
+        if (row.selectQty > 0) total += row.selectQty
+      }
+      return total
     }
   },
   mounted() {
@@ -668,9 +1065,14 @@ export default {
         this.openInboundDialog()
       } else if (key === 'adjust') {
         this.openAdjustmentDialog()
+      } else if (key === 'outbound') {
+        this.openOutboundDialog()
+      } else if (key === 'defective') {
+        this.openDefectiveDialog()
+      } else if (key === 'check') {
+        this.openInventoryCheckDialog()
       } else {
-        const labels = { outbound: '出库', check: '库存盘点', defective: '处理次品' }
-        alert(labels[key] + '功能开发中...')
+        alert('功能开发中...')
       }
     },
     getGoodsName(goodsId) {
@@ -682,12 +1084,19 @@ export default {
     async fetchMyTasks() {
       const uid = this.getUserId()
       if (!uid) return
+      const tasks = []
       try {
-        const res = await request.get('/qualityCheck/myTasks', { assigneeId: uid })
-        if (res.code === 200) {
-          this.taskList = res.data || []
+        const wtRes = await request.get('/workTask/myTasks', { assigneeId: uid })
+        if (wtRes.code === 200) {
+          tasks.push(...(wtRes.data || []))
         }
       } catch (e) { /* ignore */ }
+      tasks.sort((a, b) => {
+        const pa = a.priority === '高' ? 0 : a.priority === '中' ? 1 : 2
+        const pb = b.priority === '高' ? 0 : b.priority === '中' ? 1 : 2
+        return pa - pb
+      })
+      this.taskList = tasks
     },
 
     // --- 新增批次 ---
@@ -796,6 +1205,12 @@ export default {
         this.openInboundCompleteDialog(task)
       } else if (task.task_type === '库存调整') {
         this.openAdjustmentCompleteDialog(task)
+      } else if (task.task_type === '出库') {
+        this.openOutboundCompleteDialog(task)
+      } else if (task.task_type === '处理不合格货物') {
+        this.openDefectiveCompleteDialog(task)
+      } else if (task.task_type === '库存盘点') {
+        this.openInvCheckCompleteDialog(task)
       } else {
         alert('该类型任务完成功能开发中...')
       }
@@ -1266,6 +1681,493 @@ export default {
       } catch (e) {
         alert('操作失败')
       }
+    },
+
+    // --- 出库 ---
+    openOutboundDialog() {
+      this.fetchWarehouseStaff()
+      this.fetchGoods()
+      this.fetchAllBatches()
+      this.outboundDialog = {
+        visible: true,
+        goodsId: null,
+        inventoryRows: [],
+        assigneeId: null,
+        priority: '',
+        deadline: ''
+      }
+    },
+
+    async onOutboundGoodsChange() {
+      this.outboundDialog.inventoryRows = []
+      if (!this.outboundDialog.goodsId) return
+      try {
+        const res = await request.get('/outbound/availableInventory', { goodsId: this.outboundDialog.goodsId })
+        if (res.code === 200) {
+          const list = res.data || []
+          const rows = list.map(inv => {
+            const batch = this.allBatches.find(b => b.batch_id === inv.batch_id)
+            const available = Math.max(0, inv.quantity - inv.locked_quantity)
+            return {
+              inventory_id: inv.inventory_id,
+              batch_id: inv.batch_id,
+              expiry_date: batch ? batch.expiry_date : null,
+              location_id: inv.location_id,
+              location_name: inv.location_name || '-',
+              warehouse_id: inv.warehouse_id,
+              zone_id: inv.zone_id,
+              goods_id: inv.goods_id,
+              available: available,
+              selectQty: 0
+            }
+          })
+          // FIFO: 按到期日期排序，日期靠前的排前面
+          rows.sort((a, b) => {
+            if (!a.expiry_date) return 1
+            if (!b.expiry_date) return -1
+            return a.expiry_date.localeCompare(b.expiry_date)
+          })
+          this.outboundDialog.inventoryRows = rows
+        }
+      } catch (e) { /* ignore */ }
+    },
+
+    onOutboundQtyInput(row, event) {
+      const val = parseInt(event.target.value) || 0
+      row.selectQty = Math.max(0, Math.min(val, row.available))
+    },
+
+    submitOutbound() {
+      if (this.outboundTotalSelected <= 0) return
+      const f = this.outboundDialog
+      if (!f.assigneeId) { alert('请选择负责人'); return }
+      if (!f.priority) { alert('请选择优先级'); return }
+      if (!f.deadline) { alert('请选择截至日期'); return }
+      this.confirmDialog.message = '确定要创建出库任务吗？将锁定所有涉及的库位。'
+      this.confirmDialog.confirmText = '确认创建'
+      this.confirmDialog.callback = this.submitCreateOutbound
+      this.confirmDialog.visible = true
+    },
+
+    async submitCreateOutbound() {
+      this.confirmDialog.visible = false
+      const rows = this.outboundDialog.inventoryRows.filter(r => r.selectQty > 0)
+      const items = rows.map(r => ({
+        goodsId: r.goods_id,
+        batchId: r.batch_id,
+        quantity: r.selectQty,
+        warehouseId: r.warehouse_id,
+        zoneId: r.zone_id,
+        locationId: r.location_id
+      }))
+      const uid = this.getUserId()
+      try {
+        const res = await request.post('/outbound/create', {
+          items: items,
+          assigneeId: this.outboundDialog.assigneeId,
+          priority: this.outboundDialog.priority,
+          deadline: this.outboundDialog.deadline,
+          operatorId: uid
+        })
+        if (res.code === 200) {
+          alert('出库任务创建成功')
+          this.outboundDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '创建失败')
+        }
+      } catch (e) {
+        alert('创建失败')
+      }
+    },
+
+    // --- 出库完成 ---
+    async openOutboundCompleteDialog(task) {
+      this.outboundCompleteDialog.task = task
+      this.outboundCompleteDialog.details = []
+      this.outboundCompleteDialog.visible = true
+      try {
+        const res = await request.get('/outbound/detail/' + task.task_id)
+        if (res.code === 200) {
+          this.outboundCompleteDialog.details = res.data || []
+        }
+      } catch (e) { /* ignore */ }
+    },
+
+    rejectOutbound() {
+      if (!confirm('确定要退回该出库请求吗？退回后将解锁所有库位并删除相关单据。')) return
+      const uid = this.getUserId()
+      request.put('/outbound/reject/' + this.outboundCompleteDialog.task.task_id, { operatorId: uid })
+        .then(res => {
+          if (res.code === 200) {
+            alert('已退回出库请求')
+            this.outboundCompleteDialog.visible = false
+            this.fetchMyTasks()
+          } else {
+            alert(res.msg || '操作失败')
+          }
+        })
+        .catch(() => alert('操作失败'))
+    },
+
+    confirmCompleteOutbound() {
+      this.confirmDialog.message = '确定要完成出库吗？出库后库存数量将相应减少。'
+      this.confirmDialog.confirmText = '确认出库'
+      this.confirmDialog.callback = this.submitCompleteOutbound
+      this.confirmDialog.visible = true
+    },
+
+    async submitCompleteOutbound() {
+      this.confirmDialog.visible = false
+      const uid = this.getUserId()
+      try {
+        const res = await request.put('/outbound/complete/' + this.outboundCompleteDialog.task.task_id, { operatorId: uid })
+        if (res.code === 200) {
+          alert('出库完成')
+          this.outboundCompleteDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '操作失败')
+        }
+      } catch (e) {
+        alert('操作失败')
+      }
+    },
+
+    // --- 处理次品 ---
+    async openDefectiveDialog() {
+      this.fetchWarehouseStaff()
+      this.fetchGoods()
+      this.fetchAllBatches()
+      this.defectiveDialog = {
+        visible: true,
+        batches: [],
+        assigneeId: null,
+        priority: '',
+        deadline: ''
+      }
+      // 加载报废状态的批次
+      try {
+        const res = await request.get('/batch/list')
+        if (res.code === 200) {
+          const allBatches = res.data || []
+          const scrapBatches = allBatches.filter(b => b.batch_status === '报废')
+          this.defectiveDialog.batches = scrapBatches.map(b => {
+            const goods = this.goodsList.find(g => g.goods_id === b.goods_id)
+            return {
+              batch_id: b.batch_id,
+              goods_id: b.goods_id,
+              goods_name: goods ? goods.goods_name : '-',
+              remaining_quantity: b.remaining_quantity,
+              checked: false
+            }
+          })
+        }
+      } catch (e) { /* ignore */ }
+    },
+
+    submitDefective() {
+      const selected = this.defectiveDialog.batches.filter(b => b.checked)
+      if (selected.length === 0) return
+      if (!this.defectiveDialog.assigneeId) { alert('请选择负责人'); return }
+      if (!this.defectiveDialog.priority) { alert('请选择优先级'); return }
+      if (!this.defectiveDialog.deadline) { alert('请选择截至日期'); return }
+      this.confirmDialog.message = '确定要创建次品处理任务吗？将锁定相关库位。'
+      this.confirmDialog.confirmText = '确认创建'
+      this.confirmDialog.callback = this.submitCreateDefective
+      this.confirmDialog.visible = true
+    },
+
+    async submitCreateDefective() {
+      this.confirmDialog.visible = false
+      const selected = this.defectiveDialog.batches.filter(b => b.checked)
+      const items = []
+      for (const b of selected) {
+        try {
+          const res = await request.get('/inventory/listWithDetails', { batchId: b.batch_id })
+          if (res.code === 200 && res.data && res.data.length > 0) {
+            // 已入库：使用库存记录（不限制 inventory_status，报废批次的库存都要处理）
+            for (const inv of res.data) {
+              items.push({
+                batchId: b.batch_id,
+                goodsId: b.goods_id,
+                quantity: inv.quantity,
+                sourceLocationId: inv.location_id,
+                warehouseId: inv.warehouse_id,
+                zoneId: inv.zone_id
+              })
+            }
+          } else {
+            // 未入库：使用批次剩余数量
+            items.push({
+              batchId: b.batch_id,
+              goodsId: b.goods_id,
+              quantity: b.remaining_quantity,
+              sourceLocationId: null,
+              warehouseId: null,
+              zoneId: null
+            })
+          }
+        } catch (e) {
+          items.push({
+            batchId: b.batch_id,
+            goodsId: b.goods_id,
+            quantity: b.remaining_quantity,
+            sourceLocationId: null,
+            warehouseId: null,
+            zoneId: null
+          })
+        }
+      }
+      if (items.length === 0) {
+        alert('选中的批次无可处理的库存')
+        return
+      }
+      const uid = this.getUserId()
+      try {
+        const res = await request.post('/defective/create', {
+          items: items,
+          assigneeId: this.defectiveDialog.assigneeId,
+          priority: this.defectiveDialog.priority,
+          deadline: this.defectiveDialog.deadline,
+          operatorId: uid
+        })
+        if (res.code === 200) {
+          alert('次品处理任务创建成功')
+          this.defectiveDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '创建失败')
+        }
+      } catch (e) {
+        alert('创建失败')
+      }
+    },
+
+    // --- 处理次品完成 ---
+    async openDefectiveCompleteDialog(task) {
+      this.defectiveCompleteDialog.task = task
+      this.defectiveCompleteDialog.details = []
+      this.defectiveCompleteDialog.visible = true
+      try {
+        const res = await request.get('/defective/detail/' + task.task_id)
+        if (res.code === 200) {
+          this.defectiveCompleteDialog.details = res.data || []
+        }
+      } catch (e) { /* ignore */ }
+    },
+
+    rejectDefective() {
+      if (!confirm('确定要退回该次品处理请求吗？退回后将解锁所有库位并删除相关单据。')) return
+      const uid = this.getUserId()
+      request.put('/defective/reject/' + this.defectiveCompleteDialog.task.task_id, { operatorId: uid })
+        .then(res => {
+          if (res.code === 200) {
+            alert('已退回次品处理请求')
+            this.defectiveCompleteDialog.visible = false
+            this.fetchMyTasks()
+          } else {
+            alert(res.msg || '操作失败')
+          }
+        })
+        .catch(() => alert('操作失败'))
+    },
+
+    confirmCompleteDefective() {
+      this.confirmDialog.message = '确定要完成次品处理吗？相关库存和批次将被删除。'
+      this.confirmDialog.confirmText = '完成处理'
+      this.confirmDialog.callback = this.submitCompleteDefective
+      this.confirmDialog.visible = true
+    },
+
+    async submitCompleteDefective() {
+      this.confirmDialog.visible = false
+      const uid = this.getUserId()
+      try {
+        const res = await request.put('/defective/complete/' + this.defectiveCompleteDialog.task.task_id, { operatorId: uid })
+        if (res.code === 200) {
+          alert('次品处理完成')
+          this.defectiveCompleteDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '操作失败')
+        }
+      } catch (e) {
+        alert('操作失败')
+      }
+    },
+
+    // --- 库存盘点 ---
+    async fetchCheckers() {
+      try {
+        const res = await request.get('/user/checkers')
+        if (res.code === 200) { this.checkerList = res.data || [] }
+      } catch (e) { /* ignore */ }
+    },
+    async fetchWarehousesForCheck() {
+      try {
+        const res = await request.get('/warehouse/list')
+        if (res.code === 200) {
+          this.warehouseListForCheck = (res.data || []).filter(w => w.status === '启用')
+        }
+      } catch (e) { /* ignore */ }
+    },
+    async fetchGoodsInInventory() {
+      try {
+        const res = await request.get('/inventory/listWithDetails')
+        if (res.code === 200) {
+          const invList = res.data || []
+          const seen = new Set()
+          this.goodsInInventory = []
+          invList.forEach(item => {
+            if (!seen.has(item.goods_id)) {
+              seen.add(item.goods_id)
+              this.goodsInInventory.push({ goods_id: item.goods_id, goods_name: item.goods_name, goods_code: item.goods_name })
+            }
+          })
+        }
+      } catch (e) { /* ignore */ }
+    },
+    async fetchNormalBatchesInInventory() {
+      try {
+        const invRes = await request.get('/inventory/listWithDetails')
+        const batchRes = await request.get('/batch/list')
+        if (invRes.code === 200 && batchRes.code === 200) {
+          const invList = invRes.data || []
+          const batches = batchRes.data || []
+          const invBatchIds = new Set(invList.map(i => i.batch_id))
+          this.normalBatchesInInventory = batches.filter(
+            b => b.batch_status === '正常' && invBatchIds.has(b.batch_id)
+          )
+        }
+      } catch (e) { /* ignore */ }
+    },
+    openInventoryCheckDialog() {
+      this.invCheckDialog.form = { checkType: '', scopeValue: '', operatorId: null, priority: '', deadline: '', remark: '' }
+      this.fetchCheckers()
+      this.fetchWarehousesForCheck()
+      this.fetchGoodsInInventory()
+      this.fetchNormalBatchesInInventory()
+      this.fetchGoods()
+      this.invCheckDialog.visible = true
+    },
+    onInvCheckTypeChange() {
+      this.invCheckDialog.form.scopeValue = ''
+    },
+    async submitInvCheck() {
+      const f = this.invCheckDialog.form
+      if (!f.checkType) { alert('请选择盘点类型'); return }
+      if (!f.scopeValue) { alert('请选择盘点范围'); return }
+      if (!f.operatorId) { alert('请选择盘点员'); return }
+      if (!f.priority) { alert('请选择优先级'); return }
+      if (!f.deadline) { alert('请选择截至时间'); return }
+
+      let scopeType = ''
+      if (f.checkType === '按仓库盘点') scopeType = 'warehouse'
+      else if (f.checkType === '按商品盘点') scopeType = 'goods'
+      else if (f.checkType === '按批次盘点') scopeType = 'batch'
+
+      try {
+        const res = await request.post('/inventoryCheck/create', {
+          checkType: f.checkType,
+          scopeType: scopeType,
+          scopeValue: String(f.scopeValue),
+          operatorId: f.operatorId,
+          priority: f.priority,
+          deadline: f.deadline,
+          remark: f.remark
+        })
+        if (res.code === 200) {
+          alert('盘点任务创建成功')
+          this.invCheckDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '创建失败')
+        }
+      } catch (e) {
+        alert('创建失败')
+      }
+    },
+    async openInvCheckCompleteDialog(task) {
+      this.invCheckCompleteDialog.task = task
+      this.invCheckCompleteDialog.details = []
+      this.invCheckCompleteDialog.remark = task.remark || ''
+      this.fetchGoods()
+      try {
+        const res = await request.get('/inventoryCheck/details', { checkNo: task.related_order_no })
+        if (res.code === 200) {
+          this.invCheckCompleteDialog.details = (res.data || []).map(d => ({
+            ...d,
+            actual_quantity: null
+          }))
+        }
+      } catch (e) {
+        alert('获取盘点明细失败')
+      }
+      this.invCheckCompleteDialog.visible = true
+    },
+    invCheckDiffClass(d) {
+      if (d.actual_quantity == null) return ''
+      const diff = d.actual_quantity - d.book_quantity
+      if (diff > 0) return 'diff-surplus'
+      if (diff < 0) return 'diff-shortage'
+      return 'diff-normal'
+    },
+    invCheckStatusClass(d) {
+      if (d.actual_quantity == null) return ''
+      const diff = d.actual_quantity - d.book_quantity
+      if (diff > 0) return '高'
+      if (diff < 0) return '中'
+      return '低'
+    },
+    invCheckStatusLabel(d) {
+      if (d.actual_quantity == null) return '-'
+      const diff = d.actual_quantity - d.book_quantity
+      if (diff > 0) return '盘盈'
+      if (diff < 0) return '盘亏'
+      return '正常'
+    },
+    confirmInvCheckComplete() {
+      const details = this.invCheckCompleteDialog.details
+      for (let i = 0; i < details.length; i++) {
+        const qty = details[i].actual_quantity
+        if (qty == null || qty < 0) {
+          alert('请为所有明细填写有效的实盘数量（第' + (i + 1) + '行）')
+          return
+        }
+        if (qty > 10) {
+          alert('您所填写的货物数量不合法，每个库位货物上限不能超过10')
+          return
+        }
+      }
+      this.confirmDialog.message = '确定要提交盘点结果吗？提交后将更新库存数据。'
+      this.confirmDialog.confirmText = '确认提交'
+      this.confirmDialog.callback = this.submitInvCheckComplete
+      this.confirmDialog.visible = true
+    },
+    async submitInvCheckComplete() {
+      this.confirmDialog.visible = false
+      const uid = this.getUserId()
+      const details = this.invCheckCompleteDialog.details.map(d => ({
+        detailId: d.detail_id,
+        actualQuantity: d.actual_quantity
+      }))
+      try {
+        const res = await request.put('/inventoryCheck/complete/' + this.invCheckCompleteDialog.task.task_id, {
+          details: details,
+          remark: this.invCheckCompleteDialog.remark,
+          operatorId: uid
+        })
+        if (res.code === 200) {
+          alert('盘点任务已完成')
+          this.invCheckCompleteDialog.visible = false
+          this.fetchMyTasks()
+        } else {
+          alert(res.msg || '操作失败')
+        }
+      } catch (e) {
+        alert('操作失败')
+      }
     }
   }
 }
@@ -1586,6 +2488,10 @@ export default {
 .adjust-table-wrap { max-height: 200px; overflow-y: auto; }
 .adjust-table-wrap .data-table { font-size: 12px; }
 .adjust-table-wrap .data-table th, .adjust-table-wrap .data-table td { padding: 6px 8px; }
+
+.diff-surplus { color: #e6a23c; font-weight: 600; }
+.diff-shortage { color: #f56c6c; font-weight: 600; }
+.diff-normal { color: #67c23a; }
 
 @media (max-width: 768px) {
   .data-table { font-size: 12px; }

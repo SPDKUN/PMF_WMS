@@ -14,7 +14,7 @@ public class InventoryCheckDetail {
     private Integer zone_id;
     private Integer location_id;
     private Integer goods_id;
-    private Integer batch_id;
+    private String batch_id;
     private Integer book_quantity;
     private Integer actual_quantity;
     private Integer difference;

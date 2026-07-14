@@ -291,7 +291,10 @@
               <td>{{ getOperatorName(log.operator_id) }}</td>
               <td>{{ log.operation_type }}</td>
               <td>{{ log.operation_content }}</td>
-              <td>{{ log.operation_result || '-' }}</td>
+              <td>
+                <span>{{ getOperationResultSummary(log.operation_result) }}</span>
+                <a v-if="hasOperationDetail(log.operation_result)" class="detail-link" @click="openDetailDialog(log.operation_result)">详情</a>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -326,6 +329,63 @@
       <span v-else-if="activeTab === 'inventory'">共 {{ inventoryTableData.length }} 条</span>
       <span v-else-if="activeTab === 'log'">共 {{ logData.length }} 条</span>
       <span v-else>共 {{ currentData.length }} 条</span>
+    </div>
+
+    <!-- 盘点详情弹窗 -->
+    <div class="dialog-overlay" v-if="detailDialog.visible" @click.self="detailDialog.visible = false">
+      <div class="dialog-box" style="width:700px;">
+        <div class="dialog-header">
+          <h3>盘点详情</h3>
+          <button class="dialog-close" @click="detailDialog.visible = false">&times;</button>
+        </div>
+        <div class="dialog-body" style="max-height:500px;overflow-y:auto;">
+          <div v-if="detailDialog.surplus.length > 0" style="margin-bottom:16px;">
+            <h4 style="margin:0 0 8px 0;color:#e6a23c;">盘盈明细（{{ detailDialog.surplus.length }}项）</h4>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>批次号</th>
+                  <th>库位ID</th>
+                  <th>差异数量</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, idx) in detailDialog.surplus" :key="'s'+idx">
+                  <td>{{ idx + 1 }}</td>
+                  <td>{{ item.batchId }}</td>
+                  <td>LOC-{{ item.locationId }}</td>
+                  <td style="color:#e6a23c;font-weight:600;">+{{ item.diff }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="detailDialog.shortage.length > 0">
+            <h4 style="margin:0 0 8px 0;color:#f56c6c;">盘亏明细（{{ detailDialog.shortage.length }}项）</h4>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>批次号</th>
+                  <th>库位ID</th>
+                  <th>差异数量</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, idx) in detailDialog.shortage" :key="'h'+idx">
+                  <td>{{ idx + 1 }}</td>
+                  <td>{{ item.batchId }}</td>
+                  <td>LOC-{{ item.locationId }}</td>
+                  <td style="color:#f56c6c;font-weight:600;">{{ item.diff }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="detailDialog.surplus.length === 0 && detailDialog.shortage.length === 0" style="text-align:center;color:#909399;padding:20px;">
+            暂无详情数据
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 仓库查看弹窗（可视化） -->
@@ -435,7 +495,12 @@ export default {
         operationType: ''
       },
       logOperationTypes: [],
-      operatorNameMap: {}
+      operatorNameMap: {},
+      detailDialog: {
+        visible: false,
+        surplus: [],
+        shortage: []
+      }
     }
   },
   computed: {
@@ -684,6 +749,31 @@ export default {
       this.logSearch = { date: '', operationType: '' }
       this.fetchLogs()
     },
+    getOperationResultSummary(result) {
+      if (!result) return '-'
+      const idx = result.indexOf('|||')
+      return idx >= 0 ? result.substring(0, idx) : result
+    },
+    hasOperationDetail(result) {
+      if (!result) return false
+      const idx = result.indexOf('|||')
+      return idx >= 0 && result.length > idx + 3
+    },
+    openDetailDialog(result) {
+      const idx = result.indexOf('|||')
+      if (idx < 0) return
+      try {
+        let jsonStr = result.substring(idx + 3)
+        // 兼容旧数据中 "+3" 格式（JSON 不允许数字前加 +）
+        jsonStr = jsonStr.replace(/"diff":\+(\d+)/g, '"diff":$1')
+        const json = JSON.parse(jsonStr)
+        this.detailDialog.surplus = json.surplus || []
+        this.detailDialog.shortage = json.shortage || []
+        this.detailDialog.visible = true
+      } catch (e) {
+        console.error('解析盘点详情失败:', e)
+      }
+    },
 
     async openViewDialog(warehouse) {
       this.viewDialog.warehouse = warehouse
@@ -820,6 +910,15 @@ input[type="date"]:valid::-webkit-datetime-edit {
   color: #606266;
 }
 .btn-cancel:hover { background: #e6e6e8; }
+
+.detail-link {
+  color: #409EFF;
+  cursor: pointer;
+  margin-left: 6px;
+  font-size: 13px;
+  text-decoration: none;
+}
+.detail-link:hover { color: #66b1ff; }
 
 .tab-row {
   display: flex;

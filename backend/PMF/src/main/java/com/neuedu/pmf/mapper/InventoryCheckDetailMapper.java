@@ -13,4 +13,6 @@ public interface InventoryCheckDetailMapper {
     InventoryCheckDetail findById(@Param("detail_id") Integer detailId);
     int update(InventoryCheckDetail inventoryCheckDetail);
     int deleteById(@Param("detail_id") Integer detailId);
+    int deleteByBatchId(@Param("batch_id") String batchId);
+    ArrayList<InventoryCheckDetail> findByCheckNo(@Param("check_no") String checkNo);
 }
