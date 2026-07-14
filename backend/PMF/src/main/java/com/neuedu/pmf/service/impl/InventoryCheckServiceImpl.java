@@ -231,15 +231,18 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
         task.setRemark(request.getRemark());
         workTaskMapper.update(task);
 
-        // 6. 构建 operation_result
+        // 6. 构建 operation_result（摘要，≤500字符）和 operation_content（TEXT，存JSON详情）
         StringBuilder resultBuilder = new StringBuilder();
         resultBuilder.append("正常").append(normalCount).append("项");
         if (surplusCount > 0) resultBuilder.append("、盘盈").append(surplusCount).append("项");
         if (shortageCount > 0) resultBuilder.append("、盘亏").append(shortageCount).append("项");
+        String operationResult = resultBuilder.toString();
 
+        // 详情JSON放到 operation_content（TEXT类型，不担心超长）
+        String operationContent = checkNo + "完成盘点";
         if (surplusCount > 0 || shortageCount > 0) {
             StringBuilder jsonBuilder = new StringBuilder();
-            jsonBuilder.append("{");
+            jsonBuilder.append("|||{");
             jsonBuilder.append("\"surplus\":[");
             for (int i = 0; i < surplusItems.size(); i++) {
                 if (i > 0) jsonBuilder.append(",");
@@ -260,15 +263,14 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
             }
             jsonBuilder.append("]");
             jsonBuilder.append("}");
-            resultBuilder.append("|||").append(jsonBuilder.toString());
+            operationContent += jsonBuilder.toString();
         }
-        String operationResult = resultBuilder.toString();
 
         // 7. INSERT operation_log
         OperationLog log = new OperationLog();
         log.setOperator_id(request.getOperatorId());
         log.setOperation_type("盘点");
-        log.setOperation_content(checkNo + "完成盘点");
+        log.setOperation_content(operationContent);
         log.setOperation_result(operationResult);
         log.setOperation_time(LocalDateTime.now());
         operationLogMapper.save(log);

@@ -296,10 +296,10 @@
               <td>{{ log.operation_time }}</td>
               <td>{{ getOperatorName(log.operator_id) }}</td>
               <td>{{ log.operation_type }}</td>
-              <td>{{ log.operation_content }}</td>
+              <td>{{ trimOperationContent(log.operation_content) }}</td>
               <td>
-                <span>{{ getOperationResultSummary(log.operation_result) }}</span>
-                <a v-if="hasOperationDetail(log.operation_result)" class="detail-link" @click="openDetailDialog(log.operation_result)">详情</a>
+                <span>{{ log.operation_result || '-' }}</span>
+                <a v-if="hasDetailInLog(log)" class="detail-link" @click="openDetailFromLog(log)">详情</a>
               </td>
             </tr>
           </tbody>
@@ -744,22 +744,29 @@ export default {
       this.logSearch = { date: '', operationType: '' }
       this.fetchLogs()
     },
-    getOperationResultSummary(result) {
-      if (!result) return '-'
-      const idx = result.indexOf('|||')
-      return idx >= 0 ? result.substring(0, idx) : result
+    // 去掉操作内容中 ||| 后面的JSON详情，仅显示简洁文本
+    trimOperationContent(content) {
+      if (!content) return '-'
+      const idx = content.indexOf('|||')
+      return idx >= 0 ? content.substring(0, idx) : content
     },
-    hasOperationDetail(result) {
-      if (!result) return false
-      const idx = result.indexOf('|||')
-      return idx >= 0 && result.length > idx + 3
+    // 兼容新旧数据：JSON详情可能在operation_content（新）或operation_result（旧）
+    hasDetailInLog(log) {
+      return (log.operation_content && log.operation_content.indexOf('|||{') >= 0)
+          || (log.operation_result && log.operation_result.indexOf('|||{') >= 0)
     },
-    openDetailDialog(result) {
-      const idx = result.indexOf('|||')
-      if (idx < 0) return
+    openDetailFromLog(log) {
+      // 优先从 operation_content 取（新格式），再从 operation_result 取（旧格式）
+      let source = null
+      if (log.operation_content && log.operation_content.indexOf('|||{') >= 0) {
+        source = log.operation_content
+      } else if (log.operation_result && log.operation_result.indexOf('|||{') >= 0) {
+        source = log.operation_result
+      }
+      if (!source) return
+      const idx = source.indexOf('|||{')
       try {
-        let jsonStr = result.substring(idx + 3)
-        // 兼容旧数据中 "+3" 格式（JSON 不允许数字前加 +）
+        let jsonStr = source.substring(idx + 3)
         jsonStr = jsonStr.replace(/"diff":\+(\d+)/g, '"diff":$1')
         const json = JSON.parse(jsonStr)
         this.detailDialog.surplus = json.surplus || []
