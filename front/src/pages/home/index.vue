@@ -127,13 +127,18 @@ export default {
         const data = JSON.parse(stored)
         const uid = data.user_id
         if (!uid) return
-        // 合并质检和盘点任务
-        let tasks = []
+        // 合并质检和盘点任务，按 task_id 去重
+        const taskMap = new Map()
+        const addTasks = (list) => {
+          (list || []).forEach(t => {
+            if (!taskMap.has(t.task_id)) taskMap.set(t.task_id, t)
+          })
+        }
         const qcRes = await request.get('/qualityCheck/myTasks', { assigneeId: uid })
-        if (qcRes.code === 200 && qcRes.data) tasks = tasks.concat(qcRes.data)
+        if (qcRes.code === 200 && qcRes.data) addTasks(qcRes.data)
         const invRes = await request.get('/inventoryCheck/myTasks', { assigneeId: uid })
-        if (invRes.code === 200 && invRes.data) tasks = tasks.concat(invRes.data)
-        this.todoList = tasks.map(t => ({
+        if (invRes.code === 200 && invRes.data) addTasks(invRes.data)
+        this.todoList = Array.from(taskMap.values()).map(t => ({
           title: t.related_order_no || '-',
           desc: t.task_type,
           priority: t.priority,

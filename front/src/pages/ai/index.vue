@@ -3,7 +3,7 @@
     <!-- 对话区域 -->
     <div class="chat-messages" ref="chatContainer">
       <div v-if="messages.length === 0" class="chat-welcome">
-        <div class="welcome-icon">🤖</div>
+        <div class="welcome-icon"><img src="/ai_image.png" alt="AI" class="ai-avatar-img" /></div>
         <div class="welcome-text">您好！我是AI助手，有什么仓储管理问题可以帮您？</div>
         <div class="welcome-hint">您可以询问出入库、盘点、质检、批次管理等相关问题</div>
       </div>
@@ -11,7 +11,7 @@
       <div v-for="(msg, idx) in messages" :key="idx" class="message-row" :class="msg.role === 'user' ? 'msg-right' : 'msg-left'">
         <!-- AI消息（左侧） -->
         <template v-if="msg.role === 'assistant'">
-          <div class="avatar avatar-ai">🤖</div>
+          <div class="avatar avatar-ai"><img src="/ai_image.png" alt="AI" class="ai-avatar-img" /></div>
           <div class="msg-body">
             <div class="msg-nickname">AI助手</div>
             <div class="msg-bubble msg-bubble-ai">{{ msg.content }}</div>
@@ -19,17 +19,17 @@
         </template>
         <!-- 用户消息（右侧） -->
         <template v-else>
+          <div class="avatar avatar-user">{{ username.charAt(0) }}</div>
           <div class="msg-body msg-body-user">
             <div class="msg-nickname msg-nickname-right">{{ username }}</div>
             <div class="msg-bubble msg-bubble-user">{{ msg.content }}</div>
           </div>
-          <div class="avatar avatar-user">{{ username.charAt(0) }}</div>
         </template>
       </div>
 
       <!-- 加载中 -->
       <div v-if="loading" class="message-row msg-left">
-        <div class="avatar avatar-ai">🤖</div>
+        <div class="avatar avatar-ai"><img src="/ai_image.png" alt="AI" class="ai-avatar-img" /></div>
         <div class="msg-body">
           <div class="msg-nickname">AI助手</div>
           <div class="msg-bubble msg-bubble-ai typing-dots">
@@ -60,6 +60,8 @@
 <script>
 import request from '@/utils/request.js'
 
+const CHAT_STORAGE_KEY = 'ai_chat_messages_'
+
 export default {
   name: 'AiChatPage',
   data() {
@@ -67,14 +69,19 @@ export default {
       messages: [],
       inputText: '',
       loading: false,
-      username: ''
+      username: '',
+      storageKey: ''
     }
   },
   mounted() {
     this.loadUsername()
+    this.storageKey = CHAT_STORAGE_KEY + this.username
+    this.loadMessages()
     // 如果从主页带过来初始问题，自动发送
     const initialQ = this.$route.query.q
     if (initialQ) {
+      // 清除URL参数防止刷新重复发送
+      this.$router.replace({ query: {} })
       this.inputText = initialQ
       this.$nextTick(() => this.sendMessage())
     }
@@ -93,6 +100,20 @@ export default {
         this.username = '用户'
       }
     },
+    loadMessages() {
+      try {
+        const saved = localStorage.getItem(this.storageKey)
+        if (saved) {
+          this.messages = JSON.parse(saved)
+          this.$nextTick(() => this.scrollToBottom())
+        }
+      } catch (e) { /* ignore */ }
+    },
+    saveMessages() {
+      try {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.messages))
+      } catch (e) { /* ignore */ }
+    },
     async sendMessage() {
       const text = this.inputText.trim()
       if (!text || this.loading) return
@@ -100,6 +121,7 @@ export default {
       // 添加用户消息
       this.messages.push({ role: 'user', content: text })
       this.inputText = ''
+      this.saveMessages()
       this.$nextTick(() => this.scrollToBottom())
 
       // 构建历史对话（不含刚添加的这条）
@@ -123,6 +145,7 @@ export default {
         this.messages.push({ role: 'assistant', content: '网络异常，请检查连接后重试' })
       }
       this.loading = false
+      this.saveMessages()
       this.$nextTick(() => this.scrollToBottom())
     },
     scrollToBottom() {
@@ -176,7 +199,8 @@ export default {
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; flex-shrink: 0;
 }
-.avatar-ai { background: #fff; border: 1px solid #dcdfe6; }
+.avatar-ai { background: #fff; border: 1px solid #dcdfe6; overflow: hidden; }
+.ai-avatar-img { width: 100%; height: 100%; object-fit: cover; }
 .avatar-user { background: #409EFF; color: #fff; font-size: 14px; font-weight: 600; }
 
 /* 消息体 */
