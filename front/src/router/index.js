@@ -7,6 +7,7 @@ import Home from '@/pages/home/index.vue'
 import Manage from '@/pages/manage/index.vue'
 import Query from '@/pages/query/index.vue'
 import Tasks from '@/pages/tasks/index.vue'
+import AiChat from '@/pages/ai/index.vue'
 import Profile from '@/pages/profile/index.vue'
 
 const routes = [
@@ -47,6 +48,12 @@ const routes = [
         path: 'tasks',
         name: 'Tasks',
         component: Tasks,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'ai',
+        name: 'AiChat',
+        component: AiChat,
         meta: { requiresAuth: true }
       },
       {

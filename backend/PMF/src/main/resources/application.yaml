@@ -1,6 +1,6 @@
 # DeepSeek大模型配置（替换为自己的密钥）
 deepseek:
-  api-key: sk-ee37a7a7978a4dd3b27da8427c09ce35    # 替换为你刚才复制的sk开头密钥
+  api-key: sk-12305dc2e42f41c980c8ba94df609e85    # DeepSeek免费模型API密钥
   api-url: https://api.deepseek.com/v1/chat/completions
   model: deepseek-chat  # 最新通用模型，支持R1推理能力
   temperature: 0.2  # 健康咨询需要严谨，数值越低回答越准确，建议0.1-0.3

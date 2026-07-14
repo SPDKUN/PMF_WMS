@@ -23,6 +23,10 @@
           <el-icon><List /></el-icon>
           <span>工作任务</span>
         </a>
+        <a href="#" :class="{ active: currentRoute === 'AiChat' }" @click.prevent="navigate('AiChat')">
+          <el-icon><ChatDotRound /></el-icon>
+          <span>AI助手</span>
+        </a>
         <a href="#" :class="{ active: currentRoute === 'Profile' }" @click.prevent="navigate('Profile')">
           <el-icon><UserFilled /></el-icon>
           <span>个人中心</span>
@@ -51,14 +55,14 @@
 
 <script>
 import {
-  Box, HomeFilled, Setting, Search, List, UserFilled, SwitchButton, Calendar
+  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 
 export default {
   name: 'MainLayout',
   components: {
-    Box, HomeFilled, Setting, Search, List, UserFilled, SwitchButton, Calendar,
+    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar,
     ElIcon
   },
   data() {
@@ -76,6 +80,7 @@ export default {
         Manage: '我的管理',
         Query: '明细查询',
         Tasks: '工作任务',
+        AiChat: 'AI助手',
         Profile: '个人中心',
       }
       return titles[this.$route.name] || 'WMS'

@@ -7,15 +7,15 @@
       <div class="status-row">
         <div class="status-item">
           <el-icon><Box /></el-icon>
-          <span>总库存 <span class="num">2,847</span> 件</span>
+          <span>总库存 <span class="num">{{ stats.totalInventory.toLocaleString() }}</span> 件</span>
         </div>
         <div class="status-item">
           <el-icon><List /></el-icon>
-          <span>待办任务 <span class="num">{{ todoList.length }}</span> 项</span>
+          <span>待办任务 <span class="num">{{ stats.pendingTasks }}</span> 项</span>
         </div>
         <div class="status-item">
           <el-icon><Clock /></el-icon>
-          <span>最后更新 <span class="num">{{ lastUpdate }}</span></span>
+          <span>最后更新 <span class="num">{{ stats.lastUpdate }}</span></span>
         </div>
       </div>
 
@@ -23,20 +23,8 @@
       <div class="ai-input-area">
         <el-icon class="ai-icon"><Cpu /></el-icon>
         <input type="text" v-model="aiMessage" placeholder="向 AI 助手提问，例如：查询今日入库单..." @keydown.enter="handleAiSend" />
-        <button class="send-btn" @click="handleAiSend" :disabled="aiProcessing">
+        <button class="send-btn" @click="handleAiSend">
           <el-icon><Promotion /></el-icon> 发送
-        </button>
-      </div>
-
-      <div class="quick-actions">
-        <button class="btn" @click="quickAction('入库')">
-          <el-icon><Plus /></el-icon> 新建入库
-        </button>
-        <button class="btn" @click="quickAction('出库')">
-          <el-icon><ArrowRight /></el-icon> 新建出库
-        </button>
-        <button class="btn" @click="quickAction('盘点')">
-          <el-icon><DocumentCopy /></el-icon> 创建盘点
         </button>
       </div>
     </div>
@@ -75,7 +63,7 @@
 
 <script>
 import {
-  Box, List, Clock, Cpu, Promotion, Plus, ArrowRight, DocumentCopy, Check
+  Box, List, Clock, Cpu, Promotion, DocumentCopy, Check
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 import request from '@/utils/request.js'
@@ -92,28 +80,39 @@ const taskTypeMeta = {
 export default {
   name: 'WarehouseDashboard',
   components: {
-    Box, List, Clock, Cpu, Promotion, Plus, ArrowRight, DocumentCopy, Check,
+    Box, List, Clock, Cpu, Promotion, DocumentCopy, Check,
     ElIcon
   },
   data() {
     return {
-      lastUpdate: '',
+      stats: { totalInventory: 0, pendingTasks: 0, lastUpdate: '--' },
       aiMessage: '',
-      aiProcessing: false,
       todoList: []
     }
   },
   mounted() {
-    this.updateTime()
-    this.timer = setInterval(this.updateTime, 60000)
+    this.fetchStats()
     this.fetchTasks()
+    this.timer = setInterval(this.fetchStats, 60000)
   },
   beforeDestroy() {
     clearInterval(this.timer)
   },
   methods: {
-    updateTime() {
-      this.lastUpdate = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    async fetchStats() {
+      const stored = localStorage.getItem('userInfo')
+      let uid = null
+      if (stored) {
+        try { uid = JSON.parse(stored).user_id } catch (e) { /* ignore */ }
+      }
+      try {
+        const params = {}
+        if (uid) params.assigneeId = uid
+        const res = await request.get('/ai/homeStats', params)
+        if (res.code === 200) {
+          this.stats = res.data
+        }
+      } catch (e) { /* ignore */ }
     },
     priorityClass(priority) {
       return { 高: 'high', 中: 'medium', 低: 'low' }[priority] || 'low'
@@ -128,29 +127,27 @@ export default {
         const data = JSON.parse(stored)
         const uid = data.user_id
         if (!uid) return
-        const res = await request.get('/qualityCheck/myTasks', { assigneeId: uid })
-        if (res.code === 200) {
-          this.todoList = (res.data || []).map(t => ({
-            title: t.related_order_no || '-',
-            desc: t.task_type,
-            priority: t.priority,
-            ...this.getTaskMeta(t.task_type)
-          }))
-        }
+        // 合并质检和盘点任务
+        let tasks = []
+        const qcRes = await request.get('/qualityCheck/myTasks', { assigneeId: uid })
+        if (qcRes.code === 200 && qcRes.data) tasks = tasks.concat(qcRes.data)
+        const invRes = await request.get('/inventoryCheck/myTasks', { assigneeId: uid })
+        if (invRes.code === 200 && invRes.data) tasks = tasks.concat(invRes.data)
+        this.todoList = tasks.map(t => ({
+          title: t.related_order_no || '-',
+          desc: t.task_type,
+          priority: t.priority,
+          ...this.getTaskMeta(t.task_type)
+        }))
       } catch (e) { /* ignore */ }
     },
     markTodoDone(index) { this.todoList.splice(index, 1) },
     handleAiSend() {
       const msg = this.aiMessage.trim()
       if (!msg) return
-      this.aiProcessing = true
-      setTimeout(() => {
-        alert(`[AI 演示] ${msg}`)
-        this.aiMessage = ''
-        this.aiProcessing = false
-      }, 1200)
+      // 跳转到AI聊天页面，并通过 query 传递初始问题
+      this.$router.push({ name: 'AiChat', query: { q: msg } })
     },
-    quickAction(type) { alert(`跳转至${type}页面`) },
     goToTasks() {
       this.$router.push({ name: 'Tasks' })
     }
