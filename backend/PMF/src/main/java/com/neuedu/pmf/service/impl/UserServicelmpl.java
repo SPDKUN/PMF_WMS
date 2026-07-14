@@ -4,6 +4,7 @@ import com.neuedu.pmf.entity.User;
 import com.neuedu.pmf.mapper.UserMapper;
 import com.neuedu.pmf.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,11 +12,11 @@ import java.util.ArrayList;
 @Service
 public class UserServicelmpl implements UserService {
 
-    //自动创建userMapper实例
     @Autowired
     private UserMapper userMapper;
 
-    //@Override强调这是一个覆盖父类的方法，写错也不会报错
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     @Override
     public ArrayList<User> list() {
         return userMapper.userList();
@@ -33,17 +34,25 @@ public class UserServicelmpl implements UserService {
 
     @Override
     public boolean save(User user) {
+        user.setPassword(encoder.encode(user.getPassword()));
         return userMapper.save(user) > 0;
     }
 
     @Override
     public boolean update(User user) {
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(encoder.encode(user.getPassword()));
+        }
         return userMapper.update(user) > 0;
     }
 
     @Override
     public User login(String username, String password) {
-        return userMapper.findByUsernameAndPassword(username, password);
+        User user = userMapper.findByUsername(username);
+        if (user != null && encoder.matches(password, user.getPassword())) {
+            return user;
+        }
+        return null;
     }
 
     @Override
@@ -53,20 +62,17 @@ public class UserServicelmpl implements UserService {
             return null;
         }
 
-        // 检查是否需要修改密码
         String oldPassword = (String) params.get("old_password");
         String newPassword = (String) params.get("new_password");
 
         if (oldPassword != null && !oldPassword.isEmpty()
                 && newPassword != null && !newPassword.isEmpty()) {
-            // 验证旧密码
-            User verified = userMapper.findByIdAndPassword(userId, oldPassword);
-            if (verified == null) {
-                return null; // 旧密码错误
+            User currentUser = userMapper.findById(userId);
+            if (currentUser == null || !encoder.matches(oldPassword, currentUser.getPassword())) {
+                return null;
             }
         }
 
-        // 构建更新的User对象
         User user = new User();
         user.setUser_id(userId);
 
@@ -95,9 +101,8 @@ public class UserServicelmpl implements UserService {
             user.setPosition(position);
         }
 
-        // 如果需要修改密码
         if (newPassword != null && !newPassword.isEmpty()) {
-            user.setPassword(newPassword);
+            user.setPassword(encoder.encode(newPassword));
         }
 
         userMapper.update(user);
@@ -107,5 +112,20 @@ public class UserServicelmpl implements UserService {
     @Override
     public ArrayList<User> listByPosition(String position) {
         return userMapper.findByPosition(position);
+    }
+
+    @Override
+    public int migratePasswords() {
+        ArrayList<User> users = userMapper.userList();
+        int count = 0;
+        for (User user : users) {
+            String pwd = user.getPassword();
+            if (pwd != null && !pwd.startsWith("$2")) {
+                user.setPassword(encoder.encode(pwd));
+                userMapper.update(user);
+                count++;
+            }
+        }
+        return count;
     }
 }

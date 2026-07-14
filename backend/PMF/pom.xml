@@ -141,6 +141,12 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- Spring Security Crypto（BCrypt 密码加密） -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- EasyExcel（阿里开源 Excel 操作） -->
         <dependency>
             <groupId>com.alibaba</groupId>

@@ -24,6 +24,7 @@
           />
           <button class="btn btn-search" @click="searchPersonnel">搜索</button>
           <button class="btn btn-cancel" @click="resetSearch">重置</button>
+          <button class="btn btn-export" @click="exportPersonnel">导出Excel</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -74,6 +75,7 @@
           />
           <button class="btn btn-search" @click="searchWarehouse">搜索</button>
           <button class="btn btn-cancel" @click="resetWarehouseSearch">重置</button>
+          <button class="btn btn-export" @click="exportWarehouse">导出Excel</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -126,6 +128,7 @@
           />
           <button class="btn btn-search" @click="searchGoods">搜索</button>
           <button class="btn btn-cancel" @click="resetGoodsSearch">重置</button>
+          <button class="btn btn-export" @click="exportGoods">导出Excel</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -172,6 +175,7 @@
           />
           <button class="btn btn-search" @click="searchBatch">搜索</button>
           <button class="btn btn-cancel" @click="resetBatchSearch">重置</button>
+          <button class="btn btn-export" @click="exportBatch">导出Excel</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -217,6 +221,7 @@
           </div>
           <button class="btn btn-search" @click="searchInventory">搜索</button>
           <button class="btn btn-cancel" @click="resetInventorySearch">重置</button>
+          <button class="btn btn-export" @click="exportInventory">导出Excel</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -269,6 +274,7 @@
           </div>
           <button class="btn btn-search" @click="searchLogs">搜索</button>
           <button class="btn btn-cancel" @click="resetLogSearch">重置</button>
+          <button class="btn btn-export" @click="exportLogs">导出Excel</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -302,7 +308,7 @@
     </div>
 
     <!-- 其他选项卡（通用表格） -->
-    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods' && activeTab !== 'batch' && activeTab !== 'inventory' && activeTab !== 'log'" class="table-wrapper">
+    <div v-if="activeTab !== 'personnel' && activeTab !== 'warehouse' && activeTab !== 'goods' && activeTab !== 'batch' && activeTab !== 'inventory' && activeTab !== 'log'" class="table-wrapper" v-show="false">
       <table class="data-table">
         <thead>
           <tr>
@@ -450,7 +456,6 @@ export default {
         { key: 'goods', label: '货物列表' },
         { key: 'inventory', label: '库存明细' },
         { key: 'batch', label: '批次列表' },
-        { key: 'temperature', label: '温度列表' },
         { key: 'log', label: '操作日志' },
       ],
       allPersonnel: [],
@@ -482,13 +487,6 @@ export default {
       },
       inventoryTableData: [],
       inventoryTotal: 0,
-      temperatureData: [
-        { '仓库': 'A区冷库', '记录时间': '2026-07-10 08:00', '温度(°C)': -18.5, '湿度(%)': 65, '状态': '正常' },
-        { '仓库': 'A区冷库', '记录时间': '2026-07-10 07:00', '温度(°C)': -18.2, '湿度(%)': 64, '状态': '正常' },
-        { '仓库': 'C区冷冻库', '记录时间': '2026-07-10 08:00', '温度(°C)': -22.0, '湿度(%)': 70, '状态': '正常' },
-        { '仓库': 'C区冷冻库', '记录时间': '2026-07-10 07:00', '温度(°C)': -21.5, '湿度(%)': 71, '状态': '正常' },
-        { '仓库': 'B区常温库', '记录时间': '2026-07-10 08:00', '温度(°C)': 22.0, '湿度(%)': 55, '状态': '正常' },
-      ],
       logData: [],
       logSearch: {
         date: '',
@@ -509,10 +507,7 @@ export default {
       return Object.keys(this.currentData[0])
     },
     currentData() {
-      const map = {
-        temperature: this.temperatureData,
-      }
-      return map[this.activeTab] || []
+      return []
     }
   },
   mounted() {
@@ -775,6 +770,13 @@ export default {
       }
     },
 
+    exportPersonnel() { request.exportExcel('/user/excel', '人员列表.xlsx') },
+    exportWarehouse() { request.exportExcel('/warehouse/excel', '仓库列表.xlsx') },
+    exportGoods() { request.exportExcel('/goods/excel', '货物列表.xlsx') },
+    exportInventory() { request.exportExcel('/inventory/excel', '库存明细.xlsx') },
+    exportBatch() { request.exportExcel('/batch/excel', '批次列表.xlsx') },
+    exportLogs() { request.exportExcel('/operationLog/excel', '操作日志.xlsx') },
+
     async openViewDialog(warehouse) {
       this.viewDialog.warehouse = warehouse
       this.viewDialog.selectedZoneId = null
@@ -910,6 +912,11 @@ input[type="date"]:valid::-webkit-datetime-edit {
   color: #606266;
 }
 .btn-cancel:hover { background: #e6e6e8; }
+.btn-export {
+  background: #f0f9eb;
+  color: #67c23a;
+}
+.btn-export:hover { background: #e1f3d8; }
 
 .detail-link {
   color: #409EFF;

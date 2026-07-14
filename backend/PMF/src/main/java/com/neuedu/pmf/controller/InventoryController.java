@@ -4,8 +4,13 @@ import com.neuedu.pmf.common.ResultCode;
 import com.neuedu.pmf.common.ResultData;
 import com.neuedu.pmf.entity.Inventory;
 import com.neuedu.pmf.service.InventoryService;
+import com.neuedu.pmf.util.ExcelExportUtil;
+import com.neuedu.pmf.vo.InventoryVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/inventory")
@@ -13,6 +18,9 @@ public class InventoryController {
 
     @Autowired
     private InventoryService inventoryService;
+
+    @Autowired
+    private ExcelExportUtil excelExportUtil;
 
     @GetMapping("/list")
     public ResultData list() {
@@ -46,5 +54,11 @@ public class InventoryController {
     public ResultData delete(@PathVariable("id") Integer id) {
         boolean flag = inventoryService.delete(id);
         return flag ? ResultData.success() : ResultData.fail(ResultCode.FAILED);
+    }
+
+    @GetMapping("/excel")
+    public void excel(HttpServletResponse response) {
+        ArrayList<InventoryVO> list = inventoryService.listWithDetails(null);
+        excelExportUtil.exportExcel(response, list, InventoryVO.class, "库存明细", "库存明细");
     }
 }

@@ -24,4 +24,6 @@ public interface UserService {
     User updateProfile(java.util.Map<String, Object> params);
 
     ArrayList<User> listByPosition(String position);
+
+    int migratePasswords();
 }

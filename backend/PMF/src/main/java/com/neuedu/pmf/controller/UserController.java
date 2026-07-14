@@ -101,5 +101,11 @@ public class UserController {
         return ResultData.success(userService.listByPosition("仓库员工"));
     }
 
+    @PostMapping("/migratePasswords")
+    public ResultData migratePasswords() {
+        int count = userService.migratePasswords();
+        return ResultData.success("已加密 " + count + " 个用户的密码");
+    }
+
 }
 
