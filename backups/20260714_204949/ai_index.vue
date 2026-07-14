@@ -163,7 +163,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 140px);
-  background: var(--page-bg);
+  background: #f5f7fa;
 }
 
 /* 对话区域 */
@@ -199,9 +199,9 @@ export default {
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; flex-shrink: 0;
 }
-.avatar-ai { background: #fff; border: 1px solid var(--border-color-light); overflow: hidden; }
+.avatar-ai { background: #fff; border: 1px solid #dcdfe6; overflow: hidden; }
 .ai-avatar-img { width: 100%; height: 100%; object-fit: cover; }
-.avatar-user { background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; }
+.avatar-user { background: #409EFF; color: #fff; font-size: 14px; font-weight: 600; }
 
 /* 消息体 */
 .msg-body { max-width: 65%; display: flex; flex-direction: column; gap: 4px; }
@@ -214,8 +214,8 @@ export default {
   padding: 10px 14px; border-radius: 8px; font-size: 14px;
   line-height: 1.7; word-break: break-word; white-space: pre-wrap;
 }
-.msg-bubble-ai { background: #fff; border: 1px solid var(--border-color-light); color: #303133; }
-.msg-bubble-user { background: var(--primary-color); color: #fff; }
+.msg-bubble-ai { background: #fff; border: 1px solid #ebeef5; color: #303133; }
+.msg-bubble-user { background: #409EFF; color: #fff; }
 
 /* 打字动画 */
 .typing-dots { display: flex; gap: 4px; align-items: center; padding: 14px 18px; }
@@ -235,27 +235,27 @@ export default {
 .chat-input-bar {
   padding: 12px 24px 16px;
   background: #fff;
-  border-top: 1px solid var(--border-color-light);
+  border-top: 1px solid #ebeef5;
 }
 .input-wrapper {
   display: flex; gap: 10px; align-items: center;
 }
 .chat-input {
   flex: 1; height: 42px; padding: 0 14px;
-  border: 1px solid var(--border-color-light); border-radius: 8px;
+  border: 1px solid #dcdfe6; border-radius: 8px;
   font-size: 14px; color: #303133; outline: none;
   transition: border-color 0.2s;
 }
-.chat-input:focus { border-color: var(--primary-color); }
+.chat-input:focus { border-color: #409EFF; }
 .chat-input::placeholder { color: #c0c4cc; }
 
 .send-btn {
   padding: 0 24px; height: 42px; border: none; border-radius: 8px;
-  background: var(--primary-color); color: #fff; font-size: 14px;
+  background: #409EFF; color: #fff; font-size: 14px;
   cursor: pointer; transition: background 0.2s; white-space: nowrap;
 }
-.send-btn:hover { background: var(--primary-hover); }
-.send-btn:disabled { background: #6ee7b7; cursor: not-allowed; }
+.send-btn:hover { background: #66b1ff; }
+.send-btn:disabled { background: #a0cfff; cursor: not-allowed; }
 
 @media (max-width: 768px) {
   .chat-messages { padding: 12px; }

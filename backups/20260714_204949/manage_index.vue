@@ -865,7 +865,7 @@ export default {
   display: flex;
   gap: 0;
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   padding: 4px;
   width: fit-content;
@@ -881,7 +881,7 @@ export default {
   transition: all 0.2s;
 }
 .tab-row button.active {
-  background: var(--primary-color);
+  background: #409EFF;
   color: #fff;
 }
 
@@ -901,7 +901,7 @@ export default {
 .search-type {
   height: 32px;
   padding: 0 10px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   font-size: 13px;
   color: #303133;
@@ -911,14 +911,14 @@ export default {
   height: 32px;
   width: 180px;
   padding: 0 10px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   font-size: 13px;
   color: #303133;
   outline: none;
   transition: border-color 0.2s;
 }
-.search-input:focus { border-color: var(--primary-color); }
+.search-input:focus { border-color: #409EFF; }
 .search-input::placeholder { color: #c0c4cc; }
 
 .btn {
@@ -933,20 +933,20 @@ export default {
   transition: all 0.2s;
 }
 .btn-primary {
-  background: var(--primary-color);
+  background: #409EFF;
   color: #fff;
 }
-.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:hover { background: #66b1ff; }
 .btn-cancel {
   background: #f4f4f5;
   color: #606266;
 }
 .btn-cancel:hover { background: #e6e6e8; }
 .btn-search {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: #ecf5ff;
+  color: #409EFF;
 }
-.btn-search:hover { background: var(--primary-bg-hover); }
+.btn-search:hover { background: #d9ecff; }
 .btn-reset-pwd {
   background: #fef0f0;
   color: #f56c6c;
@@ -956,7 +956,7 @@ export default {
 
 .table-wrapper {
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -966,22 +966,22 @@ export default {
   font-size: 13px;
 }
 .data-table thead {
-  background: var(--page-bg);
+  background: #f5f7fa;
 }
 .data-table th {
   padding: 10px 14px;
   text-align: left;
   font-weight: 600;
   color: #303133;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #ebeef5;
   white-space: nowrap;
 }
 .data-table td {
   padding: 10px 14px;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #ebeef5;
   color: #606266;
 }
-.data-table tbody tr:hover { background: var(--page-bg); }
+.data-table tbody tr:hover { background: #f5f7fa; }
 .empty-cell { text-align: center; padding: 40px 0; color: #c0c4cc; }
 
 .status-tag {
@@ -1001,8 +1001,8 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-action.edit { background: var(--primary-bg); color: var(--primary-color); }
-.btn-action.edit:hover { background: var(--primary-bg-hover); }
+.btn-action.edit { background: #ecf5ff; color: #409EFF; }
+.btn-action.edit:hover { background: #d9ecff; }
 .btn-action.view { background: #f0f9eb; color: #67c23a; }
 .btn-action.view:hover { background: #e1f3d8; }
 .btn-action.delete { background: #fef0f0; color: #f56c6c; }
@@ -1017,7 +1017,7 @@ export default {
 }
 .dialog-box {
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   width: 460px; max-width: 92vw;
 }
@@ -1026,7 +1026,7 @@ export default {
 }
 .dialog-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px; border-bottom: 1px solid var(--border-color-light);
+  padding: 14px 20px; border-bottom: 1px solid #ebeef5;
 }
 .dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
 .dialog-close {
@@ -1037,18 +1037,18 @@ export default {
 .dialog-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
 .dialog-footer {
   display: flex; justify-content: flex-end; gap: 8px;
-  padding: 10px 20px 16px; border-top: 1px solid var(--border-color-light);
+  padding: 10px 20px 16px; border-top: 1px solid #ebeef5;
 }
 .form-item { display: flex; flex-direction: column; gap: 4px; }
 .form-item label { font-size: 13px; color: #606266; }
 .form-item .required { color: #f56c6c; }
 .form-item input, .form-item select {
   height: 34px; padding: 0 10px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   border-radius: 4px; font-size: 13px; color: #303133;
   outline: none; transition: border-color 0.2s;
 }
-.form-item input:focus, .form-item select:focus { border-color: var(--primary-color); }
+.form-item input:focus, .form-item select:focus { border-color: #409EFF; }
 .form-item select { background: #fff; cursor: pointer; }
 
 /* 仓库查看弹窗 */
@@ -1061,14 +1061,14 @@ export default {
 }
 .zone-sidebar {
   width: 240px; min-width: 240px;
-  border-right: 1px solid var(--border-color-light);
+  border-right: 1px solid #ebeef5;
   overflow-y: auto;
   background: #fafafa;
 }
 .zone-sidebar-title {
   padding: 12px 14px;
   font-size: 13px; font-weight: 600; color: #303133;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #ebeef5;
   background: #fff;
   position: sticky; top: 0;
 }
@@ -1079,8 +1079,8 @@ export default {
   border-bottom: 1px solid #f0f0f0;
   transition: background 0.15s;
 }
-.zone-item:hover { background: var(--primary-bg); }
-.zone-item.active { background: var(--primary-bg-hover); }
+.zone-item:hover { background: #ecf5ff; }
+.zone-item.active { background: #d9ecff; }
 .zone-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
@@ -1104,7 +1104,7 @@ export default {
 .location-main-title {
   padding: 12px 16px;
   font-size: 13px; font-weight: 600; color: #303133;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #ebeef5;
   background: #fff;
   position: sticky; top: 0; z-index: 1;
 }
@@ -1150,6 +1150,6 @@ export default {
   .search-input { width: 120px; }
   .view-dialog-box { width: 98vw; }
   .view-dialog-body { flex-direction: column; height: auto; max-height: 70vh; }
-  .zone-sidebar { width: 100%; min-width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid var(--border-color-light); }
+  .zone-sidebar { width: 100%; min-width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid #ebeef5; }
 }
 </style>

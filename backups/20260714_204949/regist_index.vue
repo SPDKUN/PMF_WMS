@@ -93,7 +93,7 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--page-bg);
+  background: #f5f7fa;
 }
 
 .regist-card {
@@ -101,9 +101,8 @@ export default {
   max-width: 420px;
   padding: 36px 36px;
   background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
 }
 
 .card-header {
@@ -139,7 +138,7 @@ form .form-group label {
 form .form-group input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   font-size: 14px;
   color: #303133;
@@ -149,7 +148,7 @@ form .form-group input {
 }
 
 form .form-group input:focus {
-  border-color: var(--primary-color);
+  border-color: #409EFF;
 }
 
 form .form-group input::placeholder {
@@ -160,7 +159,7 @@ form .regist-btn {
   width: 100%;
   margin-top: 8px;
   padding: 12px;
-  background: var(--primary-color);
+  background: #409EFF;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -172,7 +171,7 @@ form .regist-btn {
 }
 
 form .regist-btn:hover {
-  background: var(--primary-hover);
+  background: #66b1ff;
 }
 
 .error-msg {
@@ -193,12 +192,12 @@ form .regist-btn:hover {
 }
 
 .login-link a {
-  color: var(--primary-color);
+  color: #409EFF;
   text-decoration: none;
 }
 
 .login-link a:hover {
-  color: var(--primary-hover);
+  color: #66b1ff;
 }
 
 @media (max-width: 480px) {

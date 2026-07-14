@@ -292,12 +292,11 @@ export default {
 
 .profile-card {
   background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: var(--card-radius);
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
   padding: 28px;
   width: 100%;
   max-width: 640px;
-  box-shadow: var(--card-shadow);
 }
 
 .avatar-section {
@@ -306,13 +305,13 @@ export default {
   gap: 16px;
   margin-bottom: 20px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #ebeef5;
 }
 .avatar {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: var(--primary-color);
+  background: #409EFF;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,10 +347,10 @@ export default {
   transition: all 0.2s;
 }
 .btn-primary {
-  background: var(--primary-color);
+  background: #409EFF;
   color: #fff;
 }
-.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:hover { background: #66b1ff; }
 .btn-cancel {
   background: #f4f4f5;
   color: #606266;
@@ -379,7 +378,7 @@ export default {
   line-height: 36px;
   font-size: 14px;
   color: #303133;
-  background: var(--page-bg);
+  background: #f5f7fa;
   border-radius: 4px;
 }
 
@@ -407,7 +406,7 @@ export default {
 }
 .dialog-box {
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   width: 500px; max-width: 92vw;
   max-height: 90vh;
@@ -415,7 +414,7 @@ export default {
 }
 .dialog-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px; border-bottom: 1px solid var(--border-color-light);
+  padding: 14px 20px; border-bottom: 1px solid #ebeef5;
   position: sticky; top: 0; background: #fff; z-index: 1;
 }
 .dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
@@ -427,7 +426,7 @@ export default {
 .dialog-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
 .dialog-footer {
   display: flex; justify-content: flex-end; gap: 8px;
-  padding: 10px 20px 16px; border-top: 1px solid var(--border-color-light);
+  padding: 10px 20px 16px; border-top: 1px solid #ebeef5;
   position: sticky; bottom: 0; background: #fff;
 }
 
@@ -437,13 +436,13 @@ export default {
 .form-item .hint { font-size: 11px; color: #c0c4cc; }
 .form-item input {
   height: 34px; padding: 0 10px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   border-radius: 4px; font-size: 13px; color: #303133;
   outline: none; transition: border-color 0.2s;
 }
-.form-item input:focus { border-color: var(--primary-color); }
+.form-item input:focus { border-color: #409EFF; }
 .form-item input:disabled {
-  background: var(--page-bg); color: #909399; cursor: not-allowed;
+  background: #f5f7fa; color: #909399; cursor: not-allowed;
 }
 
 .divider {
@@ -452,7 +451,7 @@ export default {
 }
 .divider::before,
 .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border-color-light);
+  content: ''; flex: 1; height: 1px; background: #ebeef5;
 }
 .divider span {
   padding: 0 12px; font-size: 12px; color: #909399;

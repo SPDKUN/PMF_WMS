@@ -224,7 +224,7 @@ export default {
 }
 
 .page-header .header-left .breadcrumb .breadcrumb-item.active {
-  color: #409EFF;
+  color: var(--primary-color);
 }
 
 .page-header .header-left .breadcrumb .breadcrumb-separator {
@@ -240,7 +240,7 @@ export default {
 .page-header .header-right .header-time {
   font-size: 13px;
   color: #606266;
-  background: #f5f7fa;
+  background: var(--page-bg);
   padding: 4px 10px;
   border-radius: 4px;
 }
@@ -260,8 +260,8 @@ export default {
 }
 
 .page-header .header-right .refresh-btn:hover {
-  border-color: #409EFF;
-  color: #409EFF;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 /* 统计概览 */
@@ -298,7 +298,7 @@ export default {
   color: #fff;
 }
 
-.stat-row .stat-card .stat-icon.blue { background: #409EFF; }
+.stat-row .stat-card .stat-icon.blue { background: var(--primary-color); }
 .stat-row .stat-card .stat-icon.green { background: #67C23A; }
 .stat-row .stat-card .stat-icon.orange { background: #E6A23C; }
 .stat-row .stat-card .stat-icon.purple { background: #9254de; }
@@ -361,7 +361,7 @@ export default {
 }
 
 .view-card:hover {
-  border-color: #409EFF;
+  border-color: var(--primary-color);
 }
 
 .view-card .card-badge {
@@ -397,7 +397,7 @@ export default {
   color: #fff;
 }
 
-.view-card .card-icon.user { background: #409EFF; }
+.view-card .card-icon.user { background: var(--primary-color); }
 .view-card .card-icon.warehouse { background: #67C23A; }
 .view-card .card-icon.product { background: #E6A23C; }
 .view-card .card-icon.flow { background: #9254de; }
@@ -423,8 +423,8 @@ export default {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 4px;
-  background: #ecf5ff;
-  color: #409EFF;
+  background: var(--primary-bg);
+  color: var(--primary-color);
 }
 
 .view-card .card-meta .meta-tag.dev {
@@ -434,11 +434,11 @@ export default {
 
 /* 突出样式（人员列表） */
 .view-card.featured {
-  border-color: #409EFF;
+  border-color: var(--primary-color);
 }
 
 .view-card.featured .card-meta .meta-tag {
-  background: #409EFF;
+  background: var(--primary-color);
   color: #fff;
 }
 
@@ -456,13 +456,13 @@ export default {
   background: #fff;
   border: 1px solid #ebeef5;
   border-radius: 4px;
-  border-left: 3px solid #409EFF;
+  border-left: 3px solid var(--primary-color);
   min-width: 280px;
   max-width: 500px;
 }
 
 .toast-bar.success { border-left-color: #67C23A; }
-.toast-bar.info { border-left-color: #409EFF; }
+.toast-bar.info { border-left-color: var(--primary-color); }
 
 .toast-bar .toast-message {
   font-size: 14px;

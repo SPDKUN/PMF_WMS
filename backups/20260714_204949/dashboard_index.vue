@@ -107,9 +107,9 @@ export default {
 
       const { dates, inbound, outbound } = this.lineChartData
       this.lineChart.setOption({
-        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#5ab1ef', textStyle: { color: '#333' } },
-        legend: { data: ['入库数量', '出库数量'], top: 4, textStyle: { color: '#606266' } },
-        grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['入库数量', '出库数量'], top: 0 },
+        grid: { left: 40, right: 10, top: 28, bottom: 10 },
         xAxis: {
           type: 'category',
           data: dates,
@@ -122,18 +122,18 @@ export default {
             type: 'line',
             data: inbound,
             smooth: true,
-            lineStyle: { color: '#5ab1ef', width: 2 },
-            itemStyle: { color: '#5ab1ef' },
-            areaStyle: { color: 'rgba(90,177,239,0.15)' },
+            lineStyle: { color: '#409EFF', width: 2 },
+            itemStyle: { color: '#409EFF' },
+            areaStyle: { color: 'rgba(64,158,255,0.1)' },
           },
           {
             name: '出库数量',
             type: 'line',
             data: outbound,
             smooth: true,
-            lineStyle: { color: '#b6a2de', width: 2 },
-            itemStyle: { color: '#b6a2de' },
-            areaStyle: { color: 'rgba(182,162,222,0.15)' },
+            lineStyle: { color: '#67C23A', width: 2 },
+            itemStyle: { color: '#67C23A' },
+            areaStyle: { color: 'rgba(103,194,58,0.1)' },
           },
         ],
       })
@@ -149,8 +149,8 @@ export default {
 
       const { names, quantities } = this.barChartData
       this.barChart.setOption({
-        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#10b981', textStyle: { color: '#333' } },
-        grid: { left: '3%', right: '4%', top: 20, bottom: 35, containLabel: true },
+        tooltip: { trigger: 'axis' },
+        grid: { left: 40, right: 10, top: 15, bottom: 35 },
         xAxis: {
           type: 'category',
           data: names,
@@ -164,8 +164,8 @@ export default {
             data: quantities,
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#10b981' },
-                { offset: 1, color: '#6ee7b7' },
+                { offset: 0, color: '#409EFF' },
+                { offset: 1, color: '#79bbff' },
               ]),
               borderRadius: [4, 4, 0, 0],
             },
@@ -185,9 +185,9 @@ export default {
 
       const { names, temperatures, humidities } = this.tempHumidityData
       this.tempHumidityChart.setOption({
-        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#67e0e3', textStyle: { color: '#333' } },
-        legend: { data: ['温度(°C)', '湿度(%)'], top: 4, textStyle: { color: '#606266' } },
-        grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['温度(°C)', '湿度(%)'], top: 0 },
+        grid: { left: 40, right: 40, top: 30, bottom: 15 },
         xAxis: { type: 'category', data: names },
         yAxis: [
           { type: 'value', name: '°C' },
@@ -203,8 +203,8 @@ export default {
             data: temperatures,
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#67e0e3' },
-                { offset: 1, color: '#b2f0f2' },
+                { offset: 0, color: '#e6a23c' },
+                { offset: 1, color: '#f5dab1' },
               ]),
               borderRadius: [4, 4, 0, 0],
             },
@@ -217,8 +217,8 @@ export default {
             data: humidities,
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#5ab1ef' },
-                { offset: 1, color: '#add8f7' },
+                { offset: 0, color: '#409EFF' },
+                { offset: 1, color: '#a0cfff' },
               ]),
               borderRadius: [4, 4, 0, 0],
             },
@@ -251,9 +251,9 @@ export default {
     },
 
     getCapacityColor(saturation) {
-      if (saturation < 25) return '#10b981'
-      if (saturation < 50) return '#e6a23c'
-      if (saturation < 75) return '#f59e0b'
+      if (saturation < 25) return '#67C23A'
+      if (saturation < 50) return '#e6c200'
+      if (saturation < 75) return '#e6a23c'
       return '#f56c6c'
     },
   },
@@ -292,8 +292,8 @@ export default {
 }
 
 .chart-tab-row button.active {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: #ecf5ff;
+  color: #409EFF;
 }
 
 .chart-container {

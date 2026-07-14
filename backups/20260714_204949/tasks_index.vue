@@ -571,13 +571,13 @@
                   <td>
                     <input type="number" :min="0" :max="row.available" :value="row.selectQty"
                            @input="onOutboundQtyInput(row, $event)"
-                           style="width:80px;padding:4px 8px;border:1px solid var(--border-color-light);border-radius:4px;" />
+                           style="width:80px;padding:4px 8px;border:1px solid #dcdfe6;border-radius:4px;" />
                   </td>
                 </tr>
               </tbody>
             </table>
             <div style="text-align:right;margin-top:8px;font-size:14px;font-weight:600;color:#303133;">
-              已选总数量：<span style="color:var(--primary-color);">{{ outboundTotalSelected }}</span>
+              已选总数量：<span style="color:#409EFF;">{{ outboundTotalSelected }}</span>
             </div>
           </div>
           <div v-else-if="outboundDialog.goodsId" style="text-align:center;color:#c0c4cc;font-size:13px;padding:12px;">
@@ -890,7 +890,7 @@
                   <td>{{ d.book_quantity }}</td>
                   <td>
                     <input type="number" v-model.number="invCheckCompleteDialog.details[i].actual_quantity"
-                      min="0" style="width:80px;padding:4px 6px;border:1px solid var(--border-color-light);border-radius:4px;font-size:13px;" />
+                      min="0" style="width:80px;padding:4px 6px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px;" />
                   </td>
                   <td :class="invCheckDiffClass(d)">
                     {{ d.actual_quantity != null ? (d.actual_quantity - d.book_quantity > 0 ? '+' : '') + (d.actual_quantity - d.book_quantity) : '-' }}
@@ -928,7 +928,7 @@ export default {
     return {
       activeTab: 'todo',
       operations: [
-        { key: 'newBatch',  label: '新增批次', color: 'var(--primary-color)', icon: '&#128230;', desc: '创建新的货物批次并关联货物信息' },
+        { key: 'newBatch',  label: '新增批次', color: '#409EFF', icon: '&#128230;', desc: '创建新的货物批次并关联货物信息' },
         { key: 'inbound',   label: '入库',     color: '#67c23a', icon: '&#128229;', desc: '将货物录入仓库并分配库位' },
         { key: 'outbound',  label: '出库',     color: '#e6a23c', icon: '&#128228;', desc: '按出库单拣货并完成出库' },
         { key: 'adjust',    label: '库存调整', color: '#9065db', icon: '&#9881;',  desc: '修正库存数量差异或库位调整' },
@@ -2255,7 +2255,7 @@ export default {
   display: flex;
   gap: 0;
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   padding: 4px;
   width: fit-content;
@@ -2271,7 +2271,7 @@ export default {
   transition: all 0.2s;
 }
 .tab-row button.active {
-  background: var(--primary-color);
+  background: #409EFF;
   color: #fff;
 }
 
@@ -2305,9 +2305,9 @@ export default {
   max-width: 900px;
 }
 .op-card {
-  --card-color: var(--primary-color);
+  --card-color: #409EFF;
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 12px;
   padding: 24px 16px 20px;
   cursor: pointer;
@@ -2372,11 +2372,11 @@ export default {
   transition: all 0.2s;
 }
 .btn-primary {
-  background: var(--primary-color);
+  background: #409EFF;
   color: #fff;
   align-self: flex-start;
 }
-.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:hover { background: #66b1ff; }
 .btn-cancel {
   background: #f4f4f5;
   color: #606266;
@@ -2385,7 +2385,7 @@ export default {
 
 .table-wrapper {
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   overflow: hidden;
   overflow-x: auto;
@@ -2396,22 +2396,22 @@ export default {
   font-size: 13px;
 }
 .data-table thead {
-  background: var(--page-bg);
+  background: #f5f7fa;
 }
 .data-table th {
   padding: 10px 14px;
   text-align: left;
   font-weight: 600;
   color: #303133;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #ebeef5;
   white-space: nowrap;
 }
 .data-table td {
   padding: 10px 14px;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #ebeef5;
   color: #606266;
 }
-.data-table tbody tr:hover { background: var(--page-bg); }
+.data-table tbody tr:hover { background: #f5f7fa; }
 .empty-cell { text-align: center; padding: 40px 0; color: #c0c4cc; }
 
 .priority-tag {
@@ -2434,7 +2434,7 @@ export default {
 .form-item .required { color: #f56c6c; }
 .form-item input, .form-item select, .form-item textarea {
   padding: 8px 12px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   font-size: 13px;
   color: #303133;
@@ -2443,7 +2443,7 @@ export default {
   font-family: inherit;
 }
 .form-item input:focus, .form-item select:focus, .form-item textarea:focus {
-  border-color: var(--primary-color);
+  border-color: #409EFF;
 }
 .form-item select { background: #fff; cursor: pointer; }
 .form-item textarea { resize: vertical; min-height: 60px; }
@@ -2457,13 +2457,13 @@ export default {
 .confirm-dialog-overlay { z-index: 99999; }
 .dialog-box {
   background: #fff;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   width: 480px; max-width: 92vw;
 }
 .dialog-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px; border-bottom: 1px solid var(--border-color-light);
+  padding: 14px 20px; border-bottom: 1px solid #ebeef5;
 }
 .dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
 .dialog-close {
@@ -2476,33 +2476,33 @@ export default {
 }
 .dialog-footer {
   display: flex; justify-content: flex-end; gap: 8px;
-  padding: 10px 20px 16px; border-top: 1px solid var(--border-color-light);
+  padding: 10px 20px 16px; border-top: 1px solid #ebeef5;
 }
 
 /* 入库完成弹窗 - 仓库可视化 */
 .view-dialog-box { width: 900px; }
 .view-dialog-body {
-  display: flex; height: 400px; border-top: 1px solid var(--border-color-light); border-bottom: 1px solid var(--border-color-light);
+  display: flex; height: 400px; border-top: 1px solid #ebeef5; border-bottom: 1px solid #ebeef5;
 }
 .progress-bar-wrap {
-  background: var(--page-bg); padding: 8px 12px; border-radius: 4px; margin-bottom: 4px;
+  background: #f5f7fa; padding: 8px 12px; border-radius: 4px; margin-bottom: 4px;
 }
 .progress-text { font-size: 13px; color: #606266; }
 
 .zone-sidebar {
-  width: 240px; min-width: 240px; border-right: 1px solid var(--border-color-light);
+  width: 240px; min-width: 240px; border-right: 1px solid #ebeef5;
   overflow-y: auto; background: #fafafa;
 }
 .zone-sidebar-title {
   padding: 12px 14px; font-size: 13px; font-weight: 600; color: #303133;
-  border-bottom: 1px solid var(--border-color-light); background: #fff; position: sticky; top: 0;
+  border-bottom: 1px solid #ebeef5; background: #fff; position: sticky; top: 0;
 }
 .zone-item {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
 }
-.zone-item:hover { background: var(--primary-bg); }
-.zone-item.active { background: var(--primary-bg-hover); }
+.zone-item:hover { background: #ecf5ff; }
+.zone-item.active { background: #d9ecff; }
 .zone-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .dot-green { background: #67c23a; }
 .dot-red { background: #f56c6c; }
@@ -2511,7 +2511,7 @@ export default {
 .location-main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .location-main-title {
   padding: 12px 16px; font-size: 13px; font-weight: 600;
-  border-bottom: 1px solid var(--border-color-light); background: #fff; position: sticky; top: 0;
+  border-bottom: 1px solid #ebeef5; background: #fff; position: sticky; top: 0;
 }
 .location-main-placeholder {
   flex: 1; display: flex; align-items: center; justify-content: center;
@@ -2531,7 +2531,7 @@ export default {
 .loc-free:hover { border-color: #67c23a; }
 .loc-occupied { background: #fef0f0; border: 1px solid #fab6b6; cursor: not-allowed; }
 .loc-locked { background: #fef6e7; border: 1px solid #f5dab1; cursor: not-allowed; }
-.loc-selected { background: var(--primary-bg-hover); border: 2px solid var(--primary-color); }
+.loc-selected { background: #d9ecff; border: 2px solid #409EFF; }
 .loc-name { font-size: 11px; color: #303133; text-align: center; word-break: break-all; }
 .loc-checkbox { font-size: 12px; }
 .loc-checkbox input[type="checkbox"] { cursor: pointer; }
@@ -2543,22 +2543,22 @@ export default {
   font-size: 13px; cursor: pointer; transition: all 0.2s;
 }
 .btn-danger:hover { background: #f78989; }
-.btn-primary:disabled { background: #6ee7b7; cursor: not-allowed; }
+.btn-primary:disabled { background: #a0cfff; cursor: not-allowed; }
 
 /* 库存调整弹窗 */
 .adjust-panels { display: flex; gap: 12px; }
-.adjust-panel { flex: 1; border: 1px solid var(--border-color-light); border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; }
-.adjust-panel-title { padding: 8px 12px; font-size: 13px; font-weight: 600; color: #303133; background: var(--page-bg); border-bottom: 1px solid var(--border-color-light); }
+.adjust-panel { flex: 1; border: 1px solid #ebeef5; border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; }
+.adjust-panel-title { padding: 8px 12px; font-size: 13px; font-weight: 600; color: #303133; background: #f5f7fa; border-bottom: 1px solid #ebeef5; }
 .adjust-panel .form-item { padding: 4px 8px; margin: 0; }
 .adjust-panel .progress-bar-wrap { margin: 0 8px 4px; }
-.adjust-panel-body { display: flex; flex: 1; height: 200px; border-top: 1px solid var(--border-color-light); }
+.adjust-panel-body { display: flex; flex: 1; height: 200px; border-top: 1px solid #ebeef5; }
 .adjust-zone-sidebar { width: 140px; min-width: 140px; }
 .adjust-location-card { width: 72px; height: 46px; font-size: 10px; position: relative; }
 .adjust-location-card.loc-occupied { cursor: pointer; }
-.adjust-location-card.loc-occupied:hover { border-color: var(--primary-color); }
+.adjust-location-card.loc-occupied:hover { border-color: #409EFF; }
 .loc-seq-badge {
   position: absolute; top: 2px; right: 4px;
-  background: var(--primary-color); color: #fff; font-size: 10px; font-weight: 700;
+  background: #409EFF; color: #fff; font-size: 10px; font-weight: 700;
   width: 18px; height: 18px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
 }

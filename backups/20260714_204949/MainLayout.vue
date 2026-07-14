@@ -1,7 +1,7 @@
 <template>
   <div class="app-wrapper">
     <!-- 侧边栏 -->
-    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }" :style="{ flex: `0 0 ${sidebarCollapsed ? 60 : 224}px` }">
+    <aside class="sidebar">
       <div class="logo">
         <el-icon><Box /></el-icon>
         <span>WMS</span>
@@ -36,13 +36,8 @@
           <span>个人中心</span>
         </a>
       </nav>
-      <div class="sidebar-bottom">
-        <div class="collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '展开侧边栏' : '收缩侧边栏'">
-          <el-icon><DArrowLeft v-if="!sidebarCollapsed" /><DArrowRight v-else /></el-icon>
-        </div>
-        <div class="logout-btn" @click="handleLogout" title="退出登录">
-          <el-icon><SwitchButton /></el-icon>
-        </div>
+      <div class="logout-btn" @click="handleLogout" title="退出登录">
+        <el-icon><SwitchButton /></el-icon>
       </div>
     </aside>
 
@@ -64,19 +59,19 @@
 
 <script>
 import {
-  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight
+  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 
 export default {
   name: 'MainLayout',
   components: {
-    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, ElIcon
+    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis,
+    ElIcon
   },
   data() {
     return {
       currentDate: '',
-      sidebarCollapsed: false,
     }
   },
   computed: {
@@ -97,8 +92,6 @@ export default {
     }
   },
   mounted() {
-    const saved = localStorage.getItem('sidebarCollapsed')
-    if (saved !== null) this.sidebarCollapsed = saved === 'true'
     this.updateDateTime()
     this.timer = setInterval(this.updateDateTime, 60000)
   },
@@ -106,10 +99,6 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
-    toggleSidebar() {
-      this.sidebarCollapsed = !this.sidebarCollapsed
-      localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed)
-    },
     navigate(name) {
       this.$router.push({ name })
     },
@@ -130,108 +119,74 @@ export default {
 .app-wrapper {
   display: flex;
   height: 100vh;
-  background: var(--page-bg);
-  color: var(--text-primary);
+  background: #f5f7fa;
+  color: #303133;
   overflow: hidden;
 }
 
 /* 侧边栏 */
 .sidebar {
-  flex: 0 0 224px;
+  flex: 0 0 200px;
   background: #fff;
-  border-right: 1px solid var(--border-color-light);
+  border-right: 1px solid #ebeef5;
   padding: 20px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  transition: flex-basis 0.3s ease;
-  overflow: hidden;
 }
-
 .sidebar .logo {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 20px;
+  padding: 0 16px;
   width: 100%;
 }
 .sidebar .logo .el-icon {
   font-size: 24px;
-  color: var(--primary-color);
-  flex-shrink: 0;
+  color: #409EFF;
 }
 .sidebar .logo span {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary);
-  white-space: nowrap;
+  color: #303133;
 }
 
 .sidebar .nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   width: 100%;
   padding: 0 12px;
-  flex: 1;
-  margin-top: 24px;
 }
 .sidebar .nav a {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border-radius: 6px;
-  color: var(--text-regular);
+  border-radius: 4px;
+  color: #606266;
   text-decoration: none;
   font-size: 14px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  transition: background 0.2s;
 }
 .sidebar .nav a .el-icon {
   font-size: 18px;
-  flex-shrink: 0;
 }
 .sidebar .nav a:hover {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: #ecf5ff;
+  color: #409EFF;
 }
 .sidebar .nav a.active {
-  background: var(--primary-bg);
-  color: var(--primary-color);
-  font-weight: 500;
+  background: #ecf5ff;
+  color: #409EFF;
 }
 
-/* 侧边栏底部 */
-.sidebar-bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.collapse-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  background: var(--primary-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.3s;
-  color: var(--primary-color);
-  font-size: 16px;
-}
-.collapse-btn:hover {
-  background: var(--primary-bg-hover);
-}
-
+/* 登出按钮 */
 .logout-btn {
   width: 36px;
   height: 36px;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #fef0f0;
   display: flex;
   align-items: center;
@@ -247,12 +202,6 @@ export default {
   background: #fde2e2;
 }
 
-/* 收缩状态 */
-.sidebar.collapsed .logo { justify-content: center; padding: 0 8px; }
-.sidebar.collapsed .logo span { display: none; }
-.sidebar.collapsed .nav a { justify-content: center; padding: 10px 0; }
-.sidebar.collapsed .nav a span { display: none; }
-
 /* 主内容 */
 .main {
   flex: 1;
@@ -267,10 +216,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
+  padding: 12px 20px;
   background: #fff;
-  border-bottom: 1px solid var(--border-color-light);
-  box-shadow: var(--header-shadow);
+  border-bottom: 1px solid #ebeef5;
 }
 .topbar-left {
   display: flex;
@@ -280,12 +228,12 @@ export default {
 .topbar-left h1 {
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #303133;
   margin: 0;
 }
 .topbar-left .date-text {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: #909399;
 }
 
 /* 内容区域 */
@@ -297,13 +245,11 @@ export default {
 
 @media (max-width: 768px) {
   .sidebar {
-    flex: 0 0 56px !important;
+    flex: 0 0 56px;
     padding: 12px 0;
   }
   .sidebar .logo span,
-  .sidebar .nav a span,
-  .sidebar .collapse-btn,
-  .sidebar .logout-btn {
+  .sidebar .nav a span {
     display: none;
   }
   .sidebar .nav a {

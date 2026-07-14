@@ -70,7 +70,7 @@ import request from '@/utils/request.js'
 
 const taskTypeMeta = {
   '质检': { icon: 'List', color: '#9254de' },
-  '入库': { icon: 'ArrowRight', color: 'var(--primary-color)' },
+  '入库': { icon: 'ArrowRight', color: '#409EFF' },
   '出库': { icon: 'Check', color: '#f56c6c' },
   '库存调整': { icon: 'Box', color: '#e6a23c' },
   '库存盘点': { icon: 'DocumentCopy', color: '#67c23a' },
@@ -118,7 +118,7 @@ export default {
       return { 高: 'high', 中: 'medium', 低: 'low' }[priority] || 'low'
     },
     getTaskMeta(taskType) {
-      return taskTypeMeta[taskType] || { icon: 'List', color: 'var(--primary-color)' }
+      return taskTypeMeta[taskType] || { icon: 'List', color: '#409EFF' }
     },
     async fetchTasks() {
       const stored = localStorage.getItem('userInfo')
@@ -170,10 +170,9 @@ export default {
 /* 卡片 */
 .card {
   background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: var(--card-radius);
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
   padding: 20px 24px;
-  box-shadow: var(--card-shadow);
 }
 
 /* 欢迎卡片 */
@@ -203,7 +202,7 @@ export default {
 }
 .welcome-card .status-item .el-icon {
   font-size: 16px;
-  color: var(--primary-color);
+  color: #409EFF;
 }
 .welcome-card .status-item .num {
   font-weight: 600;
@@ -216,13 +215,13 @@ export default {
   margin-top: 4px;
   display: flex;
   align-items: center;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   padding: 4px 6px 4px 14px;
   transition: border-color 0.2s;
 }
 .welcome-card .ai-input-area:focus-within {
-  border-color: var(--primary-color);
+  border-color: #409EFF;
 }
 .welcome-card .ai-input-area input {
   flex: 1;
@@ -237,12 +236,12 @@ export default {
   color: #c0c4cc;
 }
 .welcome-card .ai-input-area .ai-icon {
-  color: var(--primary-color);
+  color: #409EFF;
   font-size: 16px;
   margin-right: 8px;
 }
 .welcome-card .ai-input-area .send-btn {
-  background: var(--primary-color);
+  background: #409EFF;
   border: none;
   border-radius: 4px;
   padding: 8px 18px;
@@ -256,10 +255,10 @@ export default {
   gap: 6px;
 }
 .welcome-card .ai-input-area .send-btn:hover:not(:disabled) {
-  background: var(--primary-hover);
+  background: #66b1ff;
 }
 .welcome-card .ai-input-area .send-btn:disabled {
-  background: #6ee7b7;
+  background: #a0cfff;
   cursor: not-allowed;
 }
 
@@ -272,7 +271,7 @@ export default {
 .welcome-card .quick-actions .btn {
   padding: 6px 16px;
   border-radius: 4px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #dcdfe6;
   background: #fff;
   color: #606266;
   font-size: 13px;
@@ -283,8 +282,8 @@ export default {
   gap: 6px;
 }
 .welcome-card .quick-actions .btn:hover {
-  color: var(--primary-color);
-  border-color: var(--primary-color);
+  color: #409EFF;
+  border-color: #409EFF;
 }
 
 /* 待办卡片 */
@@ -307,11 +306,11 @@ export default {
   margin: 0;
 }
 .todo-card .card-header h3 .el-icon {
-  color: var(--primary-color);
+  color: #409EFF;
 }
 .todo-card .card-header .count-badge {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: #ecf5ff;
+  color: #409EFF;
   padding: 2px 10px;
   border-radius: 4px;
   font-size: 12px;
@@ -326,11 +325,11 @@ export default {
   align-items: center;
   padding: 10px 12px;
   border-radius: 4px;
-  border: 1px solid var(--border-color-light);
+  border: 1px solid #ebeef5;
   gap: 12px;
 }
 .todo-item:hover {
-  background: var(--page-bg);
+  background: #f5f7fa;
 }
 .todo-item .icon {
   width: 32px;
@@ -383,7 +382,7 @@ export default {
   padding: 4px;
 }
 .todo-item .action-btn:hover {
-  color: var(--primary-color);
+  color: #409EFF;
 }
 
 @media (max-width: 768px) {
@@ -400,7 +399,7 @@ export default {
   }
   .welcome-card .ai-input-area input {
     width: 100%;
-    border: 1px solid var(--border-color-light);
+    border: 1px solid #dcdfe6;
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 6px;
