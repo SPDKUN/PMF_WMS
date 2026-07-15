@@ -4,7 +4,7 @@
     <div class="chart-card">
       <div class="chart-tab-row">
         <button :class="{ active: activeChart === 'trend' }" @click="switchChart('trend')">出入库趋势</button>
-        <button :class="{ active: activeChart === 'goods' }" @click="switchChart('goods')">货物库存分布</button>
+        <button :class="{ active: activeChart === 'goods' }" @click="switchChart('goods')">货物库存数量</button>
       </div>
       <div v-show="activeChart === 'trend'" ref="lineChartRef" class="chart-container"></div>
       <div v-show="activeChart === 'goods'" ref="barChartRef" class="chart-container"></div>
