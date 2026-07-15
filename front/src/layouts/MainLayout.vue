@@ -138,10 +138,10 @@ export default {
           localStorage.removeItem('ai_chat_msg_' + username + '_' + sessionId)
         }
       } catch (e) { /* ignore */ }
-      localStorage.removeItem('token')
-      localStorage.removeItem('userInfo')
-      localStorage.removeItem('ai_session_id')
-      this.$router.push({ name: 'Login' })
+      localStorage.removeItem('token')//清除令牌
+      localStorage.removeItem('userInfo')//清除用户信息
+      localStorage.removeItem('ai_session_id')//清除AI会话
+      this.$router.push({ name: 'Login' })//跳转登录页
     },
     updateDateTime() {
       const now = new Date()

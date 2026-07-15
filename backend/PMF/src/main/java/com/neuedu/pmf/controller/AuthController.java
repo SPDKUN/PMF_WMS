@@ -22,13 +22,18 @@ public class AuthController {
 
     @GetMapping("/login")
     public ResultData login(@RequestParam("username") String username, @RequestParam("password") String password) {
+        //调用Service验证用户
         User user = authService.login(username, password);
         if (user != null) {
+            //用户存在，生成令牌
             String token = jwtUtil.generateToken(user.getUser_id().longValue(), username);
+            //生成成功消息
             ResultData resultData = ResultData.success(user);
+            //将令牌塞入成功消息
             resultData.put("token", token);
             return resultData;
         }
+        //返回失败消息
         return ResultData.fail(ResultCode.USER_AND_PASSWORD_ERROR);
     }
 }

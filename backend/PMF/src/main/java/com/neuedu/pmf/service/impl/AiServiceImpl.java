@@ -315,6 +315,7 @@ public class AiServiceImpl implements AiService {
         // 待办任务数
         int pendingTasks = 0;
         if (assigneeId != null) {
+            //通过用户ID找到任务，存入列表中
             ArrayList<WorkTask> tasks = workTaskMapper.findByAssigneeId(assigneeId);
             pendingTasks = (tasks != null ? tasks.size() : 0);
         }
@@ -322,13 +323,17 @@ public class AiServiceImpl implements AiService {
 
         // 最后更新时间（今天只显示时分，非今天加月/日前缀）
         String lastUpdate = "--";
+        //从操作日志列表中找最近更新时间
         ArrayList<OperationLog> logs = operationLogMapper.list();
         if (logs != null && !logs.isEmpty()) {
+            //获取第一个，时间一定是最新的
             LocalDateTime latest = logs.get(0).getOperation_time();
             if (latest != null) {
+                //同一天，只显示时间
                 if (latest.toLocalDate().equals(java.time.LocalDate.now())) {
                     lastUpdate = latest.format(DateTimeFormatter.ofPattern("HH:mm"));
                 } else {
+                    //最新操作不在今天，显示日期
                     lastUpdate = latest.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
                 }
             }

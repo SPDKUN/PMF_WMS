@@ -3,10 +3,14 @@
     <!-- 上半部分：图表视图切换 -->
     <div class="chart-card">
       <div class="chart-tab-row">
+        <!-- 两个切换按钮 -->
+         <!-- 点击调用trend/goods，activeChart为trend/goods时高亮 -->
         <button :class="{ active: activeChart === 'trend' }" @click="switchChart('trend')">出入库趋势</button>
         <button :class="{ active: activeChart === 'goods' }" @click="switchChart('goods')">货物库存数量</button>
       </div>
+      <!-- 折线图 -->
       <div v-show="activeChart === 'trend'" ref="lineChartRef" class="chart-container"></div>
+      <!-- 柱状图 -->
       <div v-show="activeChart === 'goods'" ref="barChartRef" class="chart-container"></div>
     </div>
 

@@ -20,8 +20,9 @@
         <form @submit.prevent="handleLogin">
           <div class="form-group">
             <label>用户名</label>
+            <!-- 表单双向绑定 -->
             <input
-              v-model="username"
+              v-model="username" 
               type="text"
               placeholder="请输入用户名"
               required
@@ -30,6 +31,7 @@
 
           <div class="form-group">
             <label>密码</label>
+            <!-- 表单双向绑定 -->
             <input
               v-model="password"
               type="password"
@@ -38,6 +40,7 @@
             />
           </div>
 
+          <!-- 点击登录改为登录中...，增加反馈 -->
           <button type="submit" class="login-btn" :disabled="loading">
             <span v-if="!loading">登 录</span>
             <span v-else>登录中...</span>
@@ -63,7 +66,7 @@ export default {
       username: '',
       password: '',
       errorMsg: '',
-      loading: false
+      loading: false//是否正在登录中
     }
   },
 
@@ -75,14 +78,16 @@ export default {
 
   // 定义方法
   methods: {
+
+    // 为什么要async/await？因为网络请求需要时间（几百毫秒），JS 是异步的，用 `await` 等待结果回来再继续执行。
     async handleLogin() {
       this.errorMsg = ''
-      this.loading = true
+      this.loading = true//更新登录状态
       try {
 
         // 1. 先打印 request 对象，确保导入正确
     console.log('request 对象：', request)
-
+        //发送get请求
         const response = await request.get('/auth/login', {
           username: this.username,
           password: this.password
@@ -91,14 +96,17 @@ export default {
         // 3. 打印 response 实际值
     console.log('response 实际值：', response)
 
+        // 提取token
         const token = response.token
         if (token) {
           const userData = response.data
+          //检查账号是否被停用
           if (userData && userData.status === 0) {
             this.errorMsg = '该账号已被停用，请联系管理员'
             this.loading = false
             return
           }
+          //保存令牌和用户信息，localStorage里的数据是持久化的
           localStorage.setItem('token', token)
           if (userData) {
             localStorage.setItem('userInfo', JSON.stringify(userData))
@@ -106,15 +114,16 @@ export default {
           // 每次登录生成新会话ID，AI聊天记录按会话隔离
           const sessionId = Date.now().toString()
           localStorage.setItem('ai_session_id', sessionId)
+          // 跳转主页
           this.$router.push({ name: 'Home' })
         } else {
-          this.errorMsg = '登录失败，未获取到令牌'
+          this.errorMsg = '用户名密码错误'
         }
       } catch (error) {
         console.error('登录请求出错：', error)
-        this.errorMsg = '网络问题或者用户名密码错误'
+        this.errorMsg = '网络问题，请检查网络'
       } finally {
-        this.loading = false
+        this.loading = false//无论登录是成功还是失败都不属于正在登录状态
       }
     }
   }
