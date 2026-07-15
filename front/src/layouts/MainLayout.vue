@@ -55,7 +55,10 @@
         </div>
       </header>
 
-      <div class="content-area">
+      <div class="content-area" :class="{ 'loading-active': routeLoading }">
+        <div class="route-loading-overlay">
+          <div class="route-loader"></div>
+        </div>
         <router-view></router-view>
       </div>
     </main>
@@ -78,6 +81,7 @@ export default {
       currentDate: '',
       sidebarCollapsed: false,
       userPosition: '',
+      routeLoading: false,
     }
   },
   computed: {
@@ -95,6 +99,12 @@ export default {
         Profile: '个人中心',
       }
       return titles[this.$route.name] || 'WMS'
+    }
+  },
+  watch: {
+    '$route'() {
+      this.routeLoading = true
+      setTimeout(() => { this.routeLoading = false }, 300)
     }
   },
   mounted() {
@@ -308,6 +318,66 @@ export default {
   flex: 1;
   overflow-y: auto;
   padding: 16px 20px;
+  position: relative;
+}
+
+/* 路由加载动画 */
+.route-loading-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(244, 247, 249, 0.85);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.loading-active .route-loading-overlay {
+  pointer-events: all;
+  visibility: visible;
+  opacity: 1;
+}
+.route-loader {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+.route-loader::before {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 40px;
+  height: 4px;
+  content: '';
+  background: hsl(210 100% 50% / 40%);
+  border-radius: 50%;
+  animation: route-shadow-ani 0.5s linear infinite;
+}
+.route-loader::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  content: '';
+  background: #10b981;
+  border-radius: 4px;
+  animation: route-jump-ani 0.5s linear infinite;
+}
+@keyframes route-jump-ani {
+  15%  { border-bottom-right-radius: 3px; }
+  25%  { transform: translateY(8px) rotate(22.5deg); }
+  50%  { border-bottom-right-radius: 36px; transform: translateY(16px) scale(1, 0.9) rotate(45deg); }
+  75%  { transform: translateY(8px) rotate(67.5deg); }
+  100% { transform: translateY(0) rotate(90deg); }
+}
+@keyframes route-shadow-ani {
+  0%, 100% { transform: scale(1, 1); }
+  50%      { transform: scale(1.2, 1); }
 }
 
 @media (max-width: 768px) {

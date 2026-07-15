@@ -13,3 +13,12 @@ const app = createApp(App)
 app.use(router)
 //创建
 app.mount('#app')
+
+// 移除启动加载动画
+const loadingEl = document.getElementById('app-loading')
+if (loadingEl) {
+  loadingEl.classList.add('hidden')
+  loadingEl.addEventListener('transitionend', () => {
+    loadingEl.remove()
+  }, { once: true })
+}
