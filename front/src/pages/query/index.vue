@@ -910,20 +910,20 @@ input[type="date"]:valid::-webkit-datetime-edit {
   transition: all 0.2s;
 }
 .btn-search {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: #ecf5ff;
+  color: #409eff;
 }
-.btn-search:hover { background: var(--primary-bg-hover); }
+.btn-search:hover { background: #d9ecff; }
 .btn-cancel {
   background: #f4f4f5;
   color: #606266;
 }
 .btn-cancel:hover { background: #e6e6e8; }
 .btn-export {
-  background: #f0f9eb;
-  color: #67c23a;
+  background: #fdf6ec;
+  color: #e6a23c;
 }
-.btn-export:hover { background: #e1f3d8; }
+.btn-export:hover { background: #faecd8; }
 
 .detail-link {
   color: var(--primary-color);

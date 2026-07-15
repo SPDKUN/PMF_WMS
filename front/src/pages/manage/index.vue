@@ -943,10 +943,10 @@ export default {
 }
 .btn-cancel:hover { background: #e6e6e8; }
 .btn-search {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: #ecf5ff;
+  color: #409eff;
 }
-.btn-search:hover { background: var(--primary-bg-hover); }
+.btn-search:hover { background: #d9ecff; }
 .btn-reset-pwd {
   background: #fef0f0;
   color: #f56c6c;
