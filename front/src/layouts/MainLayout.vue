@@ -37,9 +37,6 @@
         </a>
       </nav>
       <div class="sidebar-bottom">
-        <div class="collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '展开侧边栏' : '收缩侧边栏'">
-          <el-icon><DArrowLeft v-if="!sidebarCollapsed" /><DArrowRight v-else /></el-icon>
-        </div>
         <div class="logout-btn" @click="handleLogout" title="退出登录">
           <el-icon><SwitchButton /></el-icon>
         </div>
@@ -50,6 +47,9 @@
     <main class="main">
       <header class="topbar">
         <div class="topbar-left">
+          <div class="collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '展开侧边栏' : '收缩侧边栏'">
+            <el-icon><DArrowLeft v-if="!sidebarCollapsed" /><DArrowRight v-else /></el-icon>
+          </div>
           <h1>{{ pageTitle }}</h1>
           <span class="date-text">{{ currentDate }}</span>
         </div>
@@ -211,23 +211,6 @@ export default {
   gap: 8px;
 }
 
-.collapse-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  background: var(--primary-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.3s;
-  color: var(--primary-color);
-  font-size: 16px;
-}
-.collapse-btn:hover {
-  background: var(--primary-bg-hover);
-}
-
 .logout-btn {
   width: 36px;
   height: 36px;
@@ -245,6 +228,24 @@ export default {
 }
 .logout-btn:hover {
   background: #fde2e2;
+}
+
+/* 收缩按钮（顶部栏） */
+.collapse-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #606266;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.collapse-btn:hover {
+  background: #f0f2f5;
 }
 
 /* 收缩状态 */
@@ -275,7 +276,7 @@ export default {
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 .topbar-left h1 {
   font-size: 18px;
@@ -302,7 +303,6 @@ export default {
   }
   .sidebar .logo span,
   .sidebar .nav a span,
-  .sidebar .collapse-btn,
   .sidebar .logout-btn {
     display: none;
   }

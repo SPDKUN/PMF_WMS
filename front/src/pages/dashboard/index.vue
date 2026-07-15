@@ -162,6 +162,7 @@ export default {
             name: '库存数量',
             type: 'bar',
             data: quantities,
+            barMaxWidth: 36,
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#10b981' },
@@ -203,8 +204,8 @@ export default {
             data: temperatures,
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#67e0e3' },
-                { offset: 1, color: '#b2f0f2' },
+                { offset: 0, color: '#ff3b3b' },
+                { offset: 1, color: '#ff9999' },
               ]),
               borderRadius: [4, 4, 0, 0],
             },

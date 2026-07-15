@@ -2303,6 +2303,7 @@ export default {
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   max-width: 900px;
+  margin: 0 auto;
 }
 .op-card {
   --card-color: var(--primary-color);
