@@ -23,11 +23,14 @@
       <div class="dashboard-card">
         <h3 class="card-title">仓库容量饱和度</h3>
         <div class="capacity-list">
+          <!-- 遍历数组，每条数据生成一个容量条目 -->
           <div v-for="item in capacityList" :key="item.warehouseName" class="capacity-item">
+            <!-- 包裹仓库名称和使用量信息 -->
             <div class="capacity-label">
               <span>{{ item.warehouseName }}</span>
               <span>{{ item.usedSlots }} / {{ item.totalSlots }}</span>
             </div>
+            <!-- 进度条 -->
             <div class="progress-bar">
               <div
                 class="progress-fill"
@@ -51,23 +54,29 @@ export default {
   name: 'Dashboard',
   data() {
     return {
-      activeChart: 'trend',
-      lineChart: null,
-      barChart: null,
-      tempHumidityChart: null,
-      lineChartData: null,
-      barChartData: null,
-      tempHumidityData: null,
-      capacityList: [],
-      barChartReady: false,
+      activeChart: 'trend',//当前上半部分显示图形，默认为出入库趋势
+      lineChart: null,//出入库趋势折线图
+      barChart: null,//货物数量柱状图
+      tempHumidityChart: null,//温湿度柱状图
+      lineChartData: null,//出入库趋势图数据
+      barChartData: null,//货物数量数据
+      tempHumidityData: null,//温湿度数据
+      capacityList: [],//仓库数据列表
+      barChartReady: false,//标记货物库存图表是否已初始化，避免重复初始化
     }
   },
+  //生命期钩子
   mounted() {
+    //请求所有看板数据
     this.fetchAllData()
+    //监听窗口大小变化事件，以便图表自适应大小
     window.addEventListener('resize', this.handleResize)
   },
+  //组件卸载前的生命周期钩子
   beforeUnmount() {
+    //移除窗口大小监听器，以防内存泄漏
     window.removeEventListener('resize', this.handleResize)
+    //如果图表存在，摧毁图表并释放资源
     if (this.lineChart) this.lineChart.dispose()
     if (this.barChart) this.barChart.dispose()
     if (this.tempHumidityChart) this.tempHumidityChart.dispose()
@@ -75,6 +84,7 @@ export default {
   methods: {
     async fetchAllData() {
       try {
+        //请求所有数据接口
         const [lineRes, barRes, tempRes, capRes] = await Promise.all([
           request.get('/dashboard/weeklyInboundOutbound'),
           request.get('/dashboard/goodsQuantity'),
@@ -82,8 +92,10 @@ export default {
           request.get('/dashboard/warehouseCapacity'),
         ])
 
+        //返回值为200
         if (lineRes.code === 200) {
           this.lineChartData = lineRes.data
+          //等 DOM 更新后（$nextTick）再初始化图表，确保图表容器已渲染。
           this.$nextTick(() => this.initLineChart())
         }
         if (barRes.code === 200) {
@@ -91,6 +103,7 @@ export default {
         }
         if (tempRes.code === 200) {
           this.tempHumidityData = tempRes.data
+          //保存温湿度数据并在 DOM 更新后初始化图表。
           this.$nextTick(() => this.initTempHumidityChart())
         }
         if (capRes.code === 200) {
@@ -102,6 +115,7 @@ export default {
     },
 
     initLineChart() {
+      //无数据就直接返回
       if (!this.lineChartData) return
       const container = this.$refs.lineChartRef
       if (!container) return
