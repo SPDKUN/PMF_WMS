@@ -185,14 +185,63 @@ export default {
       this.tempHumidityChart = echarts.init(container)
 
       const { names, temperatures, humidities } = this.tempHumidityData
+
+      // ---- 计算双Y轴范围，使温度与湿度的零刻度线对齐 ----
+      const tVals = temperatures.filter(v => v != null && !isNaN(v))
+      const hVals = humidities.filter(v => v != null && !isNaN(v))
+
+      // 数据边界（确保包含0）
+      const tDataMin = tVals.length > 0 ? Math.min(0, ...tVals) : 0
+      const tDataMax = tVals.length > 0 ? Math.max(0, ...tVals) : 0
+      const hDataMin = hVals.length > 0 ? Math.min(0, ...hVals) : 0
+      const hDataMax = hVals.length > 0 ? Math.max(0, ...hVals) : 0
+
+      // 加 10% 内边距，让条形图顶端留白
+      const pad = (min, max) => Math.max((max - min) * 0.1, 2)
+      let tMin = tDataMin - pad(tDataMin, tDataMax)
+      let tMax = tDataMax + pad(tDataMin, tDataMax)
+      let hMin = hDataMin - pad(hDataMin, hDataMax)
+      let hMax = hDataMax + pad(hDataMin, hDataMax)
+
+      // 计算零刻度在各轴上的比例位置（0 = 轴底部, 1 = 轴顶部）
+      const zeroRatio = (min, max) => {
+        const range = max - min
+        if (range <= 0) return 0
+        return (0 - min) / range
+      }
+      const tZeroR = zeroRatio(tMin, tMax)
+      const hZeroR = zeroRatio(hMin, hMax)
+
+      // 统一零刻度线比例（取零上空间需求更大的一方）
+      const targetR = Math.max(tZeroR, hZeroR)
+
+      // 调整 min 使零线对齐：targetR = (0 - newMin) / (max - newMin)
+      // → newMin = targetR × max / (targetR - 1)
+      const adjustMin = (max, r) => {
+        if (r <= 0) return 0  // 零在底部，无需向下扩展
+        return (r * max) / (r - 1)
+      }
+
+      if (targetR > tZeroR && targetR < 1) {
+        tMin = adjustMin(tMax, targetR)
+      }
+      if (targetR > hZeroR && targetR < 1) {
+        hMin = adjustMin(hMax, targetR)
+      }
+
       this.tempHumidityChart.setOption({
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#67e0e3', textStyle: { color: '#333' } },
         legend: { data: ['温度(°C)', '湿度(%)'], top: 4, textStyle: { color: '#606266' } },
         grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
         xAxis: { type: 'category', data: names },
         yAxis: [
-          { type: 'value', name: '°C' },
-          { type: 'value', name: '%' },
+          { type: 'value', name: '°C', min: tMin, max: tMax },
+          {
+            type: 'value', name: '%', min: hMin, max: hMax,
+            axisLabel: {
+              formatter: (v) => v < 0 ? '' : v  // 小于0的刻度数值不显示
+            }
+          },
         ],
         series: [
           {
