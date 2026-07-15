@@ -5,12 +5,14 @@ import com.neuedu.pmf.entity.Batch;
 import com.neuedu.pmf.entity.Goods;
 import com.neuedu.pmf.entity.Inventory;
 import com.neuedu.pmf.entity.OperationLog;
+import com.neuedu.pmf.entity.TemperatureHumidityRecord;
 import com.neuedu.pmf.entity.Warehouse;
 import com.neuedu.pmf.entity.WorkTask;
 import com.neuedu.pmf.mapper.BatchMapper;
 import com.neuedu.pmf.mapper.GoodsMapper;
 import com.neuedu.pmf.mapper.InventoryMapper;
 import com.neuedu.pmf.mapper.OperationLogMapper;
+import com.neuedu.pmf.mapper.TemperatureHumidityRecordMapper;
 import com.neuedu.pmf.mapper.WarehouseMapper;
 import com.neuedu.pmf.mapper.WorkTaskMapper;
 import com.neuedu.pmf.service.AiService;
@@ -61,13 +63,16 @@ public class AiServiceImpl implements AiService {
     private WarehouseMapper warehouseMapper;
 
     @Autowired
+    private TemperatureHumidityRecordMapper tempHumidityMapper;
+
+    @Autowired
     private OkHttpClient okHttpClient;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String SYSTEM_PROMPT =
         "你是一名专业的预制菜仓储管理(WMS)智能助手，严格遵守以下所有规则，不得违反：\n" +
-        "1、仅回答与预制菜新增批次、出入库、库存盘点、库存调整、质检、处理次品等相关问题；\n" +
+        "1、仅回答与仓储管理相关的问题，包括但不限于：批次管理、出入库、库存盘点、库存调整、质检、次品处理、仓库信息、库位管理、温湿度监控等；\n" +
         "2、绝对拒绝回答娱乐、游戏、金融、政治、个人生活等任何非仓储物流及食品安全类问题；\n" +
         "3、不提供具体的菜谱、烹饪方法或菜品口味评价；不替代专业的食品安全检测或质量认证；\n" +
         "4、对于系统报错、数据异常、设备故障等紧急情况，必须明确提示用户立即联系技术支持或现场主管处理；\n" +
@@ -77,6 +82,7 @@ public class AiServiceImpl implements AiService {
         "如果用户询问具体数据而你无法获取，必须明确告知用户去对应页面查看：" +
         "库存数量→「明细查询-库存明细」；货物列表→「明细查询-货物列表」；" +
         "批次信息→「明细查询-批次列表」；仓库库位→「明细查询-仓库列表」；" +
+        "温湿度记录→「明细查询-温湿度记录」；" +
         "待办任务→「工作任务-我的待办」；操作记录→「明细查询-操作日志」。\n" +
         "8、所有回答末尾必须添加免责声明：以上内容仅供仓储作业参考，不能替代标准作业程序(SOP)和专业人员的判断。操作前请务必核对系统数据与实际货物信息。";
 
@@ -249,6 +255,32 @@ public class AiServiceImpl implements AiService {
             long pendingCount = allTasks.stream().filter(t -> t.getCompleted_time() == null).count();
             ctx.append("- 工作任务总览：共 ").append(allTasks.size()).append(" 个任务，其中 ").append(pendingCount).append(" 个待完成\n");
             hasData = true;
+        }
+
+        // 温湿度相关
+        if (containsAny(userMessage, "温度", "湿度", "温湿度", "temperature", "humidity")) {
+            ArrayList<TemperatureHumidityRecord> records = tempHumidityMapper.list();
+            if (!records.isEmpty()) {
+                // 按仓库分组，取每个仓库最新的温湿度记录
+                Map<Integer, TemperatureHumidityRecord> latestMap = new LinkedHashMap<>();
+                for (TemperatureHumidityRecord r : records) {
+                    if (r.getRecorded_time() == null) continue;
+                    TemperatureHumidityRecord existing = latestMap.get(r.getWarehouse_id());
+                    if (existing == null || r.getRecorded_time().isAfter(existing.getRecorded_time())) {
+                        latestMap.put(r.getWarehouse_id(), r);
+                    }
+                }
+                ctx.append("- 各仓库最新温湿度记录：\n");
+                for (Map.Entry<Integer, TemperatureHumidityRecord> e : latestMap.entrySet()) {
+                    Warehouse wh = warehouseMapper.findById(e.getKey());
+                    TemperatureHumidityRecord r = e.getValue();
+                    ctx.append("    · ").append(wh != null ? wh.getWarehouse_name() : "仓库" + e.getKey())
+                       .append("：温度 ").append(r.getTemperature() != null ? r.getTemperature() + "°C" : "-")
+                       .append("，湿度 ").append(r.getHumidity() != null ? r.getHumidity() + "%" : "-")
+                       .append("（记录时间：").append(r.getRecorded_time().format(DateTimeFormatter.ofPattern("MM/dd HH:mm"))).append("）\n");
+                }
+                hasData = true;
+            }
         }
 
         if (!hasData) return "";
