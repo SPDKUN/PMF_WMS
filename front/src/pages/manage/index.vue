@@ -49,7 +49,7 @@
             <tr v-if="personnelList.length === 0">
               <td colspan="8" class="empty-cell">暂无人员数据</td>
             </tr>
-            <tr v-for="p in personnelList" :key="p.user_id">
+            <tr v-for="p in pagedPersonnel" :key="p.user_id">
               <td>{{ p.user_id }}</td>
               <td>{{ p.username }}</td>
               <td>{{ p.real_name }}</td>
@@ -64,6 +64,19 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="pagination-row">
+        <span class="total-info">共 {{ personnelList.length }} 条</span>
+        <div class="pagination-controls">
+          <button :disabled="page.personnel <= 1" @click="page.personnel = 1">首页</button>
+          <button :disabled="page.personnel <= 1" @click="page.personnel--">上一页</button>
+          <template v-for="p in getPageNumbers(personnelTotalPages, page.personnel)" :key="p">
+            <span v-if="p === '...'" class="page-ellipsis">...</span>
+            <button v-else :class="{ active: page.personnel === p }" @click="page.personnel = p">{{ p }}</button>
+          </template>
+          <button :disabled="page.personnel >= personnelTotalPages" @click="page.personnel++">下一页</button>
+          <button :disabled="page.personnel >= personnelTotalPages" @click="page.personnel = personnelTotalPages">末页</button>
+        </div>
       </div>
     </div>
 
@@ -109,7 +122,7 @@
             <tr v-if="warehouseList.length === 0">
               <td colspan="8" class="empty-cell">暂无仓库数据</td>
             </tr>
-            <tr v-for="w in warehouseList" :key="w.warehouse_id">
+            <tr v-for="w in pagedWarehouses" :key="w.warehouse_id">
               <td>{{ w.warehouse_id }}</td>
               <td>{{ w.warehouse_name }}</td>
               <td>{{ w.warehouse_type }}</td>
@@ -125,6 +138,19 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="pagination-row">
+        <span class="total-info">共 {{ warehouseList.length }} 条</span>
+        <div class="pagination-controls">
+          <button :disabled="page.warehouse <= 1" @click="page.warehouse = 1">首页</button>
+          <button :disabled="page.warehouse <= 1" @click="page.warehouse--">上一页</button>
+          <template v-for="p in getPageNumbers(warehouseTotalPages, page.warehouse)" :key="p">
+            <span v-if="p === '...'" class="page-ellipsis">...</span>
+            <button v-else :class="{ active: page.warehouse === p }" @click="page.warehouse = p">{{ p }}</button>
+          </template>
+          <button :disabled="page.warehouse >= warehouseTotalPages" @click="page.warehouse++">下一页</button>
+          <button :disabled="page.warehouse >= warehouseTotalPages" @click="page.warehouse = warehouseTotalPages">末页</button>
+        </div>
       </div>
     </div>
 
@@ -170,7 +196,7 @@
             <tr v-if="goodsList.length === 0">
               <td colspan="8" class="empty-cell">暂无货物数据</td>
             </tr>
-            <tr v-for="g in goodsList" :key="g.goods_id">
+            <tr v-for="g in pagedGoods" :key="g.goods_id">
               <td>{{ g.goods_id }}</td>
               <td>{{ g.goods_code }}</td>
               <td>{{ g.category }}</td>
@@ -184,6 +210,20 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="pagination-row">
+        <span class="total-info">共 {{ goodsList.length }} 条</span>
+        <div class="pagination-controls">
+          <button :disabled="page.goods <= 1" @click="page.goods = 1">首页</button>
+          <button :disabled="page.goods <= 1" @click="page.goods--">上一页</button>
+          <template v-for="p in getPageNumbers(goodsTotalPages, page.goods)" :key="p">
+            <span v-if="p === '...'" class="page-ellipsis">...</span>
+            <button v-else :class="{ active: page.goods === p }" @click="page.goods = p">{{ p }}</button>
+          </template>
+          <button :disabled="page.goods >= goodsTotalPages" @click="page.goods++">下一页</button>
+          <button :disabled="page.goods >= goodsTotalPages" @click="page.goods = goodsTotalPages">末页</button>
+        </div>
       </div>
     </div>
 
@@ -417,6 +457,8 @@ export default {
   data() {
     return {
       activeTab: 'personnel',
+      pageSize: 10,
+      page: { personnel: 1, warehouse: 1, goods: 1 },
       allPersonnel: [],
       personnelList: [],
       searchType: 'user_id',
@@ -457,6 +499,25 @@ export default {
     }
   },
   computed: {
+    // --- 分页 ---
+    pagedPersonnel() {
+      const s = (this.page.personnel - 1) * this.pageSize
+      return this.personnelList.slice(s, s + this.pageSize)
+    },
+    personnelTotalPages() { return Math.ceil(this.personnelList.length / this.pageSize) || 1 },
+
+    pagedWarehouses() {
+      const s = (this.page.warehouse - 1) * this.pageSize
+      return this.warehouseList.slice(s, s + this.pageSize)
+    },
+    warehouseTotalPages() { return Math.ceil(this.warehouseList.length / this.pageSize) || 1 },
+
+    pagedGoods() {
+      const s = (this.page.goods - 1) * this.pageSize
+      return this.goodsList.slice(s, s + this.pageSize)
+    },
+    goodsTotalPages() { return Math.ceil(this.goodsList.length / this.pageSize) || 1 },
+
     availablePositions() {
       const map = {
         '管理部门': ['主管'],
@@ -472,6 +533,23 @@ export default {
     this.fetchGoods()
   },
   methods: {
+    // --- 分页页码生成 ---
+    getPageNumbers(totalPages, current) {
+      const pages = []
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i)
+      } else {
+        pages.push(1)
+        if (current > 3) pages.push('...')
+        const start = Math.max(2, current - 1)
+        const end = Math.min(totalPages - 1, current + 1)
+        for (let i = start; i <= end; i++) pages.push(i)
+        if (current < totalPages - 2) pages.push('...')
+        pages.push(totalPages)
+      }
+      return pages
+    },
+
     async fetchPersonnel() {
       try {
         const res = await request.get('/user/personnel')
@@ -485,6 +563,7 @@ export default {
     },
 
     searchPersonnel() {
+      this.page.personnel = 1
       const keyword = this.searchKeyword.trim()
       if (!keyword) {
         this.personnelList = this.allPersonnel
@@ -505,6 +584,7 @@ export default {
     },
 
     resetSearch() {
+      this.page.personnel = 1
       this.searchKeyword = ''
       this.personnelList = this.allPersonnel
     },
@@ -637,6 +717,7 @@ export default {
     },
 
     searchWarehouse() {
+      this.page.warehouse = 1
       const keyword = this.warehouseSearchKeyword.trim()
       if (!keyword) {
         this.warehouseList = this.allWarehouses
@@ -657,6 +738,7 @@ export default {
     },
 
     resetWarehouseSearch() {
+      this.page.warehouse = 1
       this.warehouseSearchKeyword = ''
       this.warehouseList = this.allWarehouses
     },
@@ -786,6 +868,7 @@ export default {
     },
 
     searchGoods() {
+      this.page.goods = 1
       const keyword = this.goodsSearchKeyword.trim()
       if (!keyword) {
         this.goodsList = this.allGoods
@@ -803,6 +886,7 @@ export default {
     },
 
     resetGoodsSearch() {
+      this.page.goods = 1
       this.goodsSearchKeyword = ''
       this.goodsList = this.allGoods
     },
@@ -1151,5 +1235,53 @@ export default {
   .view-dialog-box { width: 98vw; }
   .view-dialog-body { flex-direction: column; height: auto; max-height: 70vh; }
   .zone-sidebar { width: 100%; min-width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid var(--border-color-light); }
+}
+
+/* ========== 分页 ========== */
+.pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #909399;
+  padding: 10px 0 4px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.total-info { white-space: nowrap; }
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pagination-controls button {
+  min-width: 32px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background: #fff;
+  color: #606266;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pagination-controls button:hover:not(:disabled) {
+  border-color: var(--primary-color, #409EFF);
+  color: var(--primary-color, #409EFF);
+}
+.pagination-controls button.active {
+  background: var(--primary-color, #409EFF);
+  border-color: var(--primary-color, #409EFF);
+  color: #fff;
+}
+.pagination-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.page-ellipsis {
+  width: 32px;
+  text-align: center;
+  color: #909399;
 }
 </style>

@@ -44,7 +44,7 @@
           <tr v-if="personnelList.length === 0">
             <td colspan="7" class="empty-cell">暂无人员数据</td>
           </tr>
-          <tr v-for="p in personnelList" :key="p.user_id">
+          <tr v-for="p in pagedPersonnel" :key="p.user_id">
             <td>{{ p.user_id }}</td>
             <td>{{ p.username }}</td>
             <td>{{ p.real_name }}</td>
@@ -96,7 +96,7 @@
           <tr v-if="warehouseList.length === 0">
             <td colspan="8" class="empty-cell">暂无仓库数据</td>
           </tr>
-          <tr v-for="w in warehouseList" :key="w.warehouse_id">
+          <tr v-for="w in pagedWarehouses" :key="w.warehouse_id">
             <td>{{ w.warehouse_id }}</td>
             <td>{{ w.warehouse_name }}</td>
             <td>{{ w.warehouse_type }}</td>
@@ -148,7 +148,7 @@
             <tr v-if="goodsList.length === 0">
               <td colspan="7" class="empty-cell">暂无货物数据</td>
             </tr>
-            <tr v-for="g in goodsList" :key="g.goods_id">
+            <tr v-for="g in pagedGoods" :key="g.goods_id">
               <td>{{ g.goods_id }}</td>
               <td>{{ g.goods_code }}</td>
               <td>{{ g.category }}</td>
@@ -193,7 +193,7 @@
             <tr v-if="batchList.length === 0">
               <td colspan="5" class="empty-cell">暂无批次数据</td>
             </tr>
-            <tr v-for="b in batchList" :key="b.batch_id">
+            <tr v-for="b in pagedBatches" :key="b.batch_id">
               <td>{{ b.batch_id }}</td>
               <td>{{ getBatchGoodsName(b.goods_id) }}</td>
               <td>{{ b.expiry_date }}</td>
@@ -242,7 +242,7 @@
             <tr v-if="inventoryTableData.length === 0">
               <td colspan="8" class="empty-cell">暂无库存数据</td>
             </tr>
-            <tr v-for="item in inventoryTableData" :key="item.inventory_id">
+            <tr v-for="item in pagedInventory" :key="item.inventory_id">
               <td>{{ item.inventory_id }}</td>
               <td>{{ item.goods_name || '-' }}</td>
               <td>{{ item.batch_id }}</td>
@@ -292,7 +292,7 @@
             <tr v-if="logData.length === 0">
               <td colspan="5" class="empty-cell">暂无操作日志</td>
             </tr>
-            <tr v-for="log in logData" :key="log.log_id">
+            <tr v-for="log in pagedLogs" :key="log.log_id">
               <td>{{ log.operation_time }}</td>
               <td>{{ getOperatorName(log.operator_id) }}</td>
               <td>{{ log.operation_type }}</td>
@@ -327,14 +327,88 @@
     </div>
 
     <!-- 分页 -->
-    <div class="pagination-row">
-      <span v-if="activeTab === 'personnel'">共 {{ personnelList.length }} 条</span>
-      <span v-else-if="activeTab === 'warehouse'">共 {{ warehouseList.length }} 条</span>
-      <span v-else-if="activeTab === 'goods'">共 {{ goodsList.length }} 条</span>
-      <span v-else-if="activeTab === 'batch'">共 {{ batchList.length }} 条</span>
-      <span v-else-if="activeTab === 'inventory'">共 {{ inventoryTableData.length }} 条</span>
-      <span v-else-if="activeTab === 'log'">共 {{ logData.length }} 条</span>
-      <span v-else>共 {{ currentData.length }} 条</span>
+    <div class="pagination-row" v-if="activeTab === 'personnel'">
+      <span class="total-info">共 {{ personnelList.length }} 条</span>
+      <div class="pagination-controls">
+        <button :disabled="page.personnel <= 1" @click="page.personnel = 1">首页</button>
+        <button :disabled="page.personnel <= 1" @click="page.personnel--">上一页</button>
+        <template v-for="p in getPageNumbers(personnelTotalPages, page.personnel)" :key="p">
+          <span v-if="p === '...'" class="page-ellipsis">...</span>
+          <button v-else :class="{ active: page.personnel === p }" @click="page.personnel = p">{{ p }}</button>
+        </template>
+        <button :disabled="page.personnel >= personnelTotalPages" @click="page.personnel++">下一页</button>
+        <button :disabled="page.personnel >= personnelTotalPages" @click="page.personnel = personnelTotalPages">末页</button>
+      </div>
+    </div>
+
+    <div class="pagination-row" v-if="activeTab === 'warehouse'">
+      <span class="total-info">共 {{ warehouseList.length }} 条</span>
+      <div class="pagination-controls">
+        <button :disabled="page.warehouse <= 1" @click="page.warehouse = 1">首页</button>
+        <button :disabled="page.warehouse <= 1" @click="page.warehouse--">上一页</button>
+        <template v-for="p in getPageNumbers(warehouseTotalPages, page.warehouse)" :key="p">
+          <span v-if="p === '...'" class="page-ellipsis">...</span>
+          <button v-else :class="{ active: page.warehouse === p }" @click="page.warehouse = p">{{ p }}</button>
+        </template>
+        <button :disabled="page.warehouse >= warehouseTotalPages" @click="page.warehouse++">下一页</button>
+        <button :disabled="page.warehouse >= warehouseTotalPages" @click="page.warehouse = warehouseTotalPages">末页</button>
+      </div>
+    </div>
+
+    <div class="pagination-row" v-if="activeTab === 'goods'">
+      <span class="total-info">共 {{ goodsList.length }} 条</span>
+      <div class="pagination-controls">
+        <button :disabled="page.goods <= 1" @click="page.goods = 1">首页</button>
+        <button :disabled="page.goods <= 1" @click="page.goods--">上一页</button>
+        <template v-for="p in getPageNumbers(goodsTotalPages, page.goods)" :key="p">
+          <span v-if="p === '...'" class="page-ellipsis">...</span>
+          <button v-else :class="{ active: page.goods === p }" @click="page.goods = p">{{ p }}</button>
+        </template>
+        <button :disabled="page.goods >= goodsTotalPages" @click="page.goods++">下一页</button>
+        <button :disabled="page.goods >= goodsTotalPages" @click="page.goods = goodsTotalPages">末页</button>
+      </div>
+    </div>
+
+    <div class="pagination-row" v-if="activeTab === 'batch'">
+      <span class="total-info">共 {{ batchList.length }} 条</span>
+      <div class="pagination-controls">
+        <button :disabled="page.batch <= 1" @click="page.batch = 1">首页</button>
+        <button :disabled="page.batch <= 1" @click="page.batch--">上一页</button>
+        <template v-for="p in getPageNumbers(batchTotalPages, page.batch)" :key="p">
+          <span v-if="p === '...'" class="page-ellipsis">...</span>
+          <button v-else :class="{ active: page.batch === p }" @click="page.batch = p">{{ p }}</button>
+        </template>
+        <button :disabled="page.batch >= batchTotalPages" @click="page.batch++">下一页</button>
+        <button :disabled="page.batch >= batchTotalPages" @click="page.batch = batchTotalPages">末页</button>
+      </div>
+    </div>
+
+    <div class="pagination-row" v-if="activeTab === 'inventory'">
+      <span class="total-info">共 {{ inventoryTableData.length }} 条</span>
+      <div class="pagination-controls">
+        <button :disabled="page.inventory <= 1" @click="page.inventory = 1">首页</button>
+        <button :disabled="page.inventory <= 1" @click="page.inventory--">上一页</button>
+        <template v-for="p in getPageNumbers(inventoryTotalPages, page.inventory)" :key="p">
+          <span v-if="p === '...'" class="page-ellipsis">...</span>
+          <button v-else :class="{ active: page.inventory === p }" @click="page.inventory = p">{{ p }}</button>
+        </template>
+        <button :disabled="page.inventory >= inventoryTotalPages" @click="page.inventory++">下一页</button>
+        <button :disabled="page.inventory >= inventoryTotalPages" @click="page.inventory = inventoryTotalPages">末页</button>
+      </div>
+    </div>
+
+    <div class="pagination-row" v-if="activeTab === 'log'">
+      <span class="total-info">共 {{ logData.length }} 条</span>
+      <div class="pagination-controls">
+        <button :disabled="page.log <= 1" @click="page.log = 1">首页</button>
+        <button :disabled="page.log <= 1" @click="page.log--">上一页</button>
+        <template v-for="p in getPageNumbers(logTotalPages, page.log)" :key="p">
+          <span v-if="p === '...'" class="page-ellipsis">...</span>
+          <button v-else :class="{ active: page.log === p }" @click="page.log = p">{{ p }}</button>
+        </template>
+        <button :disabled="page.log >= logTotalPages" @click="page.log++">下一页</button>
+        <button :disabled="page.log >= logTotalPages" @click="page.log = logTotalPages">末页</button>
+      </div>
     </div>
 
     <!-- 盘点详情弹窗 -->
@@ -450,6 +524,8 @@ export default {
   data() {
     return {
       activeTab: 'personnel',
+      pageSize: 10,
+      page: { personnel: 1, warehouse: 1, goods: 1, batch: 1, inventory: 1, log: 1 },
       tabs: [
         { key: 'personnel', label: '人员列表' },
         { key: 'warehouse', label: '仓库列表' },
@@ -506,9 +582,44 @@ export default {
       if (this.currentData.length === 0) return []
       return Object.keys(this.currentData[0])
     },
-    currentData() {
-      return []
-    }
+    currentData() { return [] },
+
+    // --- 分页计算 ---
+    pagedPersonnel() {
+      const start = (this.page.personnel - 1) * this.pageSize
+      return this.personnelList.slice(start, start + this.pageSize)
+    },
+    personnelTotalPages() { return Math.ceil(this.personnelList.length / this.pageSize) || 1 },
+
+    pagedWarehouses() {
+      const start = (this.page.warehouse - 1) * this.pageSize
+      return this.warehouseList.slice(start, start + this.pageSize)
+    },
+    warehouseTotalPages() { return Math.ceil(this.warehouseList.length / this.pageSize) || 1 },
+
+    pagedGoods() {
+      const start = (this.page.goods - 1) * this.pageSize
+      return this.goodsList.slice(start, start + this.pageSize)
+    },
+    goodsTotalPages() { return Math.ceil(this.goodsList.length / this.pageSize) || 1 },
+
+    pagedBatches() {
+      const start = (this.page.batch - 1) * this.pageSize
+      return this.batchList.slice(start, start + this.pageSize)
+    },
+    batchTotalPages() { return Math.ceil(this.batchList.length / this.pageSize) || 1 },
+
+    pagedInventory() {
+      const start = (this.page.inventory - 1) * this.pageSize
+      return this.inventoryTableData.slice(start, start + this.pageSize)
+    },
+    inventoryTotalPages() { return Math.ceil(this.inventoryTableData.length / this.pageSize) || 1 },
+
+    pagedLogs() {
+      const start = (this.page.log - 1) * this.pageSize
+      return this.logData.slice(start, start + this.pageSize)
+    },
+    logTotalPages() { return Math.ceil(this.logData.length / this.pageSize) || 1 },
   },
   mounted() {
     this.fetchPersonnel()
@@ -517,8 +628,26 @@ export default {
     this.fetchBatches()
   },
   methods: {
+    // --- 分页按钮生成 ---
+    getPageNumbers(totalPages, current) {
+      const pages = []
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i)
+      } else {
+        pages.push(1)
+        if (current > 3) pages.push('...')
+        const start = Math.max(2, current - 1)
+        const end = Math.min(totalPages - 1, current + 1)
+        for (let i = start; i <= end; i++) pages.push(i)
+        if (current < totalPages - 2) pages.push('...')
+        pages.push(totalPages)
+      }
+      return pages
+    },
+
     switchTab(key) {
       this.activeTab = key
+      this.page[key] = 1  // 切换标签重置页码
       if (key === 'personnel' && this.personnelList.length === 0) {
         this.fetchPersonnel()
       } else if (key === 'warehouse' && this.warehouseList.length === 0) {
@@ -546,6 +675,7 @@ export default {
       }
     },
     searchPersonnel() {
+      this.page.personnel = 1
       const keyword = this.searchKeyword.trim()
       if (!keyword) {
         this.personnelList = this.allPersonnel
@@ -562,6 +692,7 @@ export default {
       }
     },
     resetSearch() {
+      this.page.personnel = 1
       this.searchKeyword = ''
       this.personnelList = this.allPersonnel
     },
@@ -577,6 +708,7 @@ export default {
       }
     },
     searchWarehouse() {
+      this.page.warehouse = 1
       const keyword = this.warehouseSearchKeyword.trim()
       if (!keyword) {
         this.warehouseList = this.allWarehouses
@@ -593,6 +725,7 @@ export default {
       }
     },
     resetWarehouseSearch() {
+      this.page.warehouse = 1
       this.warehouseSearchKeyword = ''
       this.warehouseList = this.allWarehouses
     },
@@ -608,6 +741,7 @@ export default {
       }
     },
     searchGoods() {
+      this.page.goods = 1
       const keyword = this.goodsSearchKeyword.trim()
       if (!keyword) {
         this.goodsList = this.allGoods
@@ -624,6 +758,7 @@ export default {
       }
     },
     resetGoodsSearch() {
+      this.page.goods = 1
       this.goodsSearchKeyword = ''
       this.goodsList = this.allGoods
     },
@@ -664,6 +799,7 @@ export default {
       return ''
     },
     searchBatch() {
+      this.page.batch = 1
       const keyword = this.batchSearchKeyword.trim()
       if (!keyword) {
         this.batchList = this.allBatches
@@ -674,6 +810,7 @@ export default {
       )
     },
     resetBatchSearch() {
+      this.page.batch = 1
       this.batchSearchKeyword = ''
       this.batchList = this.allBatches
     },
@@ -700,8 +837,9 @@ export default {
       if (status === '待报废') return 'status-scrap'
       return ''
     },
-    searchInventory() { this.loadInventoryData() },
+    searchInventory() { this.page.inventory = 1; this.loadInventoryData() },
     resetInventorySearch() {
+      this.page.inventory = 1
       this.inventorySearch = { batchId: '' }
       this.loadInventoryData()
     },
@@ -735,12 +873,14 @@ export default {
       return this.operatorNameMap[operatorId] || operatorId
     },
     searchLogs() {
+      this.page.log = 1
       const params = {}
       if (this.logSearch.date) params.date = this.logSearch.date
       if (this.logSearch.operationType) params.operationType = this.logSearch.operationType
       this.fetchLogs(params)
     },
     resetLogSearch() {
+      this.page.log = 1
       this.logSearch = { date: '', operationType: '' }
       this.fetchLogs()
     },
@@ -1004,8 +1144,56 @@ input[type="date"]:valid::-webkit-datetime-edit {
 .pagination-row {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   font-size: 13px;
+  color: #909399;
+  padding: 10px 0 4px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.total-info {
+  white-space: nowrap;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination-controls button {
+  min-width: 32px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background: #fff;
+  color: #606266;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  border-color: var(--primary-color, #409EFF);
+  color: var(--primary-color, #409EFF);
+}
+
+.pagination-controls button.active {
+  background: var(--primary-color, #409EFF);
+  border-color: var(--primary-color, #409EFF);
+  color: #fff;
+}
+
+.pagination-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.page-ellipsis {
+  width: 32px;
+  text-align: center;
   color: #909399;
 }
 
