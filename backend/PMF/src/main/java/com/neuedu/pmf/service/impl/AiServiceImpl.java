@@ -268,11 +268,15 @@ public class AiServiceImpl implements AiService {
     public Map<String, Object> getHomeStats(Integer assigneeId) {
         Map<String, Object> stats = new HashMap<>();
 
-        // 总库存数量
+        // 总库存数量：只统计正常在库的货物
+        // 排除"待入库"（未进仓库）和"待报废"（质检不合格）
         int totalInventory = 0;
         ArrayList<Inventory> allInventory = inventoryMapper.list();
         for (Inventory inv : allInventory) {
-            totalInventory += (inv.getQuantity() != null ? inv.getQuantity() : 0);
+            String status = inv.getInventory_status();
+            if (!"待入库".equals(status) && !"待报废".equals(status)) {
+                totalInventory += (inv.getQuantity() != null ? inv.getQuantity() : 0);
+            }
         }
         stats.put("totalInventory", totalInventory);
 
