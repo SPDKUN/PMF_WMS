@@ -19,6 +19,8 @@
 
     <button class="login-btn" bindtap="handleLogin" loading="{{loading}}">登 录</button>
 
+    <view class="error-msg" wx:if="{{errorMsg}}">{{errorMsg}}</view>
+
     <view class="register-link" bindtap="goToRegister">
       还没有账号？<text class="text-primary">立即注册</text>
     </view>

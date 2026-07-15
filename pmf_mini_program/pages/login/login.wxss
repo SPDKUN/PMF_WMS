@@ -89,6 +89,17 @@
   opacity: 0.7;
 }
 
+.error-msg {
+  margin-top: 24rpx;
+  padding: 18rpx 24rpx;
+  background: #fef0f0;
+  border: 2rpx solid #fde2e2;
+  border-radius: 8rpx;
+  color: #f56c6c;
+  font-size: 26rpx;
+  text-align: center;
+}
+
 .register-link {
   text-align: center;
   margin-top: 32rpx;
