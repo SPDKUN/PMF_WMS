@@ -298,7 +298,7 @@
               <td>{{ log.operation_type }}</td>
               <td>{{ trimOperationContent(log.operation_content) }}</td>
               <td>
-                <span>{{ log.operation_result || '-' }}</span>
+                <span>{{ trimOperationContent(log.operation_result) }}</span>
                 <a v-if="hasDetailInLog(log)" class="detail-link" @click="openDetailFromLog(log)">详情</a>
               </td>
             </tr>
