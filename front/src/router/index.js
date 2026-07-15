@@ -36,7 +36,7 @@ const routes = [
         path: 'manage',
         name: 'Manage',
         component: Manage,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, requirePosition: '主管' }
       },
       {
         path: 'dashboard',
@@ -82,9 +82,22 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!token) {
       next({ name: 'Login' })
-    } else {
-      next()
+      return
     }
+    const requirePosition = to.meta.requirePosition
+    if (requirePosition) {
+      const stored = localStorage.getItem('userInfo')
+      if (stored) {
+        try {
+          const user = JSON.parse(stored)
+          if (user.position !== requirePosition) {
+            next({ name: 'Home' })
+            return
+          }
+        } catch (e) { /* ignore */ }
+      }
+    }
+    next()
   } else {
     next()
   }

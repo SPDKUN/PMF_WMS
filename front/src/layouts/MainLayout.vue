@@ -11,7 +11,7 @@
           <el-icon><HomeFilled /></el-icon>
           <span>主页</span>
         </a>
-        <a href="#" :class="{ active: currentRoute === 'Manage' }" @click.prevent="navigate('Manage')">
+        <a v-if="userPosition === '主管'" href="#" :class="{ active: currentRoute === 'Manage' }" @click.prevent="navigate('Manage')">
           <el-icon><Setting /></el-icon>
           <span>我的管理</span>
         </a>
@@ -77,6 +77,7 @@ export default {
     return {
       currentDate: '',
       sidebarCollapsed: false,
+      userPosition: '',
     }
   },
   computed: {
@@ -99,6 +100,10 @@ export default {
   mounted() {
     const saved = localStorage.getItem('sidebarCollapsed')
     if (saved !== null) this.sidebarCollapsed = saved === 'true'
+    const stored = localStorage.getItem('userInfo')
+    if (stored) {
+      try { this.userPosition = JSON.parse(stored).position || '' } catch (e) {}
+    }
     this.updateDateTime()
     this.timer = setInterval(this.updateDateTime, 60000)
   },

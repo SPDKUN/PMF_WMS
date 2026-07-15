@@ -939,6 +939,7 @@ export default {
       ],
       taskList: [],
       userId: null,
+      userPosition: '',
       goodsList: [],
       batchList: [],
       inspectorList: [],
@@ -1071,6 +1072,7 @@ export default {
       try {
         const data = JSON.parse(stored)
         this.userId = data.user_id
+        this.userPosition = data.position || ''
       } catch (e) { /* ignore */ }
     }
     this.fetchMyTasks()
@@ -1096,6 +1098,20 @@ export default {
       return d.substring(0, 10)
     },
     handleOp(key) {
+      const warehouseOps = ['newBatch', 'inbound', 'outbound', 'adjust', 'check', 'quality', 'defective']
+      if (warehouseOps.includes(key)) {
+        if (this.userPosition !== '主管' && this.userPosition !== '仓库管理员') {
+          alert('仅主管和仓库管理员可执行此操作')
+          return
+        }
+      }
+      if (key === 'uploadTempHumidity') {
+        if (this.userPosition !== '质检员' && this.userPosition !== '温度检测员') {
+          alert('仅质检员和温度检测员可上传温湿度')
+          return
+        }
+      }
+
       if (key === 'newBatch') {
         this.openNewBatchDialog()
       } else if (key === 'quality') {

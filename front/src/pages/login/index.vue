@@ -81,9 +81,13 @@ export default {
 
         const token = response.token
         if (token) {
-          localStorage.setItem('token', token)
-          // 存储用户基本信息
           const userData = response.data
+          if (userData && userData.status === 0) {
+            this.errorMsg = '该账号已被停用，请联系管理员'
+            this.loading = false
+            return
+          }
+          localStorage.setItem('token', token)
           if (userData) {
             localStorage.setItem('userInfo', JSON.stringify(userData))
           }
