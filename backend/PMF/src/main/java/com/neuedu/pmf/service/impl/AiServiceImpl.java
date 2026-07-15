@@ -284,13 +284,17 @@ public class AiServiceImpl implements AiService {
         }
         stats.put("pendingTasks", pendingTasks);
 
-        // 最后更新时间
+        // 最后更新时间（今天只显示时分，非今天加月/日前缀）
         String lastUpdate = "--";
         ArrayList<OperationLog> logs = operationLogMapper.list();
         if (logs != null && !logs.isEmpty()) {
             LocalDateTime latest = logs.get(0).getOperation_time();
             if (latest != null) {
-                lastUpdate = latest.format(DateTimeFormatter.ofPattern("HH:mm"));
+                if (latest.toLocalDate().equals(java.time.LocalDate.now())) {
+                    lastUpdate = latest.format(DateTimeFormatter.ofPattern("HH:mm"));
+                } else {
+                    lastUpdate = latest.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
+                }
             }
         }
         stats.put("lastUpdate", lastUpdate);

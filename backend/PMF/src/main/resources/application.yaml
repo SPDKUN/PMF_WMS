@@ -38,7 +38,7 @@ spring:
       port: 6379
       # Redis密码（无密码则注释/留空）
       # 连接超时时间（毫秒）
-      timeout: 60000ms
+      timeout: 120000ms
       # 数据库索引（Redis默认16个库，默认使用0库）
       database: 0
       # 连接池配置（提升性能）
