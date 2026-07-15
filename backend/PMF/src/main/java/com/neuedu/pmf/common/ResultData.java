@@ -2,6 +2,13 @@ package com.neuedu.pmf.common;
 
 import java.util.HashMap;
 
+//统一返回格式
+//{
+//        "code": 200,       // 状态码：200=成功，1001=用户名密码错误，1002=令牌过期
+//        "msg": "操作成功",   // 提示信息
+//        "data": { ... },   // 真正的数据
+//        "token": "xxx"     // 登录时才会有的令牌
+//        }
 public class ResultData extends HashMap<String, Object> {
     private int code;
 
@@ -9,6 +16,7 @@ public class ResultData extends HashMap<String, Object> {
 
     private Object data;
 
+    //初始化
     public ResultData(ResultCode resultCode, Object data) {
 
 
@@ -25,6 +33,7 @@ public class ResultData extends HashMap<String, Object> {
         this(resultCode, null);
     }
 
+    //成功时调用
     public static ResultData success( Object data) {
         return new ResultData(ResultCode.SUCCESS, data);
     }
@@ -34,6 +43,7 @@ public class ResultData extends HashMap<String, Object> {
         return success( null);
     }
 
+    //失败时调用
     public static ResultData fail(ResultCode resultCode, Object data) {
         return new ResultData(resultCode, data);
     }

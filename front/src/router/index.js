@@ -36,7 +36,7 @@ const routes = [
         path: 'manage',
         name: 'Manage',
         component: Manage,
-        meta: { requiresAuth: true, requirePosition: '主管' }
+        meta: { requiresAuth: true, requirePosition: '主管' }//主管才能访问
       },
       {
         path: 'dashboard',
@@ -78,10 +78,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token')//检查有没有令牌
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!token) {
-      next({ name: 'Login' })
+      next({ name: 'Login' })//没令牌就跳转到登录页面
       return
     }
     const requirePosition = to.meta.requirePosition
@@ -91,7 +91,7 @@ router.beforeEach((to, from, next) => {
         try {
           const user = JSON.parse(stored)
           if (user.position !== requirePosition) {
-            next({ name: 'Home' })
+            next({ name: 'Home' })//不是主管，跳转至主页
             return
           }
         } catch (e) { /* ignore */ }

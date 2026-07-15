@@ -14,10 +14,10 @@ public class CorsConfig {
     // 跨域配置
     private CorsConfiguration corsConfig() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("*");
-        config.setAllowCredentials(true);
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.addAllowedOriginPattern("*");//允许任何来源访问
+        config.setAllowCredentials(true);//允许携带任何cookie
+        config.addAllowedHeader("*");//允许任何请求头
+        config.addAllowedMethod("*");//允许任何HTTP方法
         config.addExposedHeader("Authorization");
         config.setMaxAge(3600L);
         return config;

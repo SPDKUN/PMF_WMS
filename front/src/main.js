@@ -1,9 +1,9 @@
 // 项目入口文件
-import { createApp } from 'vue'
-import router from './router'
-import './style.css'
-import 'element-plus/dist/index.css'
-import App from './App.vue'
+import { createApp } from 'vue'//导入vue框架
+import router from './router'//导入路由配置
+import './style.css'//导入全局样式
+import 'element-plus/dist/index.css'//导入element plus组件
+import App from './App.vue'//导入根组件
 
 
 //创建一个vue对象，创建一个vue对象时要一页的模板

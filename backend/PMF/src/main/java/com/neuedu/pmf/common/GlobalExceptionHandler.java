@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * 统一捕获并处理所有控制器层抛出的异常
  */
 //@Slf4j
-@RestControllerAdvice  // 等同于 @ControllerAdvice + @ResponseBody
+@RestControllerAdvice  // 等同于 @ControllerAdvice + @ResponseBody，拦截所有Controller中抛出的异常
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 

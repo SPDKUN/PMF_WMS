@@ -61,6 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+            //如果能直接放行，就直接放行
             if(isExcludePath(request.getRequestURI())) {
                 filterChain.doFilter(request,response);
                 return;

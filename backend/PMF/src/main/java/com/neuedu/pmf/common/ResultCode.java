@@ -10,7 +10,7 @@ public enum ResultCode {
     NOT_FOUND(404, "资源不存在"),
     USER_AND_PASSWORD_ERROR(1001, "用户名或密码错误"),
 
-    // 新增JWT相关状态码
+    // JWT相关状态码
     TOKEN_ERROR(1002, "令牌已过期或者失效"),
     BUSINESS_ERROR(1003, "业务处理异常");
 
