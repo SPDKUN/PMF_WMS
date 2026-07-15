@@ -244,8 +244,8 @@ public class DefectiveServiceImpl implements DefectiveService {
                 }
             }
 
-            // 汇总货物变更
-            if (detail.getGoods_id() != null) {
+            // 汇总货物变更（仅已入库货物才扣减goods.quantity，未入库货物从未增加过goods数量）
+            if (detail.getGoods_id() != null && detail.getSource_location_id() != null) {
                 goodsDeltaMap.merge(detail.getGoods_id(), detail.getQuantity(), Integer::sum);
             }
 

@@ -1942,9 +1942,11 @@ export default {
       for (const b of selected) {
         try {
           const res = await request.get('/inventory/listWithDetails', { batchId: b.batch_id })
-          if (res.code === 200 && res.data && res.data.length > 0) {
+          // 过滤出已入库的库存记录（location_id不为空的才是已上架货物）
+          const storedInvs = (res.data || []).filter(inv => inv.location_id != null)
+          if (res.code === 200 && storedInvs.length > 0) {
             // 已入库：使用库存记录（不限制 inventory_status，报废批次的库存都要处理）
-            for (const inv of res.data) {
+            for (const inv of storedInvs) {
               items.push({
                 batchId: b.batch_id,
                 goodsId: b.goods_id,
