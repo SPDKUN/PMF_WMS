@@ -60,7 +60,7 @@
 <script>
 import request from '@/utils/request.js'
 
-const CHAT_STORAGE_KEY = 'ai_chat_messages_'
+const CHAT_STORAGE_PREFIX = 'ai_chat_msg_'
 
 export default {
   name: 'AiChatPage',
@@ -70,12 +70,14 @@ export default {
       inputText: '',
       loading: false,
       username: '',
+      sessionId: '',
       storageKey: ''
     }
   },
   mounted() {
     this.loadUsername()
-    this.storageKey = CHAT_STORAGE_KEY + this.username
+    this.sessionId = localStorage.getItem('ai_session_id') || '0'
+    this.storageKey = CHAT_STORAGE_PREFIX + this.username + '_' + this.sessionId
     this.loadMessages()
     // 如果从主页带过来初始问题，自动发送
     const initialQ = this.$route.query.q

@@ -91,6 +91,9 @@ export default {
           if (userData) {
             localStorage.setItem('userInfo', JSON.stringify(userData))
           }
+          // 每次登录生成新会话ID，AI聊天记录按会话隔离
+          const sessionId = Date.now().toString()
+          localStorage.setItem('ai_session_id', sessionId)
           this.$router.push({ name: 'Home' })
         } else {
           this.errorMsg = '登录失败，未获取到令牌'

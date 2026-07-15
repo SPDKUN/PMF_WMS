@@ -119,8 +119,17 @@ export default {
       this.$router.push({ name })
     },
     handleLogout() {
+      // 清除当前会话的AI聊天记录
+      try {
+        const username = JSON.parse(localStorage.getItem('userInfo') || '{}').username || ''
+        const sessionId = localStorage.getItem('ai_session_id') || ''
+        if (username && sessionId) {
+          localStorage.removeItem('ai_chat_msg_' + username + '_' + sessionId)
+        }
+      } catch (e) { /* ignore */ }
       localStorage.removeItem('token')
       localStorage.removeItem('userInfo')
+      localStorage.removeItem('ai_session_id')
       this.$router.push({ name: 'Login' })
     },
     updateDateTime() {
