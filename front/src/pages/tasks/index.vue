@@ -1067,7 +1067,18 @@ export default {
       return total
     }
   },
+  watch: {
+    '$route.query.tab'(val) {
+      if (val && ['todo', 'assign'].includes(val)) {
+        this.activeTab = val
+      }
+    }
+  },
   mounted() {
+    const tab = this.$route.query.tab
+    if (tab && ['todo', 'assign'].includes(tab)) {
+      this.activeTab = tab
+    }
     const stored = localStorage.getItem('userInfo')
     if (stored) {
       try {

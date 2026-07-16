@@ -541,7 +541,18 @@ export default {
       return map[this.personnelDialog.form.department] || []
     }
   },
+  watch: {
+    '$route.query.tab'(val) {
+      if (val && ['personnel', 'warehouse', 'goods'].includes(val)) {
+        this.activeTab = val
+      }
+    }
+  },
   mounted() {
+    const tab = this.$route.query.tab
+    if (tab && ['personnel', 'warehouse', 'goods'].includes(tab)) {
+      this.activeTab = tab
+    }
     this.fetchPersonnel()
     this.fetchWarehouses()
     this.fetchGoods()

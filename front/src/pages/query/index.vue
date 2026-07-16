@@ -634,7 +634,18 @@ export default {
     },
     logTotalPages() { return Math.ceil(this.logData.length / this.pageSize) || 1 },
   },
+  watch: {
+    '$route.query.tab'(val) {
+      if (val && ['personnel', 'warehouse'].includes(val)) {
+        this.activeTab = val
+      }
+    }
+  },
   mounted() {
+    const tab = this.$route.query.tab
+    if (tab && ['personnel', 'warehouse'].includes(tab)) {
+      this.activeTab = tab
+    }
     this.fetchPersonnel()
     this.fetchWarehouses()
     this.fetchGoods()

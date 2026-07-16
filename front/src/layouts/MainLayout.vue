@@ -7,35 +7,42 @@
         <span>WMS</span>
       </div>
       <nav class="nav">
-        <a href="#" :class="{ active: currentRoute === 'Home' }" @click.prevent="navigate('Home')">
-          <el-icon><HomeFilled /></el-icon>
-          <span>主页</span>
-        </a>
-        <!-- 只有主管才可以见到“我的管理” -->
-        <a v-if="userPosition === '主管'" href="#" :class="{ active: currentRoute === 'Manage' }" @click.prevent="navigate('Manage')">
-          <el-icon><Setting /></el-icon>
-          <span>我的管理</span>
-        </a>
-        <a href="#" :class="{ active: currentRoute === 'Dashboard' }" @click.prevent="navigate('Dashboard')">
-          <el-icon><DataAnalysis /></el-icon>
-          <span>数据看板</span>
-        </a>
-        <a href="#" :class="{ active: currentRoute === 'Query' }" @click.prevent="navigate('Query')">
-          <el-icon><Search /></el-icon>
-          <span>明细查询</span>
-        </a>
-        <a href="#" :class="{ active: currentRoute === 'Tasks' || currentRoute === 'TaskForm' }" @click.prevent="navigate('Tasks')">
-          <el-icon><List /></el-icon>
-          <span>工作任务</span>
-        </a>
-        <a href="#" :class="{ active: currentRoute === 'AiChat' }" @click.prevent="navigate('AiChat')">
-          <el-icon><ChatDotRound /></el-icon>
-          <span>AI助手</span>
-        </a>
-        <a href="#" :class="{ active: currentRoute === 'Profile' }" @click.prevent="navigate('Profile')">
-          <el-icon><UserFilled /></el-icon>
-          <span>个人中心</span>
-        </a>
+        <template v-for="item in visibleMenuItems" :key="item.label">
+          <!-- 无子菜单：普通链接 -->
+          <a
+            v-if="!item.children"
+            href="#"
+            :class="{ active: currentRoute === item.route }"
+            @click.prevent="navigate(item.route)"
+          >
+            <el-icon><component :is="item.icon" /></el-icon>
+            <span>{{ item.label }}</span>
+          </a>
+          <!-- 有子菜单：可展开父级 -->
+          <div v-else class="nav-group" :class="{ expanded: expandedMenus[item.label] }">
+            <a
+              href="#"
+              class="nav-parent"
+              :class="{ active: isMenuActive(item) }"
+              @click.prevent="toggleMenu(item.label)"
+            >
+              <el-icon><component :is="item.icon" /></el-icon>
+              <span>{{ item.label }}</span>
+              <el-icon class="arrow"><ArrowDown /></el-icon>
+            </a>
+            <div class="submenu" v-show="expandedMenus[item.label]">
+              <a
+                v-for="child in item.children"
+                :key="child.label"
+                href="#"
+                :class="{ active: isChildActive(item, child) }"
+                @click.prevent="navigate(child.route, child.query)"
+              >
+                <span>{{ child.label }}</span>
+              </a>
+            </div>
+          </div>
+        </template>
       </nav>
       <div class="sidebar-bottom">
         <div class="logout-btn" @click="handleLogout" title="退出登录">
@@ -87,7 +94,7 @@
 
 <script>
 import {
-  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, Sunny, Moon
+  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, Sunny, Moon, ArrowDown
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 import { useTheme } from '@/composables/useTheme.js'
@@ -95,7 +102,7 @@ import { useTheme } from '@/composables/useTheme.js'
 export default {
   name: 'MainLayout',
   components: {
-    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, Sunny, Moon, ElIcon
+    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, Sunny, Moon, ArrowDown, ElIcon
   },
   setup() {
     const { theme, toggleTheme } = useTheme()
@@ -108,6 +115,35 @@ export default {
       userPosition: '',
       userInfo: {},
       routeLoading: false,
+      expandedMenus: {},
+      menuItems: [
+        { label: '主页', icon: 'HomeFilled', route: 'Home' },
+        {
+          label: '我的管理', icon: 'Setting', requirePosition: '主管',
+          children: [
+            { label: '人员列表', route: 'Manage', query: { tab: 'personnel' } },
+            { label: '仓库列表', route: 'Manage', query: { tab: 'warehouse' } },
+            { label: '货物列表', route: 'Manage', query: { tab: 'goods' } },
+          ]
+        },
+        { label: '数据看板', icon: 'DataAnalysis', route: 'Dashboard' },
+        {
+          label: '明细查询', icon: 'Search',
+          children: [
+            { label: '人员查询', route: 'Query', query: { tab: 'personnel' } },
+            { label: '仓库查询', route: 'Query', query: { tab: 'warehouse' } },
+          ]
+        },
+        {
+          label: '工作任务', icon: 'List',
+          children: [
+            { label: '我的待办', route: 'Tasks', query: { tab: 'todo' } },
+            { label: '操作中心', route: 'Tasks', query: { tab: 'assign' } },
+          ]
+        },
+        { label: 'AI助手', icon: 'ChatDotRound', route: 'AiChat' },
+        { label: '个人中心', icon: 'UserFilled', route: 'Profile' },
+      ],
     }
   },
   computed: {
@@ -125,6 +161,12 @@ export default {
         Profile: '个人中心',
       }
       return titles[this.$route.name] || 'WMS'
+    },
+    visibleMenuItems() {
+      return this.menuItems.filter(item => {
+        if (item.requirePosition && this.userPosition !== item.requirePosition) return false
+        return true
+      })
     }
   },
   watch: {
@@ -155,8 +197,23 @@ export default {
       this.sidebarCollapsed = !this.sidebarCollapsed
       localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed)
     },
-    navigate(name) {
-      this.$router.push({ name })
+    navigate(name, query) {
+      if (query) {
+        this.$router.push({ name, query })
+      } else {
+        this.$router.push({ name })
+      }
+    },
+    toggleMenu(label) {
+      this.expandedMenus[label] = !this.expandedMenus[label]
+      this.expandedMenus = { ...this.expandedMenus }  // 触发响应式更新
+    },
+    isMenuActive(item) {
+      return item.children.some(c => c.route === this.currentRoute)
+    },
+    isChildActive(parent, child) {
+      return this.currentRoute === child.route &&
+        this.$route.query.tab === child.query.tab
     },
     handleLogout() {
       // 清除当前会话的AI聊天记录
@@ -230,7 +287,9 @@ export default {
   width: 100%;
   padding: 0 12px;
   flex: 1;
+  min-height: 0;
   margin-top: 32px;
+  overflow-y: auto;
 }
 .sidebar .nav a {
   display: flex;
@@ -254,11 +313,56 @@ export default {
   color: var(--sidebar-text-hover);
   backdrop-filter: blur(4px);
 }
-.sidebar .nav a.active {
+.sidebar .nav a.active,
+.submenu a.active {
   background: var(--sidebar-item-active-bg);
   color: var(--sidebar-text-hover);
   font-weight: 500;
   box-shadow: 0 2px 8px hsl(0 0% 0% / 12%);
+}
+
+/* 下拉菜单组 */
+.nav-group .arrow {
+  font-size: 12px;
+  margin-left: auto;
+  transition: transform 0.25s ease;
+}
+.nav-group.expanded .arrow {
+  transform: rotate(180deg);
+}
+
+/* 子菜单容器 */
+.submenu {
+  padding-left: 24px;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+.submenu a {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+.submenu a:hover {
+  background: var(--sidebar-item-hover-bg);
+  color: var(--sidebar-text-hover);
+  opacity: 1;
+}
+.submenu a::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--sidebar-text);
+  margin-right: 8px;
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
 /* 侧边栏底部 */
@@ -297,6 +401,8 @@ export default {
 .sidebar.collapsed .logo span { display: none; }
 .sidebar.collapsed .nav a { justify-content: center; padding: 10px 0; }
 .sidebar.collapsed .nav a span { display: none; }
+.sidebar.collapsed .nav-group .arrow { display: none; }
+.sidebar.collapsed .submenu { display: none; }
 
 /* ========== 主内容 ========== */
 .main {
@@ -506,7 +612,9 @@ export default {
   }
   .sidebar .logo span,
   .sidebar .nav a span,
-  .sidebar .logout-btn { display: none; }
+  .sidebar .logout-btn,
+  .sidebar .nav-group .arrow,
+  .sidebar .submenu { display: none; }
   .sidebar .nav a { padding: 8px; justify-content: center; }
   .sidebar .logo { justify-content: center; padding: 0; }
   .content-area { padding: 14px 16px; }
