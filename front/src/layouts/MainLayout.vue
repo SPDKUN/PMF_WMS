@@ -132,6 +132,10 @@ export default {
           children: [
             { label: '人员查询', route: 'Query', query: { tab: 'personnel' } },
             { label: '仓库查询', route: 'Query', query: { tab: 'warehouse' } },
+            { label: '货物查询', route: 'Query', query: { tab: 'goods' } },
+            { label: '库存明细', route: 'Query', query: { tab: 'inventory' } },
+            { label: '批次查询', route: 'Query', query: { tab: 'batch' } },
+            { label: '操作日志', route: 'Query', query: { tab: 'log' } },
           ]
         },
         {

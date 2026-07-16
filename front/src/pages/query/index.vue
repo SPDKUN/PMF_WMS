@@ -636,14 +636,14 @@ export default {
   },
   watch: {
     '$route.query.tab'(val) {
-      if (val && ['personnel', 'warehouse'].includes(val)) {
+      if (val && ['personnel', 'warehouse', 'goods', 'inventory', 'batch', 'log'].includes(val)) {
         this.activeTab = val
       }
     }
   },
   mounted() {
     const tab = this.$route.query.tab
-    if (tab && ['personnel', 'warehouse'].includes(tab)) {
+    if (tab && ['personnel', 'warehouse', 'goods', 'inventory', 'batch', 'log'].includes(tab)) {
       this.activeTab = tab
     }
     this.fetchPersonnel()
