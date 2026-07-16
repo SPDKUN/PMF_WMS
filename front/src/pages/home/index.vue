@@ -30,13 +30,13 @@
 
       <!-- 快捷操作 -->
       <div class="quick-actions">
-        <button class="quick-btn" @click="$router.push({ name: 'Tasks' })">
+        <button class="quick-btn" @click="$router.push({ name: 'Tasks', query: { tab: 'assign', op: 'inbound' } })">
           <el-icon><ArrowRight /></el-icon> 新建入库单
         </button>
-        <button class="quick-btn" @click="$router.push({ name: 'Tasks' })">
+        <button class="quick-btn" @click="$router.push({ name: 'Tasks', query: { tab: 'assign', op: 'outbound' } })">
           <el-icon><Check /></el-icon> 新建出库单
         </button>
-        <button class="quick-btn" @click="$router.push({ name: 'Tasks' })">
+        <button class="quick-btn" @click="$router.push({ name: 'Tasks', query: { tab: 'assign', op: 'quality' } })">
           <el-icon><List /></el-icon> 发起质检
         </button>
         <button class="quick-btn" @click="$router.push({ name: 'Dashboard' })">

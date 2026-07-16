@@ -1072,12 +1072,21 @@ export default {
       if (val && ['todo', 'assign'].includes(val)) {
         this.activeTab = val
       }
+    },
+    '$route.query.op'(val) {
+      if (val) {
+        this.$nextTick(() => { this.handleOp(val) })
+      }
     }
   },
   mounted() {
     const tab = this.$route.query.tab
     if (tab && ['todo', 'assign'].includes(tab)) {
       this.activeTab = tab
+    }
+    const op = this.$route.query.op
+    if (op) {
+      this.$nextTick(() => { this.handleOp(op) })
     }
     const stored = localStorage.getItem('userInfo')
     if (stored) {
