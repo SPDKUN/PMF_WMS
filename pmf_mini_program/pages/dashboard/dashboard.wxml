@@ -1,0 +1,55 @@
+<scroll-view class="dashboard-page" scroll-y>
+  <!-- 出入库趋势 - 折线图 -->
+  <view class="chart-card">
+    <view class="chart-title">出入库趋势</view>
+    <view class="chart-canvas-wrap">
+      <canvas type="2d" id="trendCanvas" class="chart-canvas"></canvas>
+    </view>
+  </view>
+
+  <!-- 货物库存数量 - 柱状图 -->
+  <view class="chart-card">
+    <view class="chart-title">货物库存数量</view>
+    <scroll-view class="chart-scroll" scroll-x wx:if="{{goodsHasData}}">
+      <view class="chart-scroll-inner" style="width: {{goodsCanvasW}}px;">
+        <canvas type="2d" id="goodsCanvas" class="chart-canvas" style="width: {{goodsCanvasW}}px;"></canvas>
+      </view>
+    </scroll-view>
+    <view class="chart-canvas-wrap" wx:else>
+      <canvas type="2d" id="goodsCanvas" class="chart-canvas"></canvas>
+    </view>
+  </view>
+
+  <!-- 仓库温湿度记录 - 柱状图 -->
+  <view class="chart-card">
+    <view class="chart-title">仓库温湿度记录</view>
+    <scroll-view class="chart-scroll" scroll-x wx:if="{{thHasData}}">
+      <view class="chart-scroll-inner" style="width: {{thCanvasW}}px;">
+        <canvas type="2d" id="thCanvas" class="chart-canvas" style="width: {{thCanvasW}}px;"></canvas>
+      </view>
+    </scroll-view>
+    <view class="chart-canvas-wrap" wx:else>
+      <canvas type="2d" id="thCanvas" class="chart-canvas"></canvas>
+    </view>
+  </view>
+
+  <!-- 仓库容量饱和度 - 横向进度条 -->
+  <view class="chart-card">
+    <view class="chart-title">仓库容量饱和度</view>
+    <view class="capacity-list">
+      <view class="capacity-item" wx:for="{{capacityList}}" wx:key="warehouseName">
+        <view class="capacity-label">
+          <text class="capacity-name">{{item.warehouseName}}</text>
+          <text class="capacity-num">{{item.usedSlots}} / {{item.totalSlots}}</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{item.saturation}}%; background-color: {{item.color}};"></view>
+        </view>
+        <text class="capacity-percent">{{item.saturation}}%</text>
+      </view>
+      <view class="empty-hint" wx:if="{{capacityList.length === 0}}">暂无仓库数据</view>
+    </view>
+  </view>
+
+  <view style="height: 40rpx;"></view>
+</scroll-view>

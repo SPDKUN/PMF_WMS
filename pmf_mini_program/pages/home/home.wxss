@@ -336,3 +336,33 @@
 .ai-input { flex: 1; height: 64rpx; background: #F1F5F9; border-radius: 32rpx; padding: 0 24rpx; font-size: 26rpx; }
 .ai-send-btn { width: 100rpx; height: 64rpx; border-radius: 32rpx; display: flex; align-items: center; justify-content: center; margin-left: 16rpx; font-size: 26rpx; font-weight: 500; background: #2563EB; color: #FFFFFF; flex-shrink: 0; }
 .ai-send-btn.active { background: #2563EB; color: #FFFFFF; }
+
+/* 通用弹窗样式 */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35); z-index: 1100;
+  display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  width: 560rpx; background: #FFFFFF; border-radius: 24rpx;
+  overflow: hidden; animation: modalIn 0.25s ease;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28rpx 32rpx; border-bottom: 2rpx solid #F1F5F9;
+}
+.modal-title { font-size: 30rpx; font-weight: 600; color: #1E293B; }
+.modal-close { font-size: 28rpx; color: #94A3B8; padding: 8rpx; }
+.modal-body {
+  padding: 40rpx 32rpx; display: flex; align-items: center; justify-content: center;
+}
+.modal-msg { font-size: 28rpx; color: #475569; text-align: center; line-height: 1.6; }
+.modal-footer {
+  display: flex; justify-content: center; padding: 16rpx 32rpx 32rpx;
+}
+.modal-btn {
+  background: #2563EB; color: #FFFFFF; font-size: 28rpx; font-weight: 500;
+  padding: 16rpx 64rpx; border-radius: 40rpx;
+}
+.modal-btn:active { opacity: 0.8; }

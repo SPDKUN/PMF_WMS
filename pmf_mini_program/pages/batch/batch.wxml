@@ -10,7 +10,7 @@
     <view class="page-title-area">
       <text class="page-title-text">批次列表</text>
     </view>
-    <view class="add-btn" bindtap="goCreate">
+    <view class="add-btn" bindtap="goCreate" wx:if="{{isManager}}">
       <text class="add-btn-icon">+</text>
     </view>
   </view>

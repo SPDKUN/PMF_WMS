@@ -14,15 +14,21 @@ Page({
       { id: 4, icon: '📌', label: '待办任务', count: 0, bgColor: '#FEF2F2' }
     ],
     quickActions: [
-      { id: 1, icon: '📦', label: '货物管理', page: '/pages/goods/goods', bgColor: '#EFF6FF' },
+      { id: 1, icon: '🏷️', label: '批次管理', page: '/pages/batch/batch', bgColor: '#E0E7FF' },
       { id: 2, icon: '📥', label: '入库管理', page: '/pages/inbound/inbound', bgColor: '#F0FDF4' },
       { id: 3, icon: '📤', label: '出库管理', page: '/pages/outbound/outbound', bgColor: '#FFF7ED' },
-      { id: 4, icon: '✅', label: '质检管理', page: '/pages/quality/quality', bgColor: '#FEF9C3' },
-      { id: 5, icon: '🏷️', label: '批次管理', page: '/pages/batch/batch', bgColor: '#E0E7FF' }
+      { id: 4, icon: '📦', label: '货物管理', page: '/pages/goods/goods', bgColor: '#EFF6FF' },
+      { id: 5, icon: '✅', label: '质检管理', page: '/pages/quality/quality', bgColor: '#FEF9C3' },
+      { id: 6, icon: '📊', label: '数据看板', page: '/pages/dashboard/dashboard', bgColor: '#F3E8FF' },
+      { id: 7, icon: '🌡️', label: '温湿度上传', page: '/pages/env-monitor/env-monitor', bgColor: '#E0F2FE', needPerm: true },
+      { id: 8, icon: '👤', label: '个人信息', page: '/pages/profile/profile', bgColor: '#FCE7F3' }
     ],
     recentTasks: [],
     showNotifications: false,
-    notifications: []
+    notifications: [],
+    // 权限弹窗
+    showPermModal: false,
+    permModalMsg: ''
   },
 
   onLoad: function() {
@@ -182,7 +188,24 @@ Page({
   },
 
   stopPropagation: function() {},
-  onQuickAction: function(e) { var page = e.currentTarget.dataset.page; if (page) wx.navigateTo({ url: page }); },
+  onQuickAction: function(e) {
+    var page = e.currentTarget.dataset.page;
+    var needPerm = e.currentTarget.dataset.needPerm;
+    if (!page) return;
+    // 温湿度上传 - 权限检查：仅质检员和温度检测员可访问
+    if (needPerm) {
+      var userInfo = app.globalData.userInfo || {};
+      var position = userInfo.position || '';
+      if (position !== '质检员' && position !== '温度检测员') {
+        this.setData({ showPermModal: true, permModalMsg: '仅质检员和温度检测员可上传温湿度' });
+        return;
+      }
+    }
+    wx.navigateTo({ url: page });
+  },
+  closePermModal: function() {
+    this.setData({ showPermModal: false });
+  },
   goTasks: function() { wx.switchTab({ url: '/pages/tasks/tasks' }); },
   onStatTap: function(e) {
     var index = e.currentTarget.dataset.index;

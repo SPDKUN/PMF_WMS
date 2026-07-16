@@ -7,7 +7,7 @@
       <text>我的任务</text>
     </view>
   </view>
-  
+
   <view class="task-list">
     <view class="task-card" wx:for="{{taskList}}" wx:key="task_id" bindtap="onTaskTap" data-index="{{index}}">
       <view class="task-left task-priority-{{item.priority === '高' ? 'high' : item.priority === '中' ? 'medium' : 'low'}}"></view>
@@ -17,7 +17,7 @@
             <text class="task-type-icon">{{item.taskIcon}}</text>
             <text class="task-type-text">{{item.task_type}}</text>
           </view>
-          <text class="tag {{item.tagCls}}">{{item.completed_time ? '已完成' : '待处理'}}</text>
+          <text class="tag {{item.tagCls}}">{{item.displayStatus}}</text>
         </view>
         <view class="task-detail-row" wx:if="{{item.related_order_no}}">
           <text class="task-detail-label">关联单号</text>
@@ -30,8 +30,60 @@
       </view>
     </view>
   </view>
-  
+
   <view class="empty-state" wx:if="{{taskList.length === 0}}">
     <text>暂无任务</text>
+  </view>
+</view>
+
+<!-- 任务详情弹窗 -->
+<view class="modal-overlay {{showDetail ? 'show' : ''}}" bindtap="closeDetail">
+  <view class="modal-content detail-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{detailTitle}}</text>
+      <text class="modal-close" bindtap="closeDetail">✕</text>
+    </view>
+    <scroll-view class="modal-body" scroll-y>
+      <!-- 头部信息 -->
+      <view class="detail-section" wx:if="{{detailHeadFields.length > 0}}">
+        <text class="detail-section-title">基本信息</text>
+        <view class="detail-head-grid">
+          <view class="detail-head-item" wx:for="{{detailHeadFields}}" wx:key="label">
+            <text class="detail-head-label">{{item.label}}</text>
+            <text class="detail-head-value">{{item.value}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 明细列表 -->
+      <view class="detail-section">
+        <text class="detail-section-title">明细列表 (共{{detailList.length}}条)</text>
+        <view wx:if="{{detailList.length > 0}}" class="detail-table-wrap">
+          <view class="detail-table">
+            <!-- 表头 -->
+            <view class="detail-table-header">
+              <view class="detail-th" wx:for="{{detailColumns}}" wx:key="key" style="flex: 1;">
+                <text>{{item.label}}</text>
+              </view>
+            </view>
+            <!-- 数据行 -->
+            <view class="detail-table-row" wx:for="{{detailList}}" wx:for-item="row" wx:key="*this">
+              <view class="detail-td" wx:for="{{detailColumns}}" wx:for-item="col" wx:key="key" style="flex: 1;">
+                <text>{{row[col.key] || '-'}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{detailList.length === 0 && !detailLoading}}" class="detail-empty">
+          <text>暂无明细数据</text>
+        </view>
+        <view wx:if="{{detailLoading}}" class="detail-empty">
+          <text>加载中...</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="modal-footer">
+      <view class="modal-btn-cancel" bindtap="closeDetail">关闭</view>
+    </view>
   </view>
 </view>
