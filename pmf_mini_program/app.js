@@ -3,7 +3,7 @@ App({
   globalData: {
     // 后端 API 地址
     // 开发环境用 localhost, 真机调试用局域网 IP
-    baseUrl: 'http://10.172.144.82:8088',
+    baseUrl: 'http://10.242.194.76:8088',
     userInfo: null,
     token: ''
   },
