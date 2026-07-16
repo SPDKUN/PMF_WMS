@@ -457,6 +457,7 @@
 
 <script>
 import request from '@/utils/request.js'
+import { encrypt } from '@/utils/crypto.js'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { ElIcon, ElMessage } from 'element-plus'
 
@@ -645,7 +646,7 @@ export default {
             phone: f.phone,
             department: f.department,
             position: f.position,
-            password: '123456',
+            password: await encrypt('123456'),
             status: 1
           })
           if (res.code === 200) {
@@ -703,7 +704,7 @@ export default {
       try {
         const res = await request.put('/user', {
           user_id: this.personnelDialog.form.user_id,
-          password: '123456'
+          password: await encrypt('123456')
         })
         if (res.code === 200) {
           ElMessage.success('密码重置成功')

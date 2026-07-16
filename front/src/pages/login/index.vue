@@ -55,6 +55,7 @@
 
 <script>
 import request from '@/utils/request.js'
+import { encrypt } from '@/utils/crypto.js'
 
 export default {
   name: 'LoginView',
@@ -71,9 +72,11 @@ export default {
       this.errorMsg = ''
       this.loading = true
       try {
-        const response = await request.get('/auth/login', {
+        // AES 加密密码后通过 POST 发送
+        const encryptedPwd = await encrypt(this.password)
+        const response = await request.post('/auth/login', {
           username: this.username,
-          password: this.password
+          password: encryptedPwd
         })
 
         const token = response.token

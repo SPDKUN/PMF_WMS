@@ -4,12 +4,14 @@ import com.neuedu.pmf.common.ResultCode;
 import com.neuedu.pmf.common.ResultData;
 import com.neuedu.pmf.entity.User;
 import com.neuedu.pmf.service.UserService;
+import com.neuedu.pmf.util.AesUtil;
 import com.neuedu.pmf.util.ExcelExportUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -66,19 +68,37 @@ public class UserController {
         excelExportUtil.exportExcel(response, users, User.class, "用户列表", "用户列表1");
     }
 
-    //更新用户信息
+    //更新用户信息（含 AES 解密密码字段）
     @PutMapping
     public ResultData update(@RequestBody User user) {
-        boolean flag =  userService.update(user);
-        if(flag) {
+        // 如果密码字段是 AES 密文，先解密
+        String pwd = user.getPassword();
+        if (pwd != null && !pwd.isEmpty() && !pwd.startsWith("$2")) {
+            String decrypted = AesUtil.decrypt(pwd);
+            if (decrypted != null) {
+                user.setPassword(decrypted);
+            }
+        }
+        boolean flag = userService.update(user);
+        if (flag) {
             return ResultData.success();
         }
         return ResultData.fail(ResultCode.FAILED);
     }
 
-    //更新个人信息（含密码修改验证）
+    //更新个人信息（含密码修改验证 + AES 解密）
     @PutMapping("/profile")
-    public ResultData updateProfile(@RequestBody java.util.Map<String, Object> params) {
+    public ResultData updateProfile(@RequestBody Map<String, Object> params) {
+        // AES 解密旧密码和新密码
+        String oldPasswordEnc = (String) params.get("old_password");
+        String newPasswordEnc = (String) params.get("new_password");
+        if (oldPasswordEnc != null && !oldPasswordEnc.isEmpty()) {
+            params.put("old_password", AesUtil.decrypt(oldPasswordEnc));
+        }
+        if (newPasswordEnc != null && !newPasswordEnc.isEmpty()) {
+            params.put("new_password", AesUtil.decrypt(newPasswordEnc));
+        }
+
         User updatedUser = userService.updateProfile(params);
         if (updatedUser == null) {
             return ResultData.fail(700, "旧密码错误或用户不存在");

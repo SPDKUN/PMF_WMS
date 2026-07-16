@@ -101,6 +101,7 @@
 import { Edit } from '@element-plus/icons-vue'
 import { ElIcon, ElMessage } from 'element-plus'
 import request from '@/utils/request.js'
+import { encrypt } from '@/utils/crypto.js'
 
 export default {
   name: 'ProfilePage',
@@ -251,8 +252,8 @@ export default {
         position: this.editForm.position,
       }
       if (hasOldPwd && hasNewPwd) {
-        params.old_password = this.editForm.old_password
-        params.new_password = this.editForm.new_password
+        params.old_password = await encrypt(this.editForm.old_password)
+        params.new_password = await encrypt(this.editForm.new_password)
       }
 
       try {

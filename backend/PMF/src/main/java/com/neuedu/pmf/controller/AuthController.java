@@ -4,12 +4,12 @@ import com.neuedu.pmf.common.ResultCode;
 import com.neuedu.pmf.common.ResultData;
 import com.neuedu.pmf.entity.User;
 import com.neuedu.pmf.service.AuthService;
+import com.neuedu.pmf.util.AesUtil;
 import com.neuedu.pmf.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RequestMapping("/auth")
 @RestController
@@ -20,20 +20,33 @@ public class AuthController {
     @Autowired
     JwtUtil jwtUtil;
 
-    @GetMapping("/login")
-    public ResultData login(@RequestParam("username") String username, @RequestParam("password") String password) {
-        //调用Service验证用户
+    /**
+     * 登录接口（POST + AES 加密传输）
+     * 前端将密码用 AES-256-CBC 加密后以 Base64 传输，
+     * 后端先 AES 解密，再 BCrypt 验证。
+     */
+    @PostMapping("/login")
+    public ResultData login(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String encryptedPassword = body.get("password");
+
+        if (username == null || encryptedPassword == null) {
+            return ResultData.fail(ResultCode.USER_AND_PASSWORD_ERROR);
+        }
+
+        // AES 解密前端传来的密码
+        String password = AesUtil.decrypt(encryptedPassword);
+        if (password == null) {
+            return ResultData.fail(ResultCode.USER_AND_PASSWORD_ERROR);
+        }
+
         User user = authService.login(username, password);
         if (user != null) {
-            //用户存在，生成令牌
             String token = jwtUtil.generateToken(user.getUser_id().longValue(), username);
-            //生成成功消息
             ResultData resultData = ResultData.success(user);
-            //将令牌塞入成功消息
             resultData.put("token", token);
             return resultData;
         }
-        //返回失败消息
         return ResultData.fail(ResultCode.USER_AND_PASSWORD_ERROR);
     }
 }
