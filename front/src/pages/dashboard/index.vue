@@ -114,32 +114,39 @@ export default {
       }
     },
 
+    //初始化出入库趋势折线图
     initLineChart() {
       //无数据就直接返回
       if (!this.lineChartData) return
-      const container = this.$refs.lineChartRef
-      if (!container) return
+      const container = this.$refs.lineChartRef //通过ref获取DOM容器
+      if (!container) return //容器不存在则返回，避免错误
 
+      //如果已经存在旧实例，那么先摧毁旧的
       if (this.lineChart) this.lineChart.dispose()
+      //初始化
       this.lineChart = echarts.init(container)
 
+      //提取日期，出入库数量
       const { dates, inbound, outbound } = this.lineChartData
       this.lineChart.setOption({
+        //提示框配置：触发类型（鼠标悬停触发），背景颜色，边框颜色，文字颜色
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#5ab1ef', textStyle: { color: '#333' } },
+        //图例组件：数据，距离容器顶部距离，文字颜色
         legend: { data: ['入库数量', '出库数量'], top: 4, textStyle: { color: '#606266' } },
+        //绘图网格
         grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
         xAxis: {
-          type: 'category',
-          data: dates,
-          axisLabel: { formatter: (v) => v.slice(5) },
+          type: 'category',//类目轴
+          data: dates,//x轴为日期
+          axisLabel: { formatter: (v) => v.slice(5) },//取日期字符串后五位
         },
-        yAxis: { type: 'value', name: '数量' },
-        series: [
+        yAxis: { type: 'value', name: '数量' },//y轴为数量
+        series: [//包含两个折线图
           {
             name: '入库数量',
             type: 'line',
             data: inbound,
-            smooth: true,
+            smooth: true,//平滑曲线
             lineStyle: { color: '#5ab1ef', width: 2 },
             itemStyle: { color: '#5ab1ef' },
             areaStyle: { color: 'rgba(90,177,239,0.15)' },
@@ -157,49 +164,64 @@ export default {
       })
     },
 
+    //初始化货物数量柱状图
     initBarChart() {
+      //无数据直接返回
       if (!this.barChartData) return
-      const container = this.$refs.barChartRef
+      const container = this.$refs.barChartRef//获取DOM容器
+      //容器为空直接返回
       if (!container) return
 
+      //如果旧表存在，摧毁旧表
       if (this.barChart) this.barChart.dispose()
+      // 初始化
       this.barChart = echarts.init(container)
 
       const { names, quantities } = this.barChartData
       this.barChart.setOption({
+        //提示框
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#10b981', textStyle: { color: '#333' } },
+        //绘图网格
         grid: { left: '3%', right: '4%', top: 20, bottom: 35, containLabel: true },
         xAxis: {
-          type: 'category',
+          type: 'category',//x轴为类别
           data: names,
+          //如果货物名称超过6个，就使标签旋转30度
           axisLabel: { rotate: names.length > 6 ? 30 : 0, fontSize: 12 },
         },
-        yAxis: { type: 'value', name: '数量' },
+        yAxis: { type: 'value', name: '数量' },//y轴为数量
         series: [
           {
             name: '库存数量',
             type: 'bar',
             data: quantities,
-            barMaxWidth: 36,
+            barMaxWidth: 36,//最大宽度
             itemStyle: {
+              //设置渐变颜色
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#10b981' },
                 { offset: 1, color: '#6ee7b7' },
               ]),
+              //圆角矩形
               borderRadius: [4, 4, 0, 0],
             },
           },
         ],
       })
-      this.barChartReady = true
+      this.barChartReady = true//标记已经初始化
     },
 
+    //初始化温湿度柱状图
     initTempHumidityChart() {
+      //无数据，返回
       if (!this.tempHumidityData) return
-      const container = this.$refs.tempHumidityChartRef
+      const container = this.$refs.tempHumidityChartRef//获取DOM容器
+      //容器为空，返回
       if (!container) return
 
+      //有旧表先摧毁旧表
       if (this.tempHumidityChart) this.tempHumidityChart.dispose()
+      //初始化
       this.tempHumidityChart = echarts.init(container)
 
       const { names, temperatures, humidities } = this.tempHumidityData
@@ -248,16 +270,19 @@ export default {
       }
 
       this.tempHumidityChart.setOption({
+        //提示框
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#67e0e3', textStyle: { color: '#333' } },
+        //图例
         legend: { data: ['温度(°C)', '湿度(%)'], top: 4, textStyle: { color: '#606266' } },
+        //绘图网格
         grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
-        xAxis: { type: 'category', data: names },
+        xAxis: { type: 'category', data: names },//x轴为仓库名称
         yAxis: [
           { type: 'value', name: '°C', min: tMin, max: tMax },
           {
             type: 'value', name: '%', min: hMin, max: hMax,
             axisLabel: {
-              formatter: (v) => v < 0 ? '' : v  // 小于0的刻度数值不显示
+              formatter: (v) => v < 0 ? '' : v  // 湿度没有负数
             }
           },
         ],
@@ -265,9 +290,9 @@ export default {
           {
             name: '温度(°C)',
             type: 'bar',
-            yAxisIndex: 0,
-            barWidth: '35%',
-            barGap: '30%',
+            yAxisIndex: 0,//使用左边的y轴
+            barWidth: '35%',//柱子宽度
+            barGap: '30%',//间隔
             data: temperatures,
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -281,7 +306,7 @@ export default {
             name: '湿度(%)',
             type: 'bar',
             barWidth: '35%',
-            yAxisIndex: 1,
+            yAxisIndex: 1,//使用右边的y轴
             data: humidities,
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -295,6 +320,7 @@ export default {
       })
     },
 
+    // 切换视图
     switchChart(name) {
       this.activeChart = name
       if (name === 'trend') {
@@ -302,6 +328,7 @@ export default {
           if (this.lineChart) this.lineChart.resize()
         })
       } else if (name === 'goods') {
+        //未初始化则先初始化
         if (!this.barChartReady) {
           this.$nextTick(() => this.initBarChart())
         } else {
@@ -312,23 +339,26 @@ export default {
       }
     },
 
+    //浏览器大小改变时要跟随变化大小
     handleResize() {
       if (this.lineChart) this.lineChart.resize()
       if (this.barChart) this.barChart.resize()
       if (this.tempHumidityChart) this.tempHumidityChart.resize()
     },
 
+    //根据仓库饱和度返回进度条颜色
     getCapacityColor(saturation) {
-      if (saturation < 25) return '#10b981'
-      if (saturation < 50) return '#e6a23c'
-      if (saturation < 75) return '#f59e0b'
-      return '#f56c6c'
+      if (saturation < 25) return '#10b981'//绿色
+      if (saturation < 50) return '#e6a23c'//橙色
+      if (saturation < 75) return '#f59e0b'//琥珀色
+      return '#f56c6c'//红色
     },
   },
 }
 </script>
 
 <style scoped>
+/* 纵向布局 */
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -338,17 +368,18 @@ export default {
 /* 上半部分 */
 .chart-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 8px;/*圆角*/
   padding: 8px 12px 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);/*阴影*/
 }
 
+/* 切换行按钮 */
 .chart-tab-row {
   display: flex;
-  gap: 0;
+  gap: 0;/*无间距*/
   margin-bottom: 4px;
 }
-
+/* 按钮样式 */
 .chart-tab-row button {
   padding: 4px 14px;
   border: none;
@@ -359,15 +390,17 @@ export default {
   cursor: pointer;
 }
 
+/* 激活后的按钮样式 */
 .chart-tab-row button.active {
   background: var(--primary-bg);
   color: var(--primary-color);
 }
 
+/* 图表容器 */
 .chart-container {
   width: 100%;
   height: 200px;
-  overflow: hidden;
+  overflow: hidden;/*隐藏移除部分*/
 }
 
 .chart-sm {
@@ -375,11 +408,13 @@ export default {
 }
 
 /* 下半部分 */
+/* 横向布局 */
 .bottom-section {
   display: flex;
   gap: 12px;
 }
 
+/* 卡片 */
 .dashboard-card {
   flex: 1;
   background: #fff;
@@ -388,6 +423,7 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
+/* 卡片标题 */
 .card-title {
   font-size: 14px;
   font-weight: 600;
@@ -400,16 +436,18 @@ export default {
 /* 容量饱和度 */
 .capacity-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: column;/*纵向*/
   gap: 10px;
 }
 
+/*单个容量条目*/
 .capacity-item {
   display: flex;
-  align-items: center;
+  align-items: center;/*居中*/
   gap: 10px;
 }
 
+/* 标签——仓库名 */
 .capacity-label {
   width: 120px;
   font-size: 13px;
@@ -418,12 +456,13 @@ export default {
   flex-direction: column;
   gap: 2px;
 }
-
+/* 标签——容量 */
 .capacity-label span:last-child {
   font-size: 11px;
   color: #909399;
 }
 
+/* 进度条背景 */
 .progress-bar {
   flex: 1;
   height: 16px;
@@ -431,13 +470,13 @@ export default {
   border-radius: 8px;
   overflow: hidden;
 }
-
+/* 进度条填充 */
 .progress-fill {
   height: 100%;
   border-radius: 8px;
   transition: width 0.6s ease;
 }
-
+/* 百分比数字 */
 .capacity-percent {
   width: 50px;
   font-size: 13px;
@@ -445,19 +484,20 @@ export default {
   text-align: right;
 }
 
+/* 无数据提示 */
 .empty-hint {
   text-align: center;
   color: #909399;
   padding: 40px 0;
   font-size: 14px;
 }
-
-@media (max-width: 768px) {
+/* 小屏幕适配 */
+/* @media (max-width: 768px) {
   .bottom-section {
     flex-direction: column;
   }
   .capacity-label {
     width: 90px;
   }
-}
+} */
 </style>

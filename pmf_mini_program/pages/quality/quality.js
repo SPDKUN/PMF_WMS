@@ -29,7 +29,7 @@ Page({
     this.data._pendingOrderNo = params && params.order_no ? params.order_no : null;
     var user = app.globalData.userInfo || {};
     this.setData({
-      isAdmin: user.position === '系统管理员' || user.department === '管理部',
+      isAdmin: user.position === '仓库管理员' || user.department === '管理部门',
       isInspector: user.position === '质检员'
     });
     this.loadBaseData();
@@ -38,7 +38,7 @@ Page({
   onShow: function() {
     var user = app.globalData.userInfo || {};
     this.setData({
-      isAdmin: user.position === '系统管理员' || user.department === '管理部',
+      isAdmin: user.position === '仓库管理员' || user.department === '管理部门',
       isInspector: user.position === '质检员'
     });
     this.loadBaseData();

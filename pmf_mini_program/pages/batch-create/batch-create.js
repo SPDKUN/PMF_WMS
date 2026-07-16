@@ -59,7 +59,7 @@ Page({
         production_date: this.data.production_date,
         expiry_date: this.data.expiry_date,
         initial_quantity: parseInt(this.data.initial_quantity),
-        batch_status: '待入库'
+        batch_status: '待检'
       })
       wx.hideLoading()
       wx.showToast({ title: '创建成功', icon: 'success' })
