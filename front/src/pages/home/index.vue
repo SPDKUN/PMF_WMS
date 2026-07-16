@@ -109,7 +109,7 @@
             <el-icon><Check /></el-icon>
           </div>
         </div>
-        <div v-if="todoList.length === 0" style="text-align:center;color:#909399;padding:30px 0;">
+        <div v-if="todoList.length === 0" style="text-align:center;color:var(--foreground-muted);padding:30px 0;">
           所有待办已完成！
         </div>
       </div>
@@ -127,10 +127,10 @@ import request from '@/utils/request.js'
 const taskTypeMeta = {
   '质检': { icon: 'List', color: '#9254de' },
   '入库': { icon: 'ArrowRight', color: 'var(--primary-color)' },
-  '出库': { icon: 'Check', color: '#f56c6c' },
-  '库存调整': { icon: 'Box', color: '#e6a23c' },
-  '库存盘点': { icon: 'DocumentCopy', color: '#67c23a' },
-  '处理不合格货物': { icon: 'DocumentCopy', color: '#e6a23c' }
+  '出库': { icon: 'Check', color: 'var(--danger)' },
+  '库存调整': { icon: 'Box', color: 'var(--warning)' },
+  '库存盘点': { icon: 'DocumentCopy', color: 'var(--success)' },
+  '处理不合格货物': { icon: 'DocumentCopy', color: 'var(--warning)' }
 }
 
 export default {
@@ -321,7 +321,7 @@ export default {
   border: none;
   border-radius: var(--radius-md);
   padding: 8px 20px;
-  color: #fff;
+  color: var(--text-on-primary);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;

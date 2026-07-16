@@ -210,7 +210,7 @@ form .login-btn {
   width: 100%;
   padding: 12px;
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   border: none;
   border-radius: var(--radius-md);
   font-size: 15px;
@@ -226,7 +226,7 @@ form .login-btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 form .login-btn:disabled {
-  background: hsl(var(--primary-h), 50%, 70%);
+  background: var(--primary-disabled);
   cursor: not-allowed;
   transform: none;
 }
@@ -235,7 +235,7 @@ form .login-btn:disabled {
   margin-top: 16px;
   padding: 10px 14px;
   background: var(--danger-bg);
-  border: 1px solid hsl(5, 80%, 85%);
+  border: 1px solid var(--danger-bg);
   border-radius: var(--radius-md);
   color: var(--danger);
   font-size: 13px;

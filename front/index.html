@@ -19,6 +19,9 @@
         overflow: hidden;
         background-color: #f4f7f9;
       }
+      html[data-theme="dark"] #app-loading {
+        background-color: #1a1e1d;
+      }
       #app-loading.hidden {
         pointer-events: none;
         visibility: hidden;
@@ -30,6 +33,9 @@
         font-size: 24px;
         font-weight: 600;
         color: rgb(0 0 0 / 85%);
+      }
+      html[data-theme="dark"] #app-loading .title {
+        color: rgb(255 255 255 / 85%);
       }
       .loader {
         position: relative;
@@ -70,6 +76,14 @@
         50%      { transform: scale(1.2, 1); }
       }
     </style>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('app-theme');
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app-loading">

@@ -420,7 +420,7 @@
         </div>
         <div class="dialog-body" style="max-height:500px;overflow-y:auto;">
           <div v-if="detailDialog.surplus.length > 0" style="margin-bottom:16px;">
-            <h4 style="margin:0 0 8px 0;color:#e6a23c;">盘盈明细（{{ detailDialog.surplus.length }}项）</h4>
+            <h4 style="margin:0 0 8px 0;color:var(--warning);">盘盈明细（{{ detailDialog.surplus.length }}项）</h4>
             <table class="data-table">
               <thead>
                 <tr>
@@ -435,13 +435,13 @@
                   <td>{{ idx + 1 }}</td>
                   <td>{{ item.batchId }}</td>
                   <td>LOC-{{ item.locationId }}</td>
-                  <td style="color:#e6a23c;font-weight:600;">+{{ item.diff }}</td>
+                  <td style="color:var(--warning);font-weight:600;">+{{ item.diff }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div v-if="detailDialog.shortage.length > 0">
-            <h4 style="margin:0 0 8px 0;color:#f56c6c;">盘亏明细（{{ detailDialog.shortage.length }}项）</h4>
+            <h4 style="margin:0 0 8px 0;color:var(--danger);">盘亏明细（{{ detailDialog.shortage.length }}项）</h4>
             <table class="data-table">
               <thead>
                 <tr>
@@ -456,12 +456,12 @@
                   <td>{{ idx + 1 }}</td>
                   <td>{{ item.batchId }}</td>
                   <td>LOC-{{ item.locationId }}</td>
-                  <td style="color:#f56c6c;font-weight:600;">{{ item.diff }}</td>
+                  <td style="color:var(--danger);font-weight:600;">{{ item.diff }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div v-if="detailDialog.surplus.length === 0 && detailDialog.shortage.length === 0" style="text-align:center;color:#909399;padding:20px;">
+          <div v-if="detailDialog.surplus.length === 0 && detailDialog.shortage.length === 0" style="text-align:center;color:var(--foreground-muted);padding:20px;">
             暂无详情数据
           </div>
         </div>
@@ -1062,7 +1062,7 @@ input[type="date"]:invalid::-webkit-datetime-edit {
 }
 input[type="date"]:focus::-webkit-datetime-edit,
 input[type="date"]:valid::-webkit-datetime-edit {
-  color: #303133;
+  color: var(--foreground);
 }
 
 .search-item {
@@ -1072,7 +1072,7 @@ input[type="date"]:valid::-webkit-datetime-edit {
 }
 .search-item label {
   font-size: 12px;
-  color: #909399;
+  color: var(--foreground-muted);
 }
 .search-item input,
 .search-item select {
@@ -1081,16 +1081,16 @@ input[type="date"]:valid::-webkit-datetime-edit {
   border: 1px solid var(--border-color-light);
   border-radius: 4px;
   font-size: 13px;
-  color: #303133;
+  color: var(--foreground);
   outline: none;
-  background: #fff;
+  background: var(--card);
   min-width: 120px;
 }
 .search-item input:focus,
 .search-item select:focus { border-color: var(--primary-color); }
 .search-item select:disabled {
   background: var(--page-bg);
-  color: #c0c4cc;
+  color: var(--foreground-placeholder);
   cursor: not-allowed;
 }
 
@@ -1111,15 +1111,15 @@ input[type="date"]:valid::-webkit-datetime-edit {
 }
 .btn-search:hover { background: #d9ecff; }
 .btn-cancel {
-  background: #f4f4f5;
-  color: #606266;
+  background: var(--bg-secondary);
+  color: var(--foreground-regular);
 }
-.btn-cancel:hover { background: #e6e6e8; }
+.btn-cancel:hover { background: var(--bg-secondary-hover); }
 .btn-export {
-  background: #fdf6ec;
-  color: #e6a23c;
+  background: var(--warning-bg);
+  color: var(--warning);
 }
-.btn-export:hover { background: #faecd8; }
+.btn-export:hover { background: var(--warning-bg); }
 
 .detail-link {
   color: var(--primary);
@@ -1156,7 +1156,7 @@ input[type="date"]:valid::-webkit-datetime-edit {
 .tab-row button:hover { color: var(--foreground); background: var(--border-light); }
 .tab-row button.active {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1180,26 +1180,26 @@ input[type="date"]:valid::-webkit-datetime-edit {
   padding: 10px 14px;
   text-align: left;
   font-weight: 600;
-  color: #303133;
+  color: var(--foreground);
   border-bottom: 1px solid var(--border-color-light);
   white-space: nowrap;
 }
 .data-table td {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-color-light);
-  color: #606266;
+  color: var(--foreground-regular);
 }
 .data-table tbody tr:hover { background: var(--page-bg); }
-.empty-cell { text-align: center; padding: 40px 0; color: #c0c4cc; }
+.empty-cell { text-align: center; padding: 40px 0; color: var(--foreground-placeholder); }
 
 .status-tag {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 4px;
 }
-.status-tag.启用, .status-tag.status-normal { background: #f0f9eb; color: #67c23a; }
-.status-tag.禁用, .status-tag.status-scrap { background: #fef0f0; color: #f56c6c; }
-.status-tag.status-pending { background: #fdf6ec; color: #e6a23c; }
+.status-tag.启用, .status-tag.status-normal { background: var(--success-bg); color: var(--success); }
+.status-tag.禁用, .status-tag.status-scrap { background: var(--danger-bg); color: var(--danger); }
+.status-tag.status-pending { background: var(--warning-bg); color: var(--warning); }
 .status-tag.status-locked { background: var(--primary-bg); color: var(--primary-color); }
 
 .pagination-row {
@@ -1207,7 +1207,7 @@ input[type="date"]:valid::-webkit-datetime-edit {
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
-  color: #909399;
+  color: var(--foreground-muted);
   padding: 10px 0 4px;
   flex-wrap: wrap;
   gap: 8px;
@@ -1227,10 +1227,10 @@ input[type="date"]:valid::-webkit-datetime-edit {
   min-width: 32px;
   height: 30px;
   padding: 0 8px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #fff;
-  color: #606266;
+  background: var(--card);
+  color: var(--foreground-regular);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
@@ -1244,7 +1244,7 @@ input[type="date"]:valid::-webkit-datetime-edit {
 .pagination-controls button.active {
   background: var(--primary-color, #409EFF);
   border-color: var(--primary-color, #409EFF);
-  color: #fff;
+  color: var(--text-on-primary);
 }
 
 .pagination-controls button:disabled {
@@ -1255,7 +1255,7 @@ input[type="date"]:valid::-webkit-datetime-edit {
 .page-ellipsis {
   width: 32px;
   text-align: center;
-  color: #909399;
+  color: var(--foreground-muted);
 }
 
 .btn-action {
@@ -1266,17 +1266,17 @@ input[type="date"]:valid::-webkit-datetime-edit {
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-action.view { background: #f0f9eb; color: #67c23a; }
-.btn-action.view:hover { background: #e1f3d8; }
+.btn-action.view { background: var(--success-bg); color: var(--success); }
+.btn-action.view:hover { background: var(--success-bg); }
 
 /* 仓库查看弹窗 */
 .dialog-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.35); z-index: 9999;
+  background: var(--overlay-bg); z-index: 9999;
   display: flex; align-items: center; justify-content: center;
 }
 .dialog-box {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--border-color-light);
   border-radius: 4px;
   width: 460px; max-width: 92vw;
@@ -1285,12 +1285,12 @@ input[type="date"]:valid::-webkit-datetime-edit {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px; border-bottom: 1px solid var(--border-color-light);
 }
-.dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
+.dialog-header h3 { font-size: 15px; font-weight: 600; color: var(--foreground); margin: 0; }
 .dialog-close {
-  background: none; border: none; color: #c0c4cc;
+  background: none; border: none; color: var(--foreground-placeholder);
   font-size: 20px; cursor: pointer; padding: 0; line-height: 1;
 }
-.dialog-close:hover { color: #303133; }
+.dialog-close:hover { color: var(--foreground); }
 
 .view-dialog-box { width: 900px; }
 .view-dialog-body { display: flex; height: 460px; }
@@ -1298,20 +1298,20 @@ input[type="date"]:valid::-webkit-datetime-edit {
   width: 240px; min-width: 240px;
   border-right: 1px solid var(--border-color-light);
   overflow-y: auto;
-  background: #fafafa;
+  background: var(--bg-secondary);
 }
 .zone-sidebar-title {
   padding: 12px 14px;
-  font-size: 13px; font-weight: 600; color: #303133;
+  font-size: 13px; font-weight: 600; color: var(--foreground);
   border-bottom: 1px solid var(--border-color-light);
-  background: #fff;
+  background: var(--card);
   position: sticky; top: 0;
 }
 .zone-item {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 14px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--bg-secondary);
   transition: background 0.15s;
 }
 .zone-item:hover { background: var(--primary-bg); }
@@ -1319,26 +1319,26 @@ input[type="date"]:valid::-webkit-datetime-edit {
 .zone-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
-.dot-green { background: #67c23a; }
-.dot-red { background: #f56c6c; }
+.dot-green { background: var(--success); }
+.dot-red { background: var(--danger); }
 .zone-name {
-  flex: 1; font-size: 13px; color: #303133;
+  flex: 1; font-size: 13px; color: var(--foreground);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.zone-available { font-size: 11px; color: #909399; flex-shrink: 0; }
-.zone-empty { padding: 20px; text-align: center; color: #c0c4cc; font-size: 13px; }
+.zone-available { font-size: 11px; color: var(--foreground-muted); flex-shrink: 0; }
+.zone-empty { padding: 20px; text-align: center; color: var(--foreground-placeholder); font-size: 13px; }
 
 .location-main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .location-main-title {
   padding: 12px 16px;
-  font-size: 13px; font-weight: 600; color: #303133;
+  font-size: 13px; font-weight: 600; color: var(--foreground);
   border-bottom: 1px solid var(--border-color-light);
-  background: #fff;
+  background: var(--card);
   position: sticky; top: 0; z-index: 1;
 }
 .location-main-placeholder {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  color: #c0c4cc; font-size: 14px;
+  color: var(--foreground-placeholder); font-size: 14px;
 }
 .location-grid {
   display: flex; flex-wrap: wrap; gap: 12px;
@@ -1356,8 +1356,8 @@ input[type="date"]:valid::-webkit-datetime-edit {
 .loc-tooltip-fixed {
   position: fixed;
   transform: translate(-50%, -100%);
-  background: #303133;
-  color: #fff;
+  background: var(--foreground);
+  color: var(--text-on-primary);
   padding: 8px 10px;
   border-radius: 4px;
   font-size: 11px;
@@ -1374,14 +1374,14 @@ input[type="date"]:valid::-webkit-datetime-edit {
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: #303133;
+  border-top-color: var(--foreground);
 }
 .tooltip-row { white-space: nowrap; }
-.tooltip-label { color: #c0c4cc; }
-.loc-free { background: #f0f9eb; border: 1px solid #b3e19d; }
-.loc-occupied { background: #fef0f0; border: 1px solid #fab6b6; }
-.loc-locked { background: #fef6e7; border: 1px solid #f5dab1; }
-.loc-name { font-size: 11px; color: #303133; text-align: center; word-break: break-all; }
+.tooltip-label { color: var(--foreground-placeholder); }
+.loc-free { background: var(--success-bg); border: 1px solid var(--success-bg); }
+.loc-occupied { background: var(--danger-bg); border: 1px solid var(--danger-bg); }
+.loc-locked { background: #fef6e7; border: 1px solid var(--warning-bg); }
+.loc-name { font-size: 11px; color: var(--foreground); text-align: center; word-break: break-all; }
 
 @media (max-width: 768px) {
   .tab-row { flex-wrap: wrap; }

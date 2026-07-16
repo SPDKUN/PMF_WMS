@@ -58,6 +58,10 @@
           </div>
         </div>
         <div class="topbar-right">
+          <div class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? '切换亮色模式' : '切换暗色模式'">
+            <el-icon v-if="theme === 'dark'"><Sunny /></el-icon>
+            <el-icon v-else><Moon /></el-icon>
+          </div>
           <span class="header-date">{{ currentDate }}</span>
           <div class="user-badge" @click="navigate('Profile')" title="个人中心">
             <span class="user-avatar">{{ (userInfo.real_name || userInfo.username || 'U').charAt(0) }}</span>
@@ -83,14 +87,19 @@
 
 <script>
 import {
-  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight
+  Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, Sunny, Moon
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
+import { useTheme } from '@/composables/useTheme.js'
 
 export default {
   name: 'MainLayout',
   components: {
-    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, ElIcon
+    Box, HomeFilled, Setting, Search, List, ChatDotRound, UserFilled, SwitchButton, Calendar, DataAnalysis, DArrowLeft, DArrowRight, Sunny, Moon, ElIcon
+  },
+  setup() {
+    const { theme, toggleTheme } = useTheme()
+    return { theme, toggleTheme }
   },
   data() {
     return {
@@ -202,13 +211,13 @@ export default {
 }
 .sidebar .logo .el-icon {
   font-size: 26px;
-  color: #fff;
+  color: var(--text-on-primary);
   flex-shrink: 0;
 }
 .sidebar .logo span {
   font-size: 18px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-on-primary);
   white-space: nowrap;
   letter-spacing: 1px;
 }
@@ -280,7 +289,7 @@ export default {
   background: hsl(5 80% 58% / 30%);
 }
 .logout-btn:hover .el-icon {
-  color: #fff;
+  color: var(--text-on-primary);
 }
 
 /* 收缩状态 */
@@ -305,7 +314,7 @@ export default {
   justify-content: space-between;
   padding: 0 24px;
   height: 48px;
-  background: hsl(0 0% 100% / 85%);
+  background: var(--topbar-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
@@ -347,6 +356,20 @@ export default {
   color: var(--foreground-muted);
 }
 
+.theme-toggle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--foreground-muted);
+  font-size: 18px;
+}
+.theme-toggle:hover {
+  background: var(--border-light);
+  color: var(--foreground);
+}
+
 /* 用户徽章 */
 .user-badge {
   display: flex;
@@ -362,7 +385,7 @@ export default {
   width: 32px; height: 32px;
   border-radius: 50%;
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 600;
   flex-shrink: 0;
@@ -409,7 +432,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: hsl(var(--primary-h) 40% 97% / 85%);
+  background: var(--page-bg);
   backdrop-filter: blur(4px);
   pointer-events: none;
   visibility: hidden;

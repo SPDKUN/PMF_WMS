@@ -197,7 +197,7 @@ export default {
 }
 .avatar-ai { background: var(--card); border: 1px solid var(--border-light); overflow: hidden; }
 .ai-avatar-img { width: 100%; height: 100%; object-fit: cover; }
-.avatar-user { background: var(--primary); color: #fff; font-size: 14px; font-weight: 600; }
+.avatar-user { background: var(--primary); color: var(--text-on-primary); font-size: 14px; font-weight: 600; }
 
 .msg-body { max-width: 65%; display: flex; flex-direction: column; gap: 4px; }
 .msg-body-user { align-items: flex-end; }
@@ -238,7 +238,7 @@ export default {
 
 .send-btn {
   padding: 0 24px; height: 44px; border: none; border-radius: var(--radius-lg);
-  background: var(--primary); color: #fff; font-size: 14px; font-weight: 500;
+  background: var(--primary); color: var(--text-on-primary); font-size: 14px; font-weight: 500;
   cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
 }
 .send-btn:hover { background: var(--primary-hover); box-shadow: var(--shadow-sm); }
