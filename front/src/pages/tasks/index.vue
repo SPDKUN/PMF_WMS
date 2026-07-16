@@ -2288,26 +2288,30 @@ export default {
 
 .tab-row {
   display: flex;
-  gap: 0;
-  background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   padding: 4px;
   width: fit-content;
+  box-shadow: var(--shadow-sm);
 }
 .tab-row button {
-  padding: 6px 20px;
+  padding: 7px 22px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background: transparent;
-  color: #606266;
+  color: var(--foreground-regular);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
+.tab-row button:hover { color: var(--foreground); background: var(--border-light); }
 .tab-row button.active {
-  background: var(--primary-color);
+  background: var(--primary);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .tab-content { display: flex; flex-direction: column; gap: 10px; }
@@ -2341,13 +2345,13 @@ export default {
   margin: 0 auto;
 }
 .op-card {
-  --card-color: var(--primary-color);
-  background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: 12px;
+  --card-color: var(--primary);
+  background: var(--card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
   padding: 24px 16px 20px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.5, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2355,6 +2359,7 @@ export default {
   position: relative;
   overflow: hidden;
   aspect-ratio: 1;
+  box-shadow: var(--shadow-sm);
 }
 .op-card::before {
   content: '';
@@ -2362,12 +2367,12 @@ export default {
   top: 0; left: 0; right: 0;
   height: 3px;
   background: var(--card-color);
-  border-radius: 0 0 2px 2px;
+  border-radius: 0;
 }
 .op-card:hover {
   border-color: var(--card-color);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-lg);
 }
 .op-card:active {
   transform: translateY(-1px);
@@ -2408,23 +2413,25 @@ export default {
   transition: all 0.2s;
 }
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--primary);
   color: #fff;
   align-self: flex-start;
 }
 .btn-primary:hover { background: var(--primary-hover); }
 .btn-cancel {
-  background: #f4f4f5;
-  color: #606266;
+  background: hsl(0, 0%, 96%);
+  color: var(--foreground-regular);
+  border: 1px solid var(--border);
 }
-.btn-cancel:hover { background: #e6e6e8; }
+.btn-cancel:hover { background: hsl(0, 0%, 90%); }
 
 .table-wrapper {
-  background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
+  background: var(--card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   overflow-x: auto;
+  box-shadow: var(--shadow-sm);
 }
 .data-table {
   width: 100%;

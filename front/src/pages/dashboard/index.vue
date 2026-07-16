@@ -358,146 +358,132 @@ export default {
 </script>
 
 <style scoped>
-/* 纵向布局 */
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
 /* 上半部分 */
 .chart-card {
-  background: #fff;
-  border-radius: 8px;/*圆角*/
-  padding: 8px 12px 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);/*阴影*/
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  padding: 12px 16px 0;
+  box-shadow: var(--shadow-sm);
 }
 
-/* 切换行按钮 */
 .chart-tab-row {
   display: flex;
-  gap: 0;/*无间距*/
-  margin-bottom: 4px;
+  gap: 4px;
+  margin-bottom: 8px;
 }
-/* 按钮样式 */
 .chart-tab-row button {
-  padding: 4px 14px;
+  padding: 6px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background: transparent;
-  color: #606266;
+  color: var(--foreground-regular);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
-
-/* 激活后的按钮样式 */
+.chart-tab-row button:hover {
+  background: var(--border-light);
+}
 .chart-tab-row button.active {
   background: var(--primary-bg);
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
-/* 图表容器 */
 .chart-container {
   width: 100%;
-  height: 200px;
-  overflow: hidden;/*隐藏移除部分*/
+  height: 220px;
+  overflow: hidden;
 }
-
-.chart-sm {
-  height: 240px;
-}
+.chart-sm { height: 240px; }
 
 /* 下半部分 */
-/* 横向布局 */
 .bottom-section {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
-/* 卡片 */
 .dashboard-card {
   flex: 1;
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px 14px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
 }
 
-/* 卡片标题 */
 .card-title {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
-  margin: 0 0 8px 0;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #ebeef5;
+  color: var(--foreground);
+  margin: 0 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
 }
 
-/* 容量饱和度 */
 .capacity-list {
   display: flex;
-  flex-direction: column;/*纵向*/
-  gap: 10px;
+  flex-direction: column;
+  gap: 12px;
 }
-
-/*单个容量条目*/
 .capacity-item {
   display: flex;
-  align-items: center;/*居中*/
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
 }
-
-/* 标签——仓库名 */
 .capacity-label {
   width: 120px;
   font-size: 13px;
-  color: #606266;
+  color: var(--foreground-regular);
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-/* 标签——容量 */
 .capacity-label span:last-child {
   font-size: 11px;
-  color: #909399;
+  color: var(--foreground-muted);
 }
 
-/* 进度条背景 */
 .progress-bar {
   flex: 1;
   height: 16px;
-  background: #f5f7fa;
+  background: hsl(0, 0%, 95%);
   border-radius: 8px;
   overflow: hidden;
 }
-/* 进度条填充 */
 .progress-fill {
   height: 100%;
   border-radius: 8px;
   transition: width 0.6s ease;
 }
-/* 百分比数字 */
 .capacity-percent {
   width: 50px;
   font-size: 13px;
-  color: #606266;
+  font-weight: 500;
+  color: var(--foreground-regular);
   text-align: right;
 }
 
-/* 无数据提示 */
 .empty-hint {
   text-align: center;
-  color: #909399;
+  color: var(--foreground-muted);
   padding: 40px 0;
   font-size: 14px;
 }
-/* 小屏幕适配 */
-/* @media (max-width: 768px) {
+
+@media (max-width: 768px) {
   .bottom-section {
     flex-direction: column;
   }
   .capacity-label {
     width: 90px;
   }
-} */
+}
 </style>

@@ -1033,27 +1033,28 @@ export default {
   gap: 8px;
 }
 .search-type {
-  height: 32px;
+  height: 34px;
   padding: 0 10px;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
   font-size: 13px;
-  color: #303133;
-  background: #fff;
+  color: var(--foreground);
+  background: var(--card);
+  outline: none;
 }
 .search-input {
-  height: 32px;
+  height: 34px;
   width: 180px;
   padding: 0 10px;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
   font-size: 13px;
-  color: #303133;
+  color: var(--foreground);
   outline: none;
   transition: border-color 0.2s;
 }
-.search-input:focus { border-color: var(--primary-color); }
-.search-input::placeholder { color: #c0c4cc; }
+.search-input:focus { border-color: var(--primary); }
+.search-input::placeholder { color: var(--foreground-placeholder); }
 
 /* 隐藏 date 输入框空值时的默认格式提示 */
 input[type="date"]:invalid::-webkit-datetime-edit {
@@ -1121,7 +1122,7 @@ input[type="date"]:valid::-webkit-datetime-edit {
 .btn-export:hover { background: #faecd8; }
 
 .detail-link {
-  color: var(--primary-color);
+  color: var(--primary);
   cursor: pointer;
   margin-left: 6px;
   font-size: 13px;
@@ -1131,36 +1132,41 @@ input[type="date"]:valid::-webkit-datetime-edit {
 
 .tab-row {
   display: flex;
-  gap: 0;
-  background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   padding: 4px;
   width: fit-content;
   flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
 }
 .tab-row button {
-  padding: 6px 18px;
+  padding: 7px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background: transparent;
-  color: #606266;
+  color: var(--foreground-regular);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
+.tab-row button:hover { color: var(--foreground); background: var(--border-light); }
 .tab-row button.active {
-  background: var(--primary-color);
+  background: var(--primary);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .table-wrapper {
-  background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
+  background: var(--card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   overflow-x: auto;
+  box-shadow: var(--shadow-sm);
 }
 .data-table {
   width: 100%;

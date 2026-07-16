@@ -27,10 +27,26 @@
           <el-icon><Promotion /></el-icon> 发送
         </button>
       </div>
+
+      <!-- 快捷操作 -->
+      <div class="quick-actions">
+        <button class="quick-btn" @click="$router.push({ name: 'Tasks' })">
+          <el-icon><ArrowRight /></el-icon> 新建入库单
+        </button>
+        <button class="quick-btn" @click="$router.push({ name: 'Tasks' })">
+          <el-icon><Check /></el-icon> 新建出库单
+        </button>
+        <button class="quick-btn" @click="$router.push({ name: 'Tasks' })">
+          <el-icon><List /></el-icon> 发起质检
+        </button>
+        <button class="quick-btn" @click="$router.push({ name: 'Dashboard' })">
+          <el-icon><DataAnalysis /></el-icon> 数据看板
+        </button>
+      </div>
     </div>
 
     <!-- 待办卡片 -->
-    <div class="card todo-card" @click="goToTasks">
+    <div class="card todo-card card-clickable" @click="goToTasks">
       <div class="card-header">
         <h3><el-icon><List /></el-icon> 我的待办</h3>
         <span class="count-badge">{{ todoList.length }} 项待处理</span>
@@ -63,7 +79,7 @@
 
 <script>
 import {
-  Box, List, Clock, Cpu, Promotion, DocumentCopy, Check
+  Box, List, Clock, Cpu, Promotion, DocumentCopy, Check, ArrowRight, DataAnalysis
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 import request from '@/utils/request.js'
@@ -80,7 +96,7 @@ const taskTypeMeta = {
 export default {
   name: 'WarehouseDashboard',
   components: {
-    Box, List, Clock, Cpu, Promotion, DocumentCopy, Check,
+    Box, List, Clock, Cpu, Promotion, DocumentCopy, Check, ArrowRight, DataAnalysis,
     ElIcon
   },
   data() {
@@ -164,259 +180,229 @@ export default {
 .dashboard-grid {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-/* 卡片 */
-.card {
-  background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: var(--card-radius);
-  padding: 20px 24px;
-  box-shadow: var(--card-shadow);
+  gap: 20px;
 }
 
 /* 欢迎卡片 */
 .welcome-card .greeting {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  color: #303133;
+  color: var(--foreground);
   margin-bottom: 6px;
+  letter-spacing: -0.3px;
 }
 .welcome-card .sub-greeting {
   font-size: 14px;
-  color: #909399;
-  margin-bottom: 14px;
+  color: var(--foreground-muted);
+  margin-bottom: 18px;
 }
 .welcome-card .status-row {
   display: flex;
-  gap: 28px;
+  gap: 32px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 .welcome-card .status-item {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #606266;
+  color: var(--foreground-regular);
 }
 .welcome-card .status-item .el-icon {
-  font-size: 16px;
-  color: var(--primary-color);
+  font-size: 18px;
+  color: var(--primary);
 }
 .welcome-card .status-item .num {
-  font-weight: 600;
-  color: #303133;
-  font-size: 16px;
+  font-weight: 700;
+  color: var(--foreground);
+  font-size: 18px;
 }
 
 /* AI 输入框 */
 .welcome-card .ai-input-area {
-  margin-top: 4px;
   display: flex;
   align-items: center;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
-  padding: 4px 6px 4px 14px;
-  transition: border-color 0.2s;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  padding: 4px 6px 4px 16px;
+  transition: all 0.2s ease;
+  background: var(--background-deep);
 }
 .welcome-card .ai-input-area:focus-within {
-  border-color: var(--primary-color);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px hsl(var(--primary-h), var(--primary-s), 60% / 20%);
+  background: var(--card);
 }
 .welcome-card .ai-input-area input {
   flex: 1;
   border: none;
   outline: none;
-  color: #303133;
+  background: transparent;
+  color: var(--foreground);
   font-size: 14px;
   padding: 8px 0;
   min-width: 0;
 }
-.welcome-card .ai-input-area input::placeholder {
-  color: #c0c4cc;
-}
+.welcome-card .ai-input-area input::placeholder { color: var(--foreground-placeholder); }
 .welcome-card .ai-input-area .ai-icon {
-  color: var(--primary-color);
-  font-size: 16px;
+  color: var(--primary);
+  font-size: 18px;
   margin-right: 8px;
 }
 .welcome-card .ai-input-area .send-btn {
-  background: var(--primary-color);
+  background: var(--primary);
   border: none;
-  border-radius: 4px;
-  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  padding: 8px 20px;
   color: #fff;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .welcome-card .ai-input-area .send-btn:hover:not(:disabled) {
   background: var(--primary-hover);
+  box-shadow: var(--shadow-sm);
 }
 .welcome-card .ai-input-area .send-btn:disabled {
-  background: #6ee7b7;
+  background: hsl(var(--primary-h), 50%, 70%);
   cursor: not-allowed;
 }
 
+/* 快捷操作 */
 .welcome-card .quick-actions {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
-.welcome-card .quick-actions .btn {
-  padding: 6px 16px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color-light);
-  background: #fff;
-  color: #606266;
+.quick-btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground-regular);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-.welcome-card .quick-actions .btn:hover {
-  color: var(--primary-color);
-  border-color: var(--primary-color);
+.quick-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* 待办卡片 */
-.todo-card {
-  cursor: pointer;
-}
 .todo-card .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-light);
 }
 .todo-card .card-header h3 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: var(--foreground);
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
 }
-.todo-card .card-header h3 .el-icon {
-  color: var(--primary-color);
-}
+.todo-card .card-header h3 .el-icon { color: var(--primary); font-size: 18px; }
 .todo-card .card-header .count-badge {
   background: var(--primary-bg);
-  color: var(--primary-color);
-  padding: 2px 10px;
-  border-radius: 4px;
+  color: var(--primary);
+  padding: 3px 12px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
+  font-weight: 600;
 }
 .todo-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 .todo-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color-light);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
   gap: 12px;
+  transition: all 0.2s ease;
 }
 .todo-item:hover {
-  background: var(--page-bg);
+  background: var(--primary-bg);
+  border-color: hsl(var(--primary-h), 30%, 85%);
+  transform: translateX(4px);
 }
 .todo-item .icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   flex-shrink: 0;
 }
-.todo-item .info {
-  flex: 1;
-  min-width: 0;
-}
+.todo-item .info { flex: 1; min-width: 0; }
 .todo-item .info .title {
   font-size: 14px;
   font-weight: 500;
-  color: #303133;
+  color: var(--foreground);
 }
 .todo-item .info .desc {
   font-size: 12px;
-  color: #909399;
+  color: var(--foreground-muted);
   margin-top: 2px;
 }
 .todo-item .priority-tag {
   font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   flex-shrink: 0;
 }
-.todo-item .priority-tag.high {
-  background: #fef0f0;
-  color: #f56c6c;
-}
-.todo-item .priority-tag.medium {
-  background: #fdf6ec;
-  color: #e6a23c;
-}
-.todo-item .priority-tag.low {
-  background: #f0f9eb;
-  color: #67c23a;
-}
+.todo-item .priority-tag.high { background: var(--danger-bg); color: var(--danger); }
+.todo-item .priority-tag.medium { background: var(--warning-bg); color: var(--warning); }
+.todo-item .priority-tag.low { background: var(--success-bg); color: var(--success); }
 .todo-item .action-btn {
-  color: #c0c4cc;
+  color: var(--foreground-placeholder);
   cursor: pointer;
-  transition: color 0.2s;
-  font-size: 14px;
+  transition: all 0.2s ease;
+  font-size: 16px;
   padding: 4px;
+  border-radius: var(--radius-sm);
 }
 .todo-item .action-btn:hover {
-  color: var(--primary-color);
+  color: var(--primary);
+  background: hsl(var(--primary-h), 50%, 90%);
 }
 
 @media (max-width: 768px) {
-  .welcome-card .greeting {
-    font-size: 20px;
-  }
-  .welcome-card .status-row {
-    gap: 14px;
-  }
+  .welcome-card .greeting { font-size: 20px; }
+  .welcome-card .status-row { gap: 16px; }
   .welcome-card .ai-input-area {
-    flex-wrap: wrap;
-    border: none;
-    padding: 0;
+    flex-wrap: wrap; border: 1px solid var(--input-border); padding: 6px;
+    border-radius: var(--radius-lg);
   }
   .welcome-card .ai-input-area input {
-    width: 100%;
-    border: 1px solid var(--border-color-light);
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
+    width: 100%; padding: 8px 0; margin-bottom: 6px;
   }
-  .welcome-card .ai-input-area .send-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  .welcome-card .ai-input-area .ai-icon {
-    display: none;
-  }
-}
-@media (max-width: 480px) {
-  .welcome-card .quick-actions .btn {
-    font-size: 12px;
-    padding: 5px 12px;
-  }
+  .welcome-card .ai-input-area .send-btn { width: 100%; justify-content: center; }
+  .welcome-card .ai-input-area .ai-icon { display: none; }
 }
 </style>

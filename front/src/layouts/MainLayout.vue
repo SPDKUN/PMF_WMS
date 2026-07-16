@@ -156,43 +156,44 @@ export default {
   display: flex;
   height: 100vh;
   background: var(--page-bg);
-  color: var(--text-primary);
   overflow: hidden;
 }
 
-/* 侧边栏 */
+/* ========== 侧边栏 — 渐变色 + 玻璃态 ========== */
 .sidebar {
   flex: 0 0 224px;
-  background: #fff;
-  border-right: 1px solid var(--border-color-light);
+  background: var(--sidebar-gradient);
   padding: 20px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  transition: flex-basis 0.3s ease;
+  transition: flex-basis 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
   overflow: hidden;
+  box-shadow: 2px 0 12px hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - 10%) / 20%);
 }
 
 .sidebar .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 0 20px;
   width: 100%;
 }
 .sidebar .logo .el-icon {
-  font-size: 24px;
-  color: var(--primary-color);
+  font-size: 26px;
+  color: #fff;
   flex-shrink: 0;
 }
 .sidebar .logo span {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #fff;
   white-space: nowrap;
+  letter-spacing: 1px;
 }
 
+/* 导航项 */
 .sidebar .nav {
   display: flex;
   flex-direction: column;
@@ -200,32 +201,35 @@ export default {
   width: 100%;
   padding: 0 12px;
   flex: 1;
-  margin-top: 24px;
+  margin-top: 32px;
 }
 .sidebar .nav a {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border-radius: 6px;
-  color: var(--text-regular);
+  border-radius: var(--radius-md);
+  color: var(--sidebar-text);
   text-decoration: none;
   font-size: 14px;
   transition: all 0.2s ease;
   white-space: nowrap;
+  position: relative;
 }
 .sidebar .nav a .el-icon {
   font-size: 18px;
   flex-shrink: 0;
 }
 .sidebar .nav a:hover {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: var(--sidebar-item-hover-bg);
+  color: var(--sidebar-text-hover);
+  backdrop-filter: blur(4px);
 }
 .sidebar .nav a.active {
-  background: var(--primary-bg);
-  color: var(--primary-color);
+  background: var(--sidebar-item-active-bg);
+  color: var(--sidebar-text-hover);
   font-weight: 500;
+  box-shadow: 0 2px 8px hsl(0 0% 0% / 12%);
 }
 
 /* 侧边栏底部 */
@@ -235,42 +239,28 @@ export default {
   align-items: center;
   gap: 8px;
 }
-
 .logout-btn {
   width: 36px;
   height: 36px;
-  border-radius: 6px;
-  background: #fef0f0;
+  border-radius: var(--radius-md);
+  background: hsl(0 0% 100% / 10%);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 .logout-btn .el-icon {
   font-size: 18px;
-  color: #f56c6c;
+  color: hsl(0 0% 100% / 75%);
+  transition: color 0.2s;
 }
 .logout-btn:hover {
-  background: #fde2e2;
+  background: hsl(5 80% 58% / 30%);
 }
-
-/* 收缩按钮（顶部栏） */
-.collapse-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
-  color: #606266;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-.collapse-btn:hover {
-  background: #f0f2f5;
+.logout-btn:hover .el-icon {
+  color: #fff;
 }
 
 /* 收缩状态 */
@@ -279,7 +269,7 @@ export default {
 .sidebar.collapsed .nav a { justify-content: center; padding: 10px 0; }
 .sidebar.collapsed .nav a span { display: none; }
 
-/* 主内容 */
+/* ========== 主内容 ========== */
 .main {
   flex: 1;
   display: flex;
@@ -288,15 +278,16 @@ export default {
   min-width: 0;
 }
 
-/* 顶部栏 */
+/* ========== 顶部栏 ========== */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 24px;
-  background: #fff;
-  border-bottom: 1px solid var(--border-color-light);
-  box-shadow: var(--header-shadow);
+  background: hsl(0 0% 100% / 85%);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
 }
 .topbar-left {
   display: flex;
@@ -306,23 +297,43 @@ export default {
 .topbar-left h1 {
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--foreground);
   margin: 0;
+  letter-spacing: -0.3px;
 }
 .topbar-left .date-text {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--foreground-muted);
 }
 
-/* 内容区域 */
+/* 折叠按钮 */
+.collapse-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--foreground-regular);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.collapse-btn:hover {
+  background: var(--border-light);
+  color: var(--foreground);
+}
+
+/* ========== 内容区域 ========== */
 .content-area {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 20px;
+  padding: 20px 24px;
   position: relative;
 }
 
-/* 路由加载动画 */
+/* ========== 路由加载动画 ========== */
 .route-loading-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -330,8 +341,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(244, 247, 249, 0.85);
-  backdrop-filter: blur(2px);
+  background: hsl(var(--primary-h) 40% 97% / 85%);
+  backdrop-filter: blur(4px);
   pointer-events: none;
   visibility: hidden;
   opacity: 0;
@@ -354,7 +365,7 @@ export default {
   width: 40px;
   height: 4px;
   content: '';
-  background: hsl(210 100% 50% / 40%);
+  background: hsl(var(--primary-h), var(--primary-s), 60% / 40%);
   border-radius: 50%;
   animation: route-shadow-ani 0.5s linear infinite;
 }
@@ -365,8 +376,8 @@ export default {
   width: 100%;
   height: 100%;
   content: '';
-  background: #10b981;
-  border-radius: 4px;
+  background: var(--primary);
+  border-radius: var(--radius-sm);
   animation: route-jump-ani 0.5s linear infinite;
 }
 @keyframes route-jump-ani {
@@ -381,6 +392,7 @@ export default {
   50%      { transform: scale(1.2, 1); }
 }
 
+/* ========== 响应式 ========== */
 @media (max-width: 768px) {
   .sidebar {
     flex: 0 0 56px !important;
@@ -388,16 +400,9 @@ export default {
   }
   .sidebar .logo span,
   .sidebar .nav a span,
-  .sidebar .logout-btn {
-    display: none;
-  }
-  .sidebar .nav a {
-    padding: 8px;
-    justify-content: center;
-  }
-  .sidebar .logo {
-    justify-content: center;
-    padding: 0;
-  }
+  .sidebar .logout-btn { display: none; }
+  .sidebar .nav a { padding: 8px; justify-content: center; }
+  .sidebar .logo { justify-content: center; padding: 0; }
+  .content-area { padding: 14px 16px; }
 }
 </style>

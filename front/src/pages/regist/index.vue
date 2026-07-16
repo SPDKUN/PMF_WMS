@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import request from '@/utils/request.js'
 
 export default {
   name: 'RegistView',
@@ -67,19 +67,18 @@ export default {
         return
       }
       try {
-        const response = await axios.post('http://localhost:8088/user', {
+        const response = await request.post('/user', {
           username: this.username,
           real_name: this.realName,
           phone: this.phone,
           password: this.password
         })
-        if (response.data.code === 200) {
+        if (response.code === 200) {
           this.$router.push({ name: 'Login' })
         } else {
-          this.errorMsg = response.data.msg || '注册失败'
+          this.errorMsg = response.msg || '注册失败'
         }
       } catch (error) {
-        console.error('注册请求出错：', error)
         this.errorMsg = '网络异常，请稍后重试'
       }
     }
@@ -98,117 +97,97 @@ export default {
 
 .regist-card {
   width: 100%;
-  max-width: 420px;
-  padding: 36px 36px;
-  background: #fff;
-  border: 1px solid var(--border-color-light);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
+  max-width: 440px;
+  padding: 40px 40px;
+  background: var(--card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-float);
 }
 
 .card-header {
   text-align: center;
   margin-bottom: 28px;
 }
-
 .card-header .title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  color: #303133;
+  color: var(--foreground);
   margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
 }
-
 .card-header .subtitle {
-  font-size: 13px;
-  color: #909399;
+  font-size: 14px;
+  color: var(--foreground-muted);
   margin: 0;
 }
 
-form .form-group {
-  margin-bottom: 16px;
-}
-
+form .form-group { margin-bottom: 18px; }
 form .form-group label {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #606266;
-  margin-bottom: 4px;
+  color: var(--foreground-regular);
+  margin-bottom: 6px;
 }
-
 form .form-group input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
   font-size: 14px;
-  color: #303133;
+  color: var(--foreground);
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
 }
-
 form .form-group input:focus {
-  border-color: var(--primary-color);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px hsl(var(--primary-h), var(--primary-s), 60% / 20%);
 }
+form .form-group input::placeholder { color: var(--foreground-placeholder); }
 
-form .form-group input::placeholder {
-  color: #c0c4cc;
-}
-
-form .regist-btn {
+.regist-btn {
   width: 100%;
-  margin-top: 8px;
   padding: 12px;
-  background: var(--primary-color);
+  background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   letter-spacing: 4px;
+  margin-top: 4px;
 }
-
-form .regist-btn:hover {
+.regist-btn:hover {
   background: var(--primary-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .error-msg {
-  margin-top: 14px;
+  margin-top: 16px;
   padding: 10px 14px;
-  background: #fef0f0;
-  border: 1px solid #fde2e2;
-  border-radius: 4px;
-  color: #f56c6c;
+  background: var(--danger-bg);
+  border: 1px solid hsl(5, 80%, 85%);
+  border-radius: var(--radius-md);
+  color: var(--danger);
   font-size: 13px;
+  text-align: center;
 }
 
 .login-link {
-  margin-top: 20px;
+  margin-top: 16px;
+  margin-bottom: 0;
   text-align: center;
   font-size: 13px;
-  color: #909399;
+  color: var(--foreground-muted);
 }
-
 .login-link a {
-  color: var(--primary-color);
+  color: var(--primary);
   text-decoration: none;
+  font-weight: 500;
 }
-
-.login-link a:hover {
-  color: var(--primary-hover);
-}
-
-@media (max-width: 480px) {
-  .regist-card {
-    margin: 0 20px;
-    padding: 28px 20px;
-  }
-
-  .card-header .title {
-    font-size: 20px;
-  }
-}
+.login-link a:hover { text-decoration: underline; }
 </style>
