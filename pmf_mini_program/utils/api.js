@@ -139,6 +139,38 @@ var aiApi = {
   homeStats: function(a) { return request('/ai/homeStats' + (a ? '?assigneeId='+a : '')); }
 };
 
+// 数据看板 API
+var dashboardApi = {
+  weeklyInboundOutbound: function() { return request('/dashboard/weeklyInboundOutbound'); },
+  goodsQuantity: function() { return request('/dashboard/goodsQuantity'); },
+  warehouseTempHumidity: function() { return request('/dashboard/warehouseTempHumidity'); },
+  warehouseCapacity: function() { return request('/dashboard/warehouseCapacity'); }
+};
+
+// 温湿度上传 API
+var tempHumidityApi = {
+  list: function() { return request('/temperatureHumidityRecord/list'); },
+  upload: function(data) { return request('/temperatureHumidityRecord/upload', 'POST', data); }
+};
+
+// 库存盘点 API
+var inventoryCheckHeadApi = {
+  list: function() { return request('/inventoryCheckHead/list'); },
+  getById: function(no) { return request('/inventoryCheckHead/' + no); }
+};
+var inventoryCheckDetailApi = {
+  list: function() { return request('/inventoryCheckDetail/list'); }
+};
+
+// 库存调整 API
+var adjustmentOrderHeadApi = {
+  list: function() { return request('/adjustmentOrderHead/list'); },
+  getById: function(no) { return request('/adjustmentOrderHead/' + no); }
+};
+var adjustmentOrderDetailApi = {
+  list: function() { return request('/adjustmentOrderDetail/list'); }
+};
+
 module.exports = {
   request: request,
   login: login,
@@ -158,5 +190,11 @@ module.exports = {
   envApi: envApi,
   userApi: userApi,
   warehouseStaffApi: warehouseStaffApi,
-  aiApi: aiApi
+  aiApi: aiApi,
+  dashboardApi: dashboardApi,
+  tempHumidityApi: tempHumidityApi,
+  inventoryCheckHeadApi: inventoryCheckHeadApi,
+  inventoryCheckDetailApi: inventoryCheckDetailApi,
+  adjustmentOrderHeadApi: adjustmentOrderHeadApi,
+  adjustmentOrderDetailApi: adjustmentOrderDetailApi
 };

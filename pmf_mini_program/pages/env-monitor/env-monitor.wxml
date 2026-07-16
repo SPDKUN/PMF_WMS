@@ -1,4 +1,5 @@
-<view class="page-container">
+<scroll-view class="page-container" scroll-y>
+  <!-- 温湿度统计卡片 -->
   <view class="env-summary">
     <view class="env-card env-temp">
       <text class="env-label">🌡️ 平均温度</text>
@@ -11,11 +12,39 @@
       <text class="env-value" wx:else>-</text>
     </view>
   </view>
-  
+
+  <!-- 上传温湿度表单 -->
+  <view class="upload-card">
+    <view class="upload-title">📤 上传温湿度</view>
+    <view class="form-item">
+      <text class="form-label">选择库房 <text class="required">*</text></text>
+      <picker mode="selector" range="{{warehouseList}}" range-key="warehouse_name" value="{{warehouseIdx}}" bindchange="onWarehouseChange">
+        <view class="picker-wrap">
+          <text class="{{warehouseId ? '' : 'placeholder'}}">{{warehouseList[warehouseIdx] ? warehouseList[warehouseIdx].warehouse_name : '请选择库房'}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    <view class="form-row">
+      <view class="form-item form-half">
+        <text class="form-label">温度 (°C) <text class="required">*</text></text>
+        <input class="form-input" type="digit" placeholder="如 25.0" value="{{temperature}}" bindinput="onTempInput" />
+      </view>
+      <view class="form-item form-half">
+        <text class="form-label">湿度 (%) <text class="required">*</text></text>
+        <input class="form-input" type="digit" placeholder="如 60.0" value="{{humidity}}" bindinput="onHumidityInput" />
+      </view>
+    </view>
+    <view class="upload-btn" bindtap="handleUpload">
+      <text>确认上传</text>
+    </view>
+  </view>
+
+  <!-- 监测记录 -->
   <view class="section-title">
     <text>监测记录</text>
   </view>
-  
+
   <view class="record-list">
     <view class="record-card" wx:for="{{list}}" wx:key="record_id">
       <view class="record-top">
@@ -34,8 +63,10 @@
       </view>
     </view>
   </view>
-  
+
   <view class="empty-state" wx:if="{{list.length === 0}}">
     <text>暂无监测记录</text>
   </view>
-</view>
+
+  <view style="height: 40rpx;"></view>
+</scroll-view>

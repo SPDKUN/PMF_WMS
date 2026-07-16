@@ -12,11 +12,17 @@ Page({
     // 关联数据
     batchInventory: [],
     batchQcRecords: [],
-    _inventoryMap: {}
+    _inventoryMap: {},
+    isManager: false
   },
 
   onLoad() {
     wx.setNavigationBarTitle({ title: '批次管理' })
+    // 权限判断：仅管理部门（主管/仓库管理员）可新增批次
+    var app = getApp();
+    var userInfo = app.globalData.userInfo || {};
+    var position = userInfo.position || '';
+    this.setData({ isManager: position === '主管' || position === '仓库管理员' });
     this.loadBaseData()
   },
 

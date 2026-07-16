@@ -64,7 +64,7 @@
       <text class="section-title">快捷功能</text>
     </view>
     <view class="quick-grid">
-      <view class="quick-item" wx:for="{{quickActions}}" wx:key="id" bindtap="onQuickAction" data-page="{{item.page}}">
+      <view class="quick-item" wx:for="{{quickActions}}" wx:key="id" bindtap="onQuickAction" data-page="{{item.page}}" data-need-perm="{{item.needPerm}}">
         <view class="quick-icon" style="background: {{item.bgColor}}">
           <text>{{item.icon}}</text>
         </view>
@@ -97,6 +97,22 @@
     </view>
   </view>
 </scroll-view>
+  <!-- 权限提示弹窗 -->
+  <view class="modal-overlay {{showPermModal ? 'show' : ''}}" bindtap="closePermModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">提示</text>
+        <text class="modal-close" bindtap="closePermModal">✕</text>
+      </view>
+      <view class="modal-body">
+        <text class="modal-msg">{{permModalMsg}}</text>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn" bindtap="closePermModal">确定</view>
+      </view>
+    </view>
+  </view>
+
   <!-- AI对话框 -->
   <view class="ai-chat-overlay {{showAiChat ? 'show' : ''}}" bindtap="closeAiChat">
     <view class="ai-chat-panel" catchtap="stopPropagation">
