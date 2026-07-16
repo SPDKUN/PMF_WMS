@@ -12,7 +12,12 @@ Page({
     this.setData({
       userInfo: info,
       avatarText: (info.real_name || 'U').charAt(0)
-    })
+    });
+    // 从首页"个人信息"入口跳转过来时，自动打开弹窗
+    if (app.globalData.showProfileInfo) {
+      app.globalData.showProfileInfo = false;
+      this.setData({ showModal: true });
+    }
   },
 
   showUserInfo() {

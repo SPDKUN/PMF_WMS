@@ -64,7 +64,7 @@
       <text class="section-title">快捷功能</text>
     </view>
     <view class="quick-grid">
-      <view class="quick-item" wx:for="{{quickActions}}" wx:key="id" bindtap="onQuickAction" data-page="{{item.page}}" data-need-perm="{{item.needPerm}}">
+      <view class="quick-item" wx:for="{{quickActions}}" wx:key="id" bindtap="onQuickAction" data-page="{{item.page}}" data-need-perm="{{item.needPerm}}" data-is-tab="{{item.isTab}}">
         <view class="quick-icon" style="background: {{item.bgColor}}">
           <text>{{item.icon}}</text>
         </view>

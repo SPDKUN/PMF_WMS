@@ -21,7 +21,7 @@ Page({
       { id: 5, icon: '✅', label: '质检管理', page: '/pages/quality/quality', bgColor: '#FEF9C3' },
       { id: 6, icon: '📊', label: '数据看板', page: '/pages/dashboard/dashboard', bgColor: '#F3E8FF' },
       { id: 7, icon: '🌡️', label: '温湿度上传', page: '/pages/env-monitor/env-monitor', bgColor: '#E0F2FE', needPerm: true },
-      { id: 8, icon: '👤', label: '个人信息', page: '/pages/profile/profile', bgColor: '#FCE7F3' }
+      { id: 8, icon: '👤', label: '个人信息', page: '/pages/profile/profile', bgColor: '#FCE7F3', isTab: true }
     ],
     recentTasks: [],
     showNotifications: false,
@@ -69,11 +69,7 @@ Page({
       api.goodsApi.list().catch(function() { return []; }),
       api.warehouseApi.list().catch(function() { return []; }),
       api.inventoryApi.list().catch(function() { return []; }),
-      (function() {
-        var uid = app.globalData.userInfo ? app.globalData.userInfo.user_id : null;
-        if (uid) return api.taskApi.myTasks(uid).catch(function() { return []; });
-        return api.request('/workTask/list?_ts=' + Date.now()).catch(function() { return []; });
-      })()
+      api.taskApi.list().catch(function() { return []; })
     ]).then(function(results) {
       var goods = results[0] || [];
       var warehouses = results[1] || [];
@@ -191,6 +187,7 @@ Page({
   onQuickAction: function(e) {
     var page = e.currentTarget.dataset.page;
     var needPerm = e.currentTarget.dataset.needPerm;
+    var isTab = e.currentTarget.dataset.isTab;
     if (!page) return;
     // 温湿度上传 - 权限检查：仅质检员和温度检测员可访问
     if (needPerm) {
@@ -201,7 +198,16 @@ Page({
         return;
       }
     }
-    wx.navigateTo({ url: page });
+    // tabBar 页面必须用 switchTab，且 switchTab 不支持 URL 参数
+    if (isTab) {
+      // 个人信息：设置全局标记让 profile 页自动打开弹窗
+      if (page === '/pages/profile/profile') {
+        app.globalData.showProfileInfo = true;
+      }
+      wx.switchTab({ url: page });
+    } else {
+      wx.navigateTo({ url: page });
+    }
   },
   closePermModal: function() {
     this.setData({ showPermModal: false });

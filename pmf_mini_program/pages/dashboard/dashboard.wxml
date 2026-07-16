@@ -2,35 +2,55 @@
   <!-- 出入库趋势 - 折线图 -->
   <view class="chart-card">
     <view class="chart-title">出入库趋势</view>
-    <view class="chart-canvas-wrap">
+    <view class="chart-canvas-wrap" bindtap="onTrendTap">
       <canvas type="2d" id="trendCanvas" class="chart-canvas"></canvas>
+      <view class="chart-touch-overlay"></view>
+      <view class="chart-tip {{trendTip.show ? 'show' : ''}}" style="left: {{trendTip.x}}px; top: {{trendTip.y}}px;" catchtap="preventBubble">
+        <text>{{trendTip.text}}</text>
+      </view>
     </view>
   </view>
 
   <!-- 货物库存数量 - 柱状图 -->
   <view class="chart-card">
     <view class="chart-title">货物库存数量</view>
-    <scroll-view class="chart-scroll" scroll-x wx:if="{{goodsHasData}}">
-      <view class="chart-scroll-inner" style="width: {{goodsCanvasW}}px;">
+    <view class="chart-canvas-wrap" wx:if="{{!goodsHasData}}" bindtap="onGoodsTap">
+      <canvas type="2d" id="goodsCanvas" class="chart-canvas"></canvas>
+      <view class="chart-touch-overlay"></view>
+      <view class="chart-tip {{goodsTip.show ? 'show' : ''}}" style="left: {{goodsTip.x}}px; top: {{goodsTip.y}}px;" catchtap="preventBubble">
+        <text>{{goodsTip.text}}</text>
+      </view>
+    </view>
+    <scroll-view class="chart-scroll" scroll-x wx:else>
+      <view class="chart-scroll-inner" style="width: {{goodsCanvasW}}px;" bindtap="onGoodsTap">
         <canvas type="2d" id="goodsCanvas" class="chart-canvas" style="width: {{goodsCanvasW}}px;"></canvas>
+        <view class="chart-touch-overlay" style="width: {{goodsCanvasW}}px;"></view>
+        <view class="chart-tip {{goodsTip.show ? 'show' : ''}}" style="left: {{goodsTip.x}}px; top: {{goodsTip.y}}px;" catchtap="preventBubble">
+          <text>{{goodsTip.text}}</text>
+        </view>
       </view>
     </scroll-view>
-    <view class="chart-canvas-wrap" wx:else>
-      <canvas type="2d" id="goodsCanvas" class="chart-canvas"></canvas>
-    </view>
   </view>
 
   <!-- 仓库温湿度记录 - 柱状图 -->
   <view class="chart-card">
     <view class="chart-title">仓库温湿度记录</view>
-    <scroll-view class="chart-scroll" scroll-x wx:if="{{thHasData}}">
-      <view class="chart-scroll-inner" style="width: {{thCanvasW}}px;">
+    <view class="chart-canvas-wrap" wx:if="{{!thHasData}}" bindtap="onTHTap">
+      <canvas type="2d" id="thCanvas" class="chart-canvas"></canvas>
+      <view class="chart-touch-overlay"></view>
+      <view class="chart-tip {{thTip.show ? 'show' : ''}}" style="left: {{thTip.x}}px; top: {{thTip.y}}px;" catchtap="preventBubble">
+        <text>{{thTip.text}}</text>
+      </view>
+    </view>
+    <scroll-view class="chart-scroll" scroll-x wx:else>
+      <view class="chart-scroll-inner" style="width: {{thCanvasW}}px;" bindtap="onTHTap">
         <canvas type="2d" id="thCanvas" class="chart-canvas" style="width: {{thCanvasW}}px;"></canvas>
+        <view class="chart-touch-overlay" style="width: {{thCanvasW}}px;"></view>
+        <view class="chart-tip {{thTip.show ? 'show' : ''}}" style="left: {{thTip.x}}px; top: {{thTip.y}}px;" catchtap="preventBubble">
+          <text>{{thTip.text}}</text>
+        </view>
       </view>
     </scroll-view>
-    <view class="chart-canvas-wrap" wx:else>
-      <canvas type="2d" id="thCanvas" class="chart-canvas"></canvas>
-    </view>
   </view>
 
   <!-- 仓库容量饱和度 - 横向进度条 -->
