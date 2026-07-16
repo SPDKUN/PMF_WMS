@@ -501,13 +501,22 @@
                 :key="loc.location_id"
                 class="location-card"
                 :class="loc.is_occupied === 1 ? 'loc-occupied' : (loc.lock_status === '锁定' ? 'loc-locked' : 'loc-free')"
+                @mouseenter="onLocMouseEnter($event, loc)"
+                @mouseleave="onLocMouseLeave"
               >
                 <span class="loc-name">{{ loc.location_name }}</span>
               </div>
               <div v-if="viewDialog.locations.length === 0" class="zone-empty">暂无库位数据</div>
             </div>
-            <div class="location-main-placeholder" v-else>
-              请在左侧选择一个库区查看库位详情
+            <!-- 悬浮提示框（fixed定位，不受overflow裁剪） -->
+            <div
+              class="loc-tooltip-fixed"
+              v-if="tooltipVisible"
+              :style="{ left: tooltipStyle.left + 'px', top: tooltipStyle.top + 'px' }"
+            >
+              <div class="tooltip-row"><span class="tooltip-label">批次：</span>{{ tooltipData.batchId || '-' }}</div>
+              <div class="tooltip-row"><span class="tooltip-label">货物：</span>{{ tooltipData.goodsName || '-' }}</div>
+              <div class="tooltip-row"><span class="tooltip-label">到期：</span>{{ tooltipData.expiryDate || '-' }}</div>
             </div>
           </div>
         </div>
@@ -556,8 +565,12 @@ export default {
         zones: [],
         selectedZoneId: null,
         selectedZone: null,
-        locations: []
+        locations: [],
+        locationInfoMap: {}
       },
+      tooltipVisible: false,
+      tooltipStyle: { left: 0, top: 0 },
+      tooltipData: { batchId: '', goodsName: '', expiryDate: '' },
       inventorySearch: {
         batchId: '',
       },
@@ -943,14 +956,56 @@ export default {
     async selectZone(zone) {
       this.viewDialog.selectedZoneId = zone.zone_id
       this.viewDialog.selectedZone = zone
+      this.viewDialog.locationInfoMap = {}
+      this.tooltipVisible = false
       try {
-        const res = await request.get('/location/list', { zoneId: zone.zone_id })
-        if (res.code === 200) {
-          this.viewDialog.locations = res.data || []
+        const locRes = await request.get('/location/list', { zoneId: zone.zone_id })
+        if (locRes.code === 200) {
+          this.viewDialog.locations = locRes.data || []
         }
       } catch (e) {
         // 静默失败
       }
+      try {
+        const [invRes, batchRes] = await Promise.all([
+          request.get('/inventory/listWithDetails'),
+          request.get('/batch/list')
+        ])
+        const invList = (invRes.code === 200 ? invRes.data : []) || []
+        const batchList = (batchRes.code === 200 ? batchRes.data : []) || []
+        const batchMap = {}
+        batchList.forEach(b => { batchMap[b.batch_id] = b })
+        invList.forEach(inv => {
+          if (inv.location_id && inv.zone_id === zone.zone_id) {
+            const batch = batchMap[inv.batch_id]
+            this.viewDialog.locationInfoMap[inv.location_id] = {
+              batchId: inv.batch_id,
+              goodsName: inv.goods_name,
+              expiryDate: batch ? (batch.expiry_date || '-') : '-'
+            }
+          }
+        })
+      } catch (e) {
+        // 静默失败
+      }
+    },
+    onLocMouseEnter(event, loc) {
+      if (loc.is_occupied !== 1) return
+      const rect = event.currentTarget.getBoundingClientRect()
+      const info = this.viewDialog.locationInfoMap[loc.location_id] || {}
+      this.tooltipData = {
+        batchId: info.batchId || '-',
+        goodsName: info.goodsName || '-',
+        expiryDate: info.expiryDate || '-'
+      }
+      this.tooltipStyle = {
+        left: rect.left + rect.width / 2,
+        top: rect.top - 8
+      }
+      this.tooltipVisible = true
+    },
+    onLocMouseLeave() {
+      this.tooltipVisible = false
     }
   }
 }
@@ -1292,6 +1347,31 @@ input[type="date"]:valid::-webkit-datetime-edit {
   transition: transform 0.15s;
 }
 .location-card:hover { transform: scale(1.05); }
+.loc-tooltip-fixed {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  background: #303133;
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: nowrap;
+  z-index: 99999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  pointer-events: none;
+}
+.loc-tooltip-fixed::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #303133;
+}
+.tooltip-row { white-space: nowrap; }
+.tooltip-label { color: #c0c4cc; }
 .loc-free { background: #f0f9eb; border: 1px solid #b3e19d; }
 .loc-occupied { background: #fef0f0; border: 1px solid #fab6b6; }
 .loc-locked { background: #fef6e7; border: 1px solid #f5dab1; }
