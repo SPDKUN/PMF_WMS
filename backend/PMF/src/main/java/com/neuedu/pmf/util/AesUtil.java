@@ -15,7 +15,7 @@ import java.util.Base64;
  */
 public class AesUtil {
 
-    private static final String AES_KEY = "PMF-WMS-AES-Key-2026!!Secret12"; // 32 字节
+    private static final String AES_KEY = "PMF-WMS-AES-Key-2026!!SecretKey#"; // 32 字节
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
 
     /**

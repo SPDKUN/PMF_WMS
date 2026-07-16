@@ -98,7 +98,9 @@ export default {
           this.errorMsg = '用户名密码错误'
         }
       } catch (error) {
-        this.errorMsg = '网络问题，请检查网络'
+        console.error('登录失败:', error)
+        const msg = error?.response?.data?.msg || error?.message || '网络问题，请检查网络'
+        this.errorMsg = msg
       } finally {
         this.loading = false
       }

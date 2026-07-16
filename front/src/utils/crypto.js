@@ -10,7 +10,7 @@
  * 后端用相同的密钥和分离 IV 的方式解密。
  */
 
-const AES_KEY = 'PMF-WMS-AES-Key-2026!!Secret12' // 32 字节密钥（AES-256）
+const AES_KEY = 'PMF-WMS-AES-Key-2026!!SecretKey#' // 32 字节密钥（AES-256）
 const encoder = new TextEncoder()
 
 /**

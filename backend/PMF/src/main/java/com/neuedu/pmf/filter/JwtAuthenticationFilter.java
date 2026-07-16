@@ -118,10 +118,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * /user
      */
     private boolean isExcludePath(String requestUri) {
+        // 去掉 /api 前缀（前端 axios baseURL 可能带 /api）
+        String normalizedUri = requestUri.startsWith("/api") ? requestUri.substring(4) : requestUri;
         for (String excludePath : EXCLUDE_PATHS) {
             // 支持通配符（如/swagger-ui/**）
             String path = excludePath.replace("/**", ".*");
-            if (requestUri.matches(path)) {
+            if (normalizedUri.matches(path)) {
                 return true;
             }
         }
