@@ -51,8 +51,18 @@
           <div class="collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '展开侧边栏' : '收缩侧边栏'">
             <el-icon><DArrowLeft v-if="!sidebarCollapsed" /><DArrowRight v-else /></el-icon>
           </div>
-          <h1>{{ pageTitle }}</h1>
-          <span class="date-text">{{ currentDate }}</span>
+          <div class="breadcrumb">
+            <el-icon><HomeFilled /></el-icon>
+            <span class="breadcrumb-sep">/</span>
+            <span>{{ pageTitle }}</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span class="header-date">{{ currentDate }}</span>
+          <div class="user-badge" @click="navigate('Profile')" title="个人中心">
+            <span class="user-avatar">{{ (userInfo.real_name || userInfo.username || 'U').charAt(0) }}</span>
+            <span class="user-name">{{ userInfo.real_name || userInfo.username || '用户' }}</span>
+          </div>
         </div>
       </header>
 
@@ -62,6 +72,11 @@
         </div>
         <router-view></router-view>
       </div>
+      <footer class="layout-footer">
+        <span>PMF WMS 智能仓储管理系统</span>
+        <span class="footer-divider">|</span>
+        <span>© 2026 Prepared-Meal-Factory</span>
+      </footer>
     </main>
   </div>
 </template>
@@ -82,6 +97,7 @@ export default {
       currentDate: '',
       sidebarCollapsed: false,
       userPosition: '',
+      userInfo: {},
       routeLoading: false,
     }
   },
@@ -113,7 +129,11 @@ export default {
     if (saved !== null) this.sidebarCollapsed = saved === 'true'
     const stored = localStorage.getItem('userInfo')
     if (stored) {
-      try { this.userPosition = JSON.parse(stored).position || '' } catch (e) {}
+      try {
+        const parsed = JSON.parse(stored)
+        this.userPosition = parsed.position || ''
+        this.userInfo = parsed
+      } catch (e) {}
     }
     this.updateDateTime()
     this.timer = setInterval(this.updateDateTime, 60000)
@@ -283,7 +303,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
+  padding: 0 24px;
+  height: 48px;
   background: hsl(0 0% 100% / 85%);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-light);
@@ -301,9 +322,56 @@ export default {
   margin: 0;
   letter-spacing: -0.3px;
 }
-.topbar-left .date-text {
+
+/* 面包屑 */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   color: var(--foreground-muted);
+  margin-left: 4px;
+}
+.breadcrumb .el-icon { font-size: 14px; color: var(--foreground-muted); }
+.breadcrumb-sep { color: var(--foreground-placeholder); margin: 0 2px; }
+.breadcrumb span:last-child { color: var(--foreground); font-weight: 500; }
+
+/* 右侧区域 */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-date {
+  font-size: 12px;
+  color: var(--foreground-muted);
+}
+
+/* 用户徽章 */
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.user-badge:hover { background: var(--border-light); }
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  flex-shrink: 0;
+}
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
+  white-space: nowrap;
 }
 
 /* 折叠按钮 */
@@ -391,6 +459,21 @@ export default {
   0%, 100% { transform: scale(1, 1); }
   50%      { transform: scale(1.2, 1); }
 }
+
+/* ========== 页脚 ========== */
+.layout-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 24px;
+  font-size: 12px;
+  color: var(--foreground-muted);
+  background: var(--card);
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.footer-divider { color: var(--foreground-placeholder); }
 
 /* ========== 响应式 ========== */
 @media (max-width: 768px) {

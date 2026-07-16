@@ -45,6 +45,46 @@
       </div>
     </div>
 
+    <!-- 大盘统计卡片行 -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: hsl(212, 80%, 96%); color: hsl(212, 100%, 48%);">
+          <el-icon><ArrowDown /></el-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ quickStats.todayInbound }}</div>
+          <div class="stat-label">今日入库（单）</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: hsl(36, 80%, 96%); color: hsl(36, 90%, 48%);">
+          <el-icon><Top /></el-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ quickStats.todayOutbound }}</div>
+          <div class="stat-label">今日出库（单）</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: hsl(270, 60%, 96%); color: hsl(270, 65%, 55%);">
+          <el-icon><List /></el-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ quickStats.pendingQC }}</div>
+          <div class="stat-label">待质检任务</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: hsl(5, 80%, 96%); color: hsl(5, 85%, 58%);">
+          <el-icon><WarningFilled /></el-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ quickStats.alertCount }}</div>
+          <div class="stat-label">库存预警</div>
+        </div>
+      </div>
+    </div>
+
     <!-- 待办卡片 -->
     <div class="card todo-card card-clickable" @click="goToTasks">
       <div class="card-header">
@@ -79,7 +119,7 @@
 
 <script>
 import {
-  Box, List, Clock, Cpu, Promotion, DocumentCopy, Check, ArrowRight, DataAnalysis
+  Box, List, Clock, Cpu, Promotion, DocumentCopy, Check, ArrowRight, DataAnalysis, ArrowDown, Top, WarningFilled
 } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 import request from '@/utils/request.js'
@@ -96,18 +136,20 @@ const taskTypeMeta = {
 export default {
   name: 'WarehouseDashboard',
   components: {
-    Box, List, Clock, Cpu, Promotion, DocumentCopy, Check, ArrowRight, DataAnalysis,
+    Box, List, Clock, Cpu, Promotion, DocumentCopy, Check, ArrowRight, DataAnalysis, ArrowDown, Top, WarningFilled,
     ElIcon
   },
   data() {
     return {
       stats: { totalInventory: 0, pendingTasks: 0, lastUpdate: '--' },
+      quickStats: { todayInbound: 0, todayOutbound: 0, pendingQC: 0, alertCount: 0 },
       aiMessage: '',
       todoList: []
     }
   },
   mounted() {
     this.fetchStats()
+    this.fetchQuickStats()
     this.fetchTasks()
     this.timer = setInterval(this.fetchStats, 60000)
   },
@@ -115,6 +157,30 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    async fetchQuickStats() {
+      try {
+        const [qcRes] = await Promise.all([
+          request.get('/qualityCheck/myTasks', { params: { assigneeId: JSON.parse(localStorage.getItem('userInfo') || '{}').user_id || '' } })
+        ])
+        if (qcRes.code === 200) {
+          this.quickStats.pendingQC = (qcRes.data || []).length
+        }
+      } catch (e) { /* ignore */ }
+      // 入库/出库/预警暂用默认值，后端有对应接口后可替换
+      try {
+        const [inRes, outRes] = await Promise.all([
+          request.get('/inboundOrderHead/list'),
+          request.get('/outboundOrderHead/list')
+        ])
+        const today = new Date().toISOString().slice(0, 10)
+        if (inRes.code === 200) {
+          this.quickStats.todayInbound = (inRes.data || []).filter(i => (i.created_at || '').startsWith(today)).length
+        }
+        if (outRes.code === 200) {
+          this.quickStats.todayOutbound = (outRes.data || []).filter(o => (o.created_at || '').startsWith(today)).length
+        }
+      } catch (e) { /* ignore */ }
+    },
     async fetchStats() {
       const stored = localStorage.getItem('userInfo')
       let uid = null
@@ -302,6 +368,45 @@ export default {
   box-shadow: var(--shadow-sm);
 }
 
+/* 大盘统计卡片行 */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.stat-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.stat-body { display: flex; flex-direction: column; gap: 2px; }
+.stat-value {
+  font-size: 24px; font-weight: 700;
+  color: var(--foreground);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--foreground-muted);
+}
+
 /* 待办卡片 */
 .todo-card .card-header {
   display: flex;
@@ -393,6 +498,7 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
   .welcome-card .greeting { font-size: 20px; }
   .welcome-card .status-row { gap: 16px; }
   .welcome-card .ai-input-area {
