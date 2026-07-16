@@ -885,7 +885,7 @@
               <tbody>
                 <tr v-for="(d, i) in invCheckCompleteDialog.details" :key="d.detail_id">
                   <td>{{ getGoodsName(d.goods_id) }}</td>
-                  <td>{{ d.location_id || '-' }}</td>
+                  <td>{{ getLocationName(d.location_id) }}</td>
                   <td>{{ d.batch_id || '-' }}</td>
                   <td>{{ d.book_quantity }}</td>
                   <td>
@@ -1040,7 +1040,8 @@ export default {
       checkerList: [],
       warehouseListForCheck: [],
       goodsInInventory: [],
-      normalBatchesInInventory: []
+      normalBatchesInInventory: [],
+      locationMap: {}
     }
   },
   computed: {
@@ -2181,11 +2182,27 @@ export default {
         alert('创建失败')
       }
     },
+    async fetchAllLocations() {
+      try {
+        const res = await request.get('/location/list')
+        if (res.code === 200) {
+          const list = res.data || []
+          list.forEach(loc => {
+            this.locationMap[loc.location_id] = loc.location_name
+          })
+        }
+      } catch (e) { /* ignore */ }
+    },
+    getLocationName(locationId) {
+      if (!locationId) return '-'
+      return this.locationMap[locationId] || '库位' + locationId
+    },
     async openInvCheckCompleteDialog(task) {
       this.invCheckCompleteDialog.task = task
       this.invCheckCompleteDialog.details = []
       this.invCheckCompleteDialog.remark = task.remark || ''
       this.fetchGoods()
+      this.fetchAllLocations()
       try {
         const res = await request.get('/inventoryCheck/details', { checkNo: task.related_order_no })
         if (res.code === 200) {
