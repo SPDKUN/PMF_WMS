@@ -113,8 +113,8 @@
 .modal-overlay.show { display: flex; }
 
 .detail-modal {
-  width: 640rpx;
-  max-height: 80vh;
+  width: 680rpx;
+  max-height: 85vh;
   background: #FFFFFF;
   border-radius: 24rpx;
   overflow: hidden;
@@ -202,6 +202,7 @@
 /* 明细表格 */
 .detail-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .detail-table {
@@ -212,32 +213,34 @@
   display: flex;
   background: #F8FAFC;
   border-radius: 8rpx 8rpx 0 0;
-  padding: 16rpx 0;
+  padding: 14rpx 0;
+  white-space: nowrap;
 }
 
 .detail-th {
   flex: 1;
+  min-width: 100rpx;
   text-align: center;
-  font-size: 22rpx;
+  font-size: 20rpx;
   font-weight: 600;
   color: #64748B;
-  padding: 0 8rpx;
+  padding: 0 6rpx;
 }
 
 .detail-table-row {
   display: flex;
   border-bottom: 1rpx solid #F1F5F9;
-  padding: 14rpx 0;
+  padding: 12rpx 0;
+  white-space: nowrap;
 }
-
-.detail-table-row:last-child { border-bottom: none; }
 
 .detail-td {
   flex: 1;
+  min-width: 100rpx;
   text-align: center;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #475569;
-  padding: 0 8rpx;
+  padding: 0 6rpx;
   word-break: break-all;
 }
 
