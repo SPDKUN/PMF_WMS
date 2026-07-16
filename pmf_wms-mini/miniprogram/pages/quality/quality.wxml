@@ -1,0 +1,146 @@
+﻿<view class="page-container">
+  <view class="page-top-bar">
+    <scroll-view class="tab-scroll" scroll-x>
+      <view class="tab-row">
+        <view class="tab-item {{currentTab === index ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="id" data-index="{{index}}" bindtap="switchTab">
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="add-btn {{isAdmin ? '' : 'hidden'}}" bindtap="goCreate">
+      <text class="add-btn-icon">+</text>
+    </view>
+  </view>
+
+  <view class="order-list">
+    <view class="order-card" wx:for="{{filteredList}}" wx:key="quality_check_no" bindtap="showDetail" data-no="{{item.quality_check_no}}">
+      <view class="order-header">
+        <view class="order-no">{{item.quality_check_no}}</view>
+        <text class="tag {{item.tagCls}}">{{item.order_status}}</text>
+      </view>
+      <view class="order-body">
+        <view class="order-row">
+          <text class="order-label">检验类型</text>
+          <text class="order-value">{{item.check_type || '-'}}</text>
+        </view>
+        <view class="order-row">
+          <text class="order-label">检验员</text>
+          <text class="order-value">{{item.inspector_name || '-'}}</text>
+        </view>
+        <view class="order-row">
+          <text class="order-label">检验时间</text>
+          <text class="order-value">{{item.fmtTime || '待检验'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{filteredList.length === 0}}">
+    <text>暂无质检记录</text>
+  </view>
+
+  <!-- 质检详情弹窗 -->
+  <view class="modal-overlay {{showModal ? 'show' : ''}}" bindtap="closeModal">
+    <view class="modal-content modal-wide" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">质检详情</text>
+        <text class="modal-close" bindtap="closeModal">✕</text>
+      </view>
+      <scroll-view class="modal-body" scroll-y wx:if="{{detailItem}}">
+        <view class="detail-status-bar">
+          <text class="tag {{detailItem.tagCls}}" style="font-size:28rpx;padding:8rpx 24rpx;">{{detailItem.order_status}}</text>
+        </view>
+        <view class="info-list-card">
+          <view class="info-row">
+            <text class="info-label">质检单号</text>
+            <text class="info-value">{{detailItem.quality_check_no}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">检验类型</text>
+            <text class="info-value">{{detailItem.check_type || '-'}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">检验员</text>
+            <text class="info-value">{{detailItem.inspector_name || '-'}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">检验时间</text>
+            <text class="info-value">{{detailItem.fmtTime || '待检验'}}</text>
+          </view>
+          <view class="info-row" wx:if="{{detailItem.remark}}">
+            <text class="info-label">备注</text>
+            <text class="info-value">{{detailItem.remark}}</text>
+          </view>
+        </view>
+
+        <view class="section-title" style="margin-top:24rpx;">
+          <text>检验明细</text>
+        </view>
+        <view class="detail-item" wx:for="{{detailItems}}" wx:key="detail_id">
+          <view class="detail-item-top">
+            <text class="detail-item-goods">{{item.goods_name}}</text>
+          </view>
+          <view class="detail-item-info">
+            <text>批次: {{item.batch_id}}</text>
+            <text wx:if="{{item.inspection_result !== '待检验'}}">结果: {{item.inspection_result}}</text>
+            <text wx:if="{{item.inspection_result === '待检验'}}">结果: 待检验</text>
+            <text wx:if="{{item.defect_reason}}">原因: {{item.defect_reason}}</text>
+            <text wx:if="{{item.handling_suggestion}}">建议: {{item.handling_suggestion}}</text>
+          </view>
+        </view>
+        <view class="empty-state" wx:if="{{detailItems.length === 0}}" style="padding:20rpx 0;">
+          <text style="font-size:24rpx;">暂无明细数据</text>
+        </view>
+
+        <view class="detail-actions">
+          <view class="detail-btn detail-btn-qc {{(detailItem.order_status !== '已完成' && (isInspector || isAdmin)) ? '' : 'hidden'}}" bindtap="openQcComplete">
+            <text class="btn-icon">✓</text>
+            <text class="btn-text">完成质检</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 完成质检弹窗 -->
+  <view class="modal-overlay {{showQcComplete ? 'show' : ''}}" bindtap="closeQcComplete">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">完成质检</text>
+        <text class="modal-close" bindtap="closeQcComplete">✕</text>
+      </view>
+      <scroll-view class="modal-body" scroll-y>
+        <view class="form-item-inline">
+          <text class="form-label-inline">质检结果 <text class="required">*</text></text>
+          <picker mode="selector" range="{{qcResults}}" bindchange="onQcResultChange">
+            <view class="form-picker">
+              <text>{{qcResult || '请选择结果'}}</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+        <view class="form-item-inline" wx:if="{{qcResult === '不合格'}}">
+          <text class="form-label-inline" style="color:#EF4444;">不合格原因 <text class="required">*</text></text>
+          <textarea class="qc-textarea" placeholder="请填写不合格原因" value="{{qcDefectReason}}" bindinput="onQcInput" data-field="qcDefectReason" />
+        </view>
+        <view class="form-item-inline">
+          <text class="form-label-inline">处理建议</text>
+          <input class="qc-input" placeholder="如：报废、退货、降级" value="{{qcHandlingSuggestion}}" bindinput="onQcInput" data-field="qcHandlingSuggestion" />
+        </view>
+        <view class="form-item-inline">
+          <text class="form-label-inline">备注</text>
+          <textarea class="qc-textarea" placeholder="选填" value="{{qcRemark}}" bindinput="onQcInput" data-field="qcRemark" />
+        </view>
+        <view class="form-hint" wx:if="{{qcResult === '不合格'}}" style="color:#EF4444;font-size:24rpx;padding:10rpx 0;">
+          ⚠ 选择"不合格"后，该批次将被标记为"报废"
+        </view>
+        <view class="detail-actions" style="margin-top:24rpx;">
+          <view class="detail-btn detail-btn-qc" bindtap="submitQcComplete">
+            <text class="btn-icon">✓</text>
+            <text class="btn-text">提交结果</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

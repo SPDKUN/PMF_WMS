@@ -57,6 +57,22 @@ public class QualityCheckServiceImpl implements QualityCheckService {
             throw new RuntimeException("批次不存在: " + request.getBatchId());
         }
 
+        // 2.1 根据质检类型校验批次是否可检
+        String checkType = request.getCheckType();
+        java.util.ArrayList<Inventory> invRecords = inventoryMapper.findInventoryByBatchId(request.getBatchId());
+        boolean hasNormalInventory = false;
+        boolean hasPendingInventory = false;
+        for (Inventory inv : invRecords) {
+            if ("正常".equals(inv.getInventory_status())) hasNormalInventory = true;
+            if ("待入库".equals(inv.getInventory_status())) hasPendingInventory = true;
+        }
+        if ("来料检".equals(checkType) && hasNormalInventory) {
+            throw new RuntimeException("该批次已经入库，不能进行来料检");
+        }
+        if ("日常抽检".equals(checkType) && !hasNormalInventory) {
+            throw new RuntimeException("该批次尚未入库，不能进行日常抽检");
+        }
+
         // 3. INSERT quality_check_head
         QualityCheckHead head = new QualityCheckHead();
         head.setQuality_check_no(qualityCheckNo);
