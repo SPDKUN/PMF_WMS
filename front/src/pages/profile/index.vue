@@ -319,7 +319,7 @@ export default {
   justify-content: center;
   font-size: 24px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-on-primary);
   flex-shrink: 0;
   box-shadow: var(--shadow-sm);
 }
@@ -351,7 +351,7 @@ export default {
 }
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
 }
 .btn-primary:hover { background: var(--primary-hover); box-shadow: var(--shadow-sm); }
 .btn-cancel {

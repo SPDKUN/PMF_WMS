@@ -387,7 +387,7 @@
           <button class="dialog-close" @click="confirmDialog.visible = false">&times;</button>
         </div>
         <div class="dialog-body" style="text-align:center;padding:24px;">
-          <p style="color:#303133;font-size:14px;margin:0;">确定将该用户的密码重置为 123456 吗？</p>
+          <p style="color:var(--foreground);font-size:14px;margin:0;">确定将该用户的密码重置为 123456 吗？</p>
         </div>
         <div class="dialog-footer" style="justify-content:center;">
           <button class="btn btn-cancel" @click="confirmDialog.visible = false">取消</button>
@@ -541,7 +541,18 @@ export default {
       return map[this.personnelDialog.form.department] || []
     }
   },
+  watch: {
+    '$route.query.tab'(val) {
+      if (val && ['personnel', 'warehouse', 'goods'].includes(val)) {
+        this.activeTab = val
+      }
+    }
+  },
   mounted() {
+    const tab = this.$route.query.tab
+    if (tab && ['personnel', 'warehouse', 'goods'].includes(tab)) {
+      this.activeTab = tab
+    }
     this.fetchPersonnel()
     this.fetchWarehouses()
     this.fetchGoods()
@@ -1025,7 +1036,7 @@ export default {
 .tab-row button:hover { color: var(--foreground); background: var(--border-light); }
 .tab-row button.active {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1079,7 +1090,7 @@ export default {
 }
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
 }
 .btn-primary:hover { background: var(--primary-hover); }
 .btn-cancel {
@@ -1120,25 +1131,25 @@ export default {
   padding: 10px 14px;
   text-align: left;
   font-weight: 600;
-  color: #303133;
+  color: var(--foreground);
   border-bottom: 1px solid var(--border-color-light);
   white-space: nowrap;
 }
 .data-table td {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-color-light);
-  color: #606266;
+  color: var(--foreground-regular);
 }
 .data-table tbody tr:hover { background: var(--page-bg); }
-.empty-cell { text-align: center; padding: 40px 0; color: #c0c4cc; }
+.empty-cell { text-align: center; padding: 40px 0; color: var(--foreground-placeholder); }
 
 .status-tag {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 4px;
 }
-.status-tag.启用 { background: #f0f9eb; color: #67c23a; }
-.status-tag.禁用, .status-tag.停用 { background: #fef0f0; color: #f56c6c; }
+.status-tag.启用 { background: var(--success-bg); color: var(--success); }
+.status-tag.禁用, .status-tag.停用 { background: var(--danger-bg); color: var(--danger); }
 
 .action-cell { display: flex; gap: 6px; }
 .btn-action {
@@ -1151,20 +1162,20 @@ export default {
 }
 .btn-action.edit { background: var(--primary-bg); color: var(--primary-color); }
 .btn-action.edit:hover { background: var(--primary-bg-hover); }
-.btn-action.view { background: #f0f9eb; color: #67c23a; }
-.btn-action.view:hover { background: #e1f3d8; }
-.btn-action.delete { background: #fef0f0; color: #f56c6c; }
-.btn-action.delete:hover { background: #fde2e2; }
-.btn-action.delete:disabled { background: #f5f5f5; color: #c0c4cc; cursor: not-allowed; }
+.btn-action.view { background: var(--success-bg); color: var(--success); }
+.btn-action.view:hover { background: var(--success-bg); }
+.btn-action.delete { background: var(--danger-bg); color: var(--danger); }
+.btn-action.delete:hover { background: var(--danger-bg); }
+.btn-action.delete:disabled { background: var(--bg-secondary); color: var(--foreground-placeholder); cursor: not-allowed; }
 
 /* 弹窗 */
 .dialog-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.35); z-index: 9999;
+  background: var(--overlay-bg); z-index: 9999;
   display: flex; align-items: center; justify-content: center;
 }
 .dialog-box {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--border-color-light);
   border-radius: 4px;
   width: 460px; max-width: 92vw;
@@ -1176,28 +1187,28 @@ export default {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px; border-bottom: 1px solid var(--border-color-light);
 }
-.dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
+.dialog-header h3 { font-size: 15px; font-weight: 600; color: var(--foreground); margin: 0; }
 .dialog-close {
-  background: none; border: none; color: #c0c4cc;
+  background: none; border: none; color: var(--foreground-placeholder);
   font-size: 20px; cursor: pointer; padding: 0; line-height: 1;
 }
-.dialog-close:hover { color: #303133; }
+.dialog-close:hover { color: var(--foreground); }
 .dialog-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
 .dialog-footer {
   display: flex; justify-content: flex-end; gap: 8px;
   padding: 10px 20px 16px; border-top: 1px solid var(--border-color-light);
 }
 .form-item { display: flex; flex-direction: column; gap: 4px; }
-.form-item label { font-size: 13px; color: #606266; }
-.form-item .required { color: #f56c6c; }
+.form-item label { font-size: 13px; color: var(--foreground-regular); }
+.form-item .required { color: var(--danger); }
 .form-item input, .form-item select {
   height: 34px; padding: 0 10px;
   border: 1px solid var(--border-color-light);
-  border-radius: 4px; font-size: 13px; color: #303133;
+  border-radius: 4px; font-size: 13px; color: var(--foreground);
   outline: none; transition: border-color 0.2s;
 }
 .form-item input:focus, .form-item select:focus { border-color: var(--primary-color); }
-.form-item select { background: #fff; cursor: pointer; }
+.form-item select { background: var(--card); cursor: pointer; }
 
 /* 仓库查看弹窗 */
 .view-dialog-box {
@@ -1211,20 +1222,20 @@ export default {
   width: 240px; min-width: 240px;
   border-right: 1px solid var(--border-color-light);
   overflow-y: auto;
-  background: #fafafa;
+  background: var(--bg-secondary);
 }
 .zone-sidebar-title {
   padding: 12px 14px;
-  font-size: 13px; font-weight: 600; color: #303133;
+  font-size: 13px; font-weight: 600; color: var(--foreground);
   border-bottom: 1px solid var(--border-color-light);
-  background: #fff;
+  background: var(--card);
   position: sticky; top: 0;
 }
 .zone-item {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 14px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--bg-secondary);
   transition: background 0.15s;
 }
 .zone-item:hover { background: var(--primary-bg); }
@@ -1232,17 +1243,17 @@ export default {
 .zone-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
-.dot-green { background: #67c23a; }
-.dot-red { background: #f56c6c; }
+.dot-green { background: var(--success); }
+.dot-red { background: var(--danger); }
 .zone-name {
-  flex: 1; font-size: 13px; color: #303133;
+  flex: 1; font-size: 13px; color: var(--foreground);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .zone-available {
-  font-size: 11px; color: #909399; flex-shrink: 0;
+  font-size: 11px; color: var(--foreground-muted); flex-shrink: 0;
 }
 .zone-empty {
-  padding: 20px; text-align: center; color: #c0c4cc; font-size: 13px;
+  padding: 20px; text-align: center; color: var(--foreground-placeholder); font-size: 13px;
 }
 
 .location-main {
@@ -1251,14 +1262,14 @@ export default {
 }
 .location-main-title {
   padding: 12px 16px;
-  font-size: 13px; font-weight: 600; color: #303133;
+  font-size: 13px; font-weight: 600; color: var(--foreground);
   border-bottom: 1px solid var(--border-color-light);
-  background: #fff;
+  background: var(--card);
   position: sticky; top: 0; z-index: 1;
 }
 .location-main-placeholder {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  color: #c0c4cc; font-size: 14px;
+  color: var(--foreground-placeholder); font-size: 14px;
 }
 .location-grid {
   display: flex; flex-wrap: wrap; gap: 12px;
@@ -1276,8 +1287,8 @@ export default {
 .loc-tooltip-fixed {
   position: fixed;
   transform: translate(-50%, -100%);
-  background: #303133;
-  color: #fff;
+  background: var(--foreground);
+  color: var(--text-on-primary);
   padding: 8px 10px;
   border-radius: 4px;
   font-size: 11px;
@@ -1294,24 +1305,24 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: #303133;
+  border-top-color: var(--foreground);
 }
 .tooltip-row { white-space: nowrap; }
-.tooltip-label { color: #c0c4cc; }
+.tooltip-label { color: var(--foreground-placeholder); }
 .loc-free {
-  background: #f0f9eb;
-  border: 1px solid #b3e19d;
+  background: var(--success-bg);
+  border: 1px solid var(--success-bg);
 }
 .loc-occupied {
-  background: #fef0f0;
-  border: 1px solid #fab6b6;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-bg);
 }
 .loc-locked {
   background: #fef6e7;
-  border: 1px solid #f5dab1;
+  border: 1px solid var(--warning-bg);
 }
 .loc-name {
-  font-size: 11px; color: #303133;
+  font-size: 11px; color: var(--foreground);
   text-align: center; word-break: break-all;
 }
 
@@ -1332,7 +1343,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
-  color: #909399;
+  color: var(--foreground-muted);
   padding: 10px 0 4px;
   flex-wrap: wrap;
   gap: 8px;
@@ -1347,10 +1358,10 @@ export default {
   min-width: 32px;
   height: 30px;
   padding: 0 8px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #fff;
-  color: #606266;
+  background: var(--card);
+  color: var(--foreground-regular);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
@@ -1362,7 +1373,7 @@ export default {
 .pagination-controls button.active {
   background: var(--primary-color, #409EFF);
   border-color: var(--primary-color, #409EFF);
-  color: #fff;
+  color: var(--text-on-primary);
 }
 .pagination-controls button:disabled {
   cursor: not-allowed;
@@ -1371,6 +1382,6 @@ export default {
 .page-ellipsis {
   width: 32px;
   text-align: center;
-  color: #909399;
+  color: var(--foreground-muted);
 }
 </style>

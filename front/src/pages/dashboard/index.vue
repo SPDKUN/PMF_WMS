@@ -132,7 +132,7 @@ export default {
         //提示框配置：触发类型（鼠标悬停触发），背景颜色，边框颜色，文字颜色
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#5ab1ef', textStyle: { color: '#333' } },
         //图例组件：数据，距离容器顶部距离，文字颜色
-        legend: { data: ['入库数量', '出库数量'], top: 4, textStyle: { color: '#606266' } },
+        legend: { data: ['入库数量', '出库数量'], top: 4, textStyle: { color: 'var(--foreground-regular)' } },
         //绘图网格
         grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
         xAxis: {
@@ -273,7 +273,7 @@ export default {
         //提示框
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#67e0e3', textStyle: { color: '#333' } },
         //图例
-        legend: { data: ['温度(°C)', '湿度(%)'], top: 4, textStyle: { color: '#606266' } },
+        legend: { data: ['温度(°C)', '湿度(%)'], top: 4, textStyle: { color: 'var(--foreground-regular)' } },
         //绘图网格
         grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
         xAxis: { type: 'category', data: names },//x轴为仓库名称
@@ -349,9 +349,9 @@ export default {
     //根据仓库饱和度返回进度条颜色
     getCapacityColor(saturation) {
       if (saturation < 25) return '#10b981'//绿色
-      if (saturation < 50) return '#e6a23c'//橙色
+      if (saturation < 50) return 'var(--warning)'//橙色
       if (saturation < 75) return '#f59e0b'//琥珀色
-      return '#f56c6c'//红色
+      return 'var(--danger)'//红色
     },
   },
 }

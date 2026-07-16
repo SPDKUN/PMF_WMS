@@ -249,7 +249,7 @@
           </div>
         </div>
         <div class="dialog-body" v-else>
-          <p style="text-align:center;color:#909399;padding:20px;">该类型任务完成功能开发中...</p>
+          <p style="text-align:center;color:var(--foreground-muted);padding:20px;">该类型任务完成功能开发中...</p>
         </div>
         <div class="dialog-footer">
           <button class="btn btn-cancel" @click="completeDialog.visible = false">取消</button>
@@ -266,7 +266,7 @@
           <button class="dialog-close" @click="confirmDialog.visible = false">&times;</button>
         </div>
         <div class="dialog-body">
-          <p style="text-align:center;font-size:14px;color:#303133;">{{ confirmDialog.message }}</p>
+          <p style="text-align:center;font-size:14px;color:var(--foreground);">{{ confirmDialog.message }}</p>
         </div>
         <div class="dialog-footer">
           <button class="btn btn-cancel" @click="confirmDialog.visible = false">取消</button>
@@ -297,9 +297,9 @@
           <div class="progress-bar-wrap" v-if="inboundCompleteDialog.totalNeeded > 0">
             <div class="progress-text">
               已选库位：<strong>{{ inboundCompleteDialog.selectedLocationIds.length }}</strong> / {{ inboundCompleteDialog.totalNeeded }}
-              <span v-if="inboundCompleteDialog.selectedLocationIds.length === inboundCompleteDialog.totalNeeded" style="color:#67c23a;"> ✓ 已满足</span>
-              <span v-else-if="inboundCompleteDialog.selectedLocationIds.length > inboundCompleteDialog.totalNeeded" style="color:#e6a23c;">（多了 {{ inboundCompleteDialog.selectedLocationIds.length - inboundCompleteDialog.totalNeeded }} 个）</span>
-              <span v-else style="color:#f56c6c;">（还需 {{ inboundCompleteDialog.totalNeeded - inboundCompleteDialog.selectedLocationIds.length }} 个）</span>
+              <span v-if="inboundCompleteDialog.selectedLocationIds.length === inboundCompleteDialog.totalNeeded" style="color:var(--success);"> ✓ 已满足</span>
+              <span v-else-if="inboundCompleteDialog.selectedLocationIds.length > inboundCompleteDialog.totalNeeded" style="color:var(--warning);">（多了 {{ inboundCompleteDialog.selectedLocationIds.length - inboundCompleteDialog.totalNeeded }} 个）</span>
+              <span v-else style="color:var(--danger);">（还需 {{ inboundCompleteDialog.totalNeeded - inboundCompleteDialog.selectedLocationIds.length }} 个）</span>
             </div>
           </div>
         </div>
@@ -314,7 +314,7 @@
               <span class="zone-name">{{ zone.zone_name }}</span>
               <span class="zone-available">可用 {{ zone.available_slots }}/{{ zone.total_slots }}</span>
             </div>
-            <div v-if="inboundCompleteDialog.zones.length === 0" style="padding:16px;color:#909399;font-size:12px;">
+            <div v-if="inboundCompleteDialog.zones.length === 0" style="padding:16px;color:var(--foreground-muted);font-size:12px;">
               该仓库暂无库区
             </div>
           </div>
@@ -333,7 +333,7 @@
                 </span>
                 <span class="loc-name">{{ loc.location_name }}</span>
               </div>
-              <div v-if="inboundCompleteDialog.locations.length === 0" style="width:100%;text-align:center;padding:30px;color:#909399;">
+              <div v-if="inboundCompleteDialog.locations.length === 0" style="width:100%;text-align:center;padding:30px;color:var(--foreground-muted);">
                 该库区暂无库位
               </div>
             </div>
@@ -460,7 +460,7 @@
               </tbody>
             </table>
           </div>
-          <div v-else style="text-align:center;color:#c0c4cc;font-size:13px;padding:8px;">
+          <div v-else style="text-align:center;color:var(--foreground-placeholder);font-size:13px;padding:8px;">
             请在左右两侧选择库位，系统将按顺序自动匹配
           </div>
 
@@ -507,7 +507,7 @@
           <button class="dialog-close" @click="adjustmentCompleteDialog.visible = false">&times;</button>
         </div>
         <div class="dialog-body" style="flex-direction:column;">
-          <p style="font-size:13px;color:#606266;">截至日期：<strong>{{ formatDeadline(adjustmentCompleteDialog.task.deadline) }}</strong></p>
+          <p style="font-size:13px;color:var(--foreground-regular);">截至日期：<strong>{{ formatDeadline(adjustmentCompleteDialog.task.deadline) }}</strong></p>
           <table class="data-table" style="margin-top:8px;">
             <thead>
               <tr><th>批次</th><th>货物名称</th><th>数量</th><th>原库位</th><th>新库位</th></tr>
@@ -576,11 +576,11 @@
                 </tr>
               </tbody>
             </table>
-            <div style="text-align:right;margin-top:8px;font-size:14px;font-weight:600;color:#303133;">
+            <div style="text-align:right;margin-top:8px;font-size:14px;font-weight:600;color:var(--foreground);">
               已选总数量：<span style="color:var(--primary-color);">{{ outboundTotalSelected }}</span>
             </div>
           </div>
-          <div v-else-if="outboundDialog.goodsId" style="text-align:center;color:#c0c4cc;font-size:13px;padding:12px;">
+          <div v-else-if="outboundDialog.goodsId" style="text-align:center;color:var(--foreground-placeholder);font-size:13px;padding:12px;">
             该货物暂无可用库存
           </div>
 
@@ -626,8 +626,8 @@
           <button class="dialog-close" @click="outboundCompleteDialog.visible = false">&times;</button>
         </div>
         <div class="dialog-body" style="flex-direction:column;">
-          <p style="font-size:13px;color:#606266;">截至日期：<strong>{{ formatDeadline(outboundCompleteDialog.task.deadline) }}</strong></p>
-          <p style="font-size:13px;color:#606266;margin-top:4px;" v-if="outboundCompleteDialog.details.length > 0">
+          <p style="font-size:13px;color:var(--foreground-regular);">截至日期：<strong>{{ formatDeadline(outboundCompleteDialog.task.deadline) }}</strong></p>
+          <p style="font-size:13px;color:var(--foreground-regular);margin-top:4px;" v-if="outboundCompleteDialog.details.length > 0">
             货物名称：<strong>{{ outboundCompleteDialog.details[0].goodsName }}</strong>
           </p>
           <table class="data-table" style="margin-top:8px;">
@@ -681,7 +681,7 @@
               </tbody>
             </table>
           </div>
-          <div v-else style="text-align:center;color:#c0c4cc;font-size:13px;padding:12px;">
+          <div v-else style="text-align:center;color:var(--foreground-placeholder);font-size:13px;padding:12px;">
             暂无待报废的批次
           </div>
 
@@ -756,7 +756,7 @@
                 {{ b.batch_id }} ({{ getGoodsName(b.goods_id) }})
               </option>
             </select>
-            <span v-else style="color:#909399;font-size:12px;">请先选择盘点类型</span>
+            <span v-else style="color:var(--foreground-muted);font-size:12px;">请先选择盘点类型</span>
           </div>
           <div class="form-item">
             <label>盘点员 <span class="required">*</span></label>
@@ -800,7 +800,7 @@
           <button class="dialog-close" @click="defectiveCompleteDialog.visible = false">&times;</button>
         </div>
         <div class="dialog-body" style="flex-direction:column;">
-          <p style="font-size:13px;color:#606266;">截至日期：<strong>{{ formatDeadline(defectiveCompleteDialog.task.deadline) }}</strong></p>
+          <p style="font-size:13px;color:var(--foreground-regular);">截至日期：<strong>{{ formatDeadline(defectiveCompleteDialog.task.deadline) }}</strong></p>
           <table class="data-table" style="margin-top:8px;">
             <thead>
               <tr><th>批次</th><th>货物名称</th><th>位置</th><th>数量</th></tr>
@@ -866,7 +866,7 @@
           <button class="dialog-close" @click="invCheckCompleteDialog.visible = false">&times;</button>
         </div>
         <div class="dialog-body" style="flex-direction:column;">
-          <p style="font-size:13px;color:#606266;margin-bottom:8px;">
+          <p style="font-size:13px;color:var(--foreground-regular);margin-bottom:8px;">
             盘点单号：<strong>{{ invCheckCompleteDialog.task ? invCheckCompleteDialog.task.related_order_no : '' }}</strong>
           </p>
           <div class="table-wrapper" style="max-height:300px;overflow-y:auto;">
@@ -929,11 +929,11 @@ export default {
       activeTab: 'todo',
       operations: [
         { key: 'newBatch',  label: '新增批次', color: 'var(--primary-color)', icon: '&#128230;', desc: '创建新的货物批次并关联货物信息' },
-        { key: 'inbound',   label: '入库',     color: '#67c23a', icon: '&#128229;', desc: '将货物录入仓库并分配库位' },
-        { key: 'outbound',  label: '出库',     color: '#e6a23c', icon: '&#128228;', desc: '按出库单拣货并完成出库' },
+        { key: 'inbound',   label: '入库',     color: 'var(--success)', icon: '&#128229;', desc: '将货物录入仓库并分配库位' },
+        { key: 'outbound',  label: '出库',     color: 'var(--warning)', icon: '&#128228;', desc: '按出库单拣货并完成出库' },
         { key: 'adjust',    label: '库存调整', color: '#9065db', icon: '&#9881;',  desc: '修正库存数量差异或库位调整' },
         { key: 'check',     label: '库存盘点', color: '#20a0ff', icon: '&#128203;', desc: '对库位货物进行盘点核对' },
-        { key: 'quality',   label: '质检',     color: '#f56c6c', icon: '&#128270;', desc: '对入库货物进行质量检验' },
+        { key: 'quality',   label: '质检',     color: 'var(--danger)', icon: '&#128270;', desc: '对入库货物进行质量检验' },
         { key: 'defective', label: '处理次品', color: '#f39c12', icon: '&#128465;', desc: '登记并处理不合格或报废货物' },
         { key: 'uploadTempHumidity', label: '上传温湿度', color: '#00b4d8', icon: '&#127777;', desc: '上传库房温度和湿度记录' },
       ],
@@ -1067,7 +1067,27 @@ export default {
       return total
     }
   },
+  watch: {
+    '$route.query.tab'(val) {
+      if (val && ['todo', 'assign'].includes(val)) {
+        this.activeTab = val
+      }
+    },
+    '$route.query.op'(val) {
+      if (val) {
+        this.$nextTick(() => { this.handleOp(val) })
+      }
+    }
+  },
   mounted() {
+    const tab = this.$route.query.tab
+    if (tab && ['todo', 'assign'].includes(tab)) {
+      this.activeTab = tab
+    }
+    const op = this.$route.query.op
+    if (op) {
+      this.$nextTick(() => { this.handleOp(op) })
+    }
     const stored = localStorage.getItem('userInfo')
     if (stored) {
       try {
@@ -2310,7 +2330,7 @@ export default {
 .tab-row button:hover { color: var(--foreground); background: var(--border-light); }
 .tab-row button.active {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2328,12 +2348,12 @@ export default {
 .assign-header h3 {
   font-size: 20px;
   font-weight: 700;
-  color: #303133;
+  color: var(--foreground);
   margin: 0 0 6px 0;
 }
 .assign-header p {
   font-size: 13px;
-  color: #909399;
+  color: var(--foreground-muted);
   margin: 0;
 }
 
@@ -2392,12 +2412,12 @@ export default {
 .op-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: var(--foreground);
   margin-bottom: 6px;
 }
 .op-card-desc {
   font-size: 12px;
-  color: #909399;
+  color: var(--foreground-muted);
   line-height: 1.5;
 }
 
@@ -2414,7 +2434,7 @@ export default {
 }
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   align-self: flex-start;
 }
 .btn-primary:hover { background: var(--primary-hover); }
@@ -2445,42 +2465,42 @@ export default {
   padding: 10px 14px;
   text-align: left;
   font-weight: 600;
-  color: #303133;
+  color: var(--foreground);
   border-bottom: 1px solid var(--border-color-light);
   white-space: nowrap;
 }
 .data-table td {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-color-light);
-  color: #606266;
+  color: var(--foreground-regular);
 }
 .data-table tbody tr:hover { background: var(--page-bg); }
-.empty-cell { text-align: center; padding: 40px 0; color: #c0c4cc; }
+.empty-cell { text-align: center; padding: 40px 0; color: var(--foreground-placeholder); }
 
 .priority-tag {
   font-size: 11px; padding: 2px 8px; border-radius: 4px;
 }
-.priority-tag.高 { background: #fef0f0; color: #f56c6c; }
-.priority-tag.中 { background: #fdf6ec; color: #e6a23c; }
-.priority-tag.低 { background: #f0f9eb; color: #67c23a; }
+.priority-tag.高 { background: var(--danger-bg); color: var(--danger); }
+.priority-tag.中 { background: var(--warning-bg); color: var(--warning); }
+.priority-tag.低 { background: var(--success-bg); color: var(--success); }
 
 .action-cell { display: flex; gap: 6px; }
 .btn-action {
   padding: 4px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s;
 }
-.btn-action.done { background: #f0f9eb; color: #67c23a; }
-.btn-action.done:hover { background: #e1f3d8; }
+.btn-action.done { background: var(--success-bg); color: var(--success); }
+.btn-action.done:hover { background: var(--success-bg); }
 
 /* 表单 */
 .form-item { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
-.form-item label { font-size: 13px; color: #606266; }
-.form-item .required { color: #f56c6c; }
+.form-item label { font-size: 13px; color: var(--foreground-regular); }
+.form-item .required { color: var(--danger); }
 .form-item input, .form-item select, .form-item textarea {
   padding: 8px 12px;
   border: 1px solid var(--border-color-light);
   border-radius: 4px;
   font-size: 13px;
-  color: #303133;
+  color: var(--foreground);
   outline: none;
   transition: border-color 0.2s;
   font-family: inherit;
@@ -2488,18 +2508,18 @@ export default {
 .form-item input:focus, .form-item select:focus, .form-item textarea:focus {
   border-color: var(--primary-color);
 }
-.form-item select { background: #fff; cursor: pointer; }
+.form-item select { background: var(--card); cursor: pointer; }
 .form-item textarea { resize: vertical; min-height: 60px; }
 
 /* 弹窗 */
 .dialog-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.35); z-index: 9999;
+  background: var(--overlay-bg); z-index: 9999;
   display: flex; align-items: center; justify-content: center;
 }
 .confirm-dialog-overlay { z-index: 99999; }
 .dialog-box {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--border-color-light);
   border-radius: 4px;
   width: 480px; max-width: 92vw;
@@ -2508,12 +2528,12 @@ export default {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px; border-bottom: 1px solid var(--border-color-light);
 }
-.dialog-header h3 { font-size: 15px; font-weight: 600; color: #303133; margin: 0; }
+.dialog-header h3 { font-size: 15px; font-weight: 600; color: var(--foreground); margin: 0; }
 .dialog-close {
-  background: none; border: none; color: #c0c4cc;
+  background: none; border: none; color: var(--foreground-placeholder);
   font-size: 20px; cursor: pointer; padding: 0; line-height: 1;
 }
-.dialog-close:hover { color: #303133; }
+.dialog-close:hover { color: var(--foreground); }
 .dialog-body {
   padding: 16px 20px; display: flex; flex-direction: column;
 }
@@ -2530,35 +2550,35 @@ export default {
 .progress-bar-wrap {
   background: var(--page-bg); padding: 8px 12px; border-radius: 4px; margin-bottom: 4px;
 }
-.progress-text { font-size: 13px; color: #606266; }
+.progress-text { font-size: 13px; color: var(--foreground-regular); }
 
 .zone-sidebar {
   width: 240px; min-width: 240px; border-right: 1px solid var(--border-color-light);
-  overflow-y: auto; background: #fafafa;
+  overflow-y: auto; background: var(--bg-secondary);
 }
 .zone-sidebar-title {
-  padding: 12px 14px; font-size: 13px; font-weight: 600; color: #303133;
-  border-bottom: 1px solid var(--border-color-light); background: #fff; position: sticky; top: 0;
+  padding: 12px 14px; font-size: 13px; font-weight: 600; color: var(--foreground);
+  border-bottom: 1px solid var(--border-color-light); background: var(--card); position: sticky; top: 0;
 }
 .zone-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--bg-secondary);
 }
 .zone-item:hover { background: var(--primary-bg); }
 .zone-item.active { background: var(--primary-bg-hover); }
 .zone-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.dot-green { background: #67c23a; }
-.dot-red { background: #f56c6c; }
-.zone-name { flex: 1; font-size: 13px; color: #303133; }
-.zone-available { font-size: 11px; color: #909399; }
+.dot-green { background: var(--success); }
+.dot-red { background: var(--danger); }
+.zone-name { flex: 1; font-size: 13px; color: var(--foreground); }
+.zone-available { font-size: 11px; color: var(--foreground-muted); }
 .location-main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .location-main-title {
   padding: 12px 16px; font-size: 13px; font-weight: 600;
-  border-bottom: 1px solid var(--border-color-light); background: #fff; position: sticky; top: 0;
+  border-bottom: 1px solid var(--border-color-light); background: var(--card); position: sticky; top: 0;
 }
 .location-main-placeholder {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  color: #c0c4cc; font-size: 14px;
+  color: var(--foreground-placeholder); font-size: 14px;
 }
 .location-grid {
   display: flex; flex-wrap: wrap; gap: 10px;
@@ -2570,17 +2590,17 @@ export default {
   cursor: pointer; transition: all 0.15s; position: relative;
 }
 .location-card:hover { transform: scale(1.05); }
-.loc-free { background: #f0f9eb; border: 1px solid #b3e19d; }
-.loc-free:hover { border-color: #67c23a; }
-.loc-occupied { background: #fef0f0; border: 1px solid #fab6b6; cursor: not-allowed; }
-.loc-locked { background: #fef6e7; border: 1px solid #f5dab1; cursor: not-allowed; }
+.loc-free { background: var(--success-bg); border: 1px solid var(--success-bg); }
+.loc-free:hover { border-color: var(--success); }
+.loc-occupied { background: var(--danger-bg); border: 1px solid var(--danger-bg); cursor: not-allowed; }
+.loc-locked { background: #fef6e7; border: 1px solid var(--warning-bg); cursor: not-allowed; }
 .loc-selected { background: var(--primary-bg-hover); border: 2px solid var(--primary-color); }
-.loc-name { font-size: 11px; color: #303133; text-align: center; word-break: break-all; }
+.loc-name { font-size: 11px; color: var(--foreground); text-align: center; word-break: break-all; }
 .loc-checkbox { font-size: 12px; }
 .loc-checkbox input[type="checkbox"] { cursor: pointer; }
 
 .btn-danger {
-  background: #f56c6c; color: #fff;
+  background: var(--danger); color: var(--text-on-primary);
   display: inline-flex; align-items: center; gap: 4px;
   padding: 6px 16px; border: none; border-radius: 4px;
   font-size: 13px; cursor: pointer; transition: all 0.2s;
@@ -2591,7 +2611,7 @@ export default {
 /* 库存调整弹窗 */
 .adjust-panels { display: flex; gap: 12px; }
 .adjust-panel { flex: 1; border: 1px solid var(--border-color-light); border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; }
-.adjust-panel-title { padding: 8px 12px; font-size: 13px; font-weight: 600; color: #303133; background: var(--page-bg); border-bottom: 1px solid var(--border-color-light); }
+.adjust-panel-title { padding: 8px 12px; font-size: 13px; font-weight: 600; color: var(--foreground); background: var(--page-bg); border-bottom: 1px solid var(--border-color-light); }
 .adjust-panel .form-item { padding: 4px 8px; margin: 0; }
 .adjust-panel .progress-bar-wrap { margin: 0 8px 4px; }
 .adjust-panel-body { display: flex; flex: 1; height: 200px; border-top: 1px solid var(--border-color-light); }
@@ -2601,7 +2621,7 @@ export default {
 .adjust-location-card.loc-occupied:hover { border-color: var(--primary-color); }
 .loc-seq-badge {
   position: absolute; top: 2px; right: 4px;
-  background: var(--primary-color); color: #fff; font-size: 10px; font-weight: 700;
+  background: var(--primary-color); color: var(--text-on-primary); font-size: 10px; font-weight: 700;
   width: 18px; height: 18px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
 }
@@ -2609,9 +2629,9 @@ export default {
 .adjust-table-wrap .data-table { font-size: 12px; }
 .adjust-table-wrap .data-table th, .adjust-table-wrap .data-table td { padding: 6px 8px; }
 
-.diff-surplus { color: #e6a23c; font-weight: 600; }
-.diff-shortage { color: #f56c6c; font-weight: 600; }
-.diff-normal { color: #67c23a; }
+.diff-surplus { color: var(--warning); font-weight: 600; }
+.diff-shortage { color: var(--danger); font-weight: 600; }
+.diff-normal { color: var(--success); }
 
 @media (max-width: 768px) {
   .data-table { font-size: 12px; }

@@ -151,7 +151,7 @@ form .form-group input::placeholder { color: var(--foreground-placeholder); }
   width: 100%;
   padding: 12px;
   background: var(--primary);
-  color: #fff;
+  color: var(--text-on-primary);
   border: none;
   border-radius: var(--radius-md);
   font-size: 15px;
@@ -170,7 +170,7 @@ form .form-group input::placeholder { color: var(--foreground-placeholder); }
   margin-top: 16px;
   padding: 10px 14px;
   background: var(--danger-bg);
-  border: 1px solid hsl(5, 80%, 85%);
+  border: 1px solid var(--danger-bg);
   border-radius: var(--radius-md);
   color: var(--danger);
   font-size: 13px;
