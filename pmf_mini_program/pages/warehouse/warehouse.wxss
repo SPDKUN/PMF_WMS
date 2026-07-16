@@ -1,0 +1,75 @@
+/* warehouse.wxss */
+.page-container { padding: 0 30rpx; }
+
+.wh-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+
+.wh-card:active { transform: scale(0.98); }
+
+.wh-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.wh-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.wh-icon { font-size: 32rpx; }
+
+.wh-info {
+  flex: 1;
+}
+
+.wh-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 4rpx;
+}
+
+.wh-type {
+  font-size: 24rpx;
+  color: #94A3B8;
+}
+
+.wh-stats {
+  display: flex;
+  background: #F8FAFC;
+  border-radius: 12rpx;
+  padding: 16rpx 0;
+}
+
+.wh-stat {
+  flex: 1;
+  text-align: center;
+  border-right: 2rpx solid #E2E8F0;
+}
+
+.wh-stat:last-child { border-right: none; }
+
+.wh-stat-value {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 4rpx;
+}
+
+.wh-stat-label {
+  font-size: 22rpx;
+  color: #94A3B8;
+}

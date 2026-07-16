@@ -1,148 +1,75 @@
-// 任务页面 - 我的待办 + 任务分配
-const api = require('../../utils/api')
+﻿const api = require('../../utils/api')
 const util = require('../../utils/util')
 
 Page({
   data: {
-    activeTab: 'mytodos',
-    todoList: [],
-
-    // 批次表单
-    showBatchModal: false,
-    batchForm: {
-      batch_id: '',
-      goods_id: '',
-      production_date: '',
-      expiry_date: '',
-      initial_quantity: ''
-    }
+    filterType: 'all',
+    taskList: [],
+    _allTasks: []
   },
 
-  onShow() {
-    if (getApp().checkLogin()) {
-      this.loadTodos()
-    }
-  },
+  onLoad() { this.loadData() },
 
-  async loadTodos() {
-    util.showLoading('加载中...')
+  // 切换 tab 时刷新数据
+  onShow() { this.loadData() },
+
+  async loadData() {
+    wx.showLoading({ title: '加载中...' })
     try {
-      const res = await api.getWorkTaskList().catch(() => ({ data: [] }))
-      const tasks = (res.data || []).map(t => {
-        if (t.deadline) t.deadline = util.formatDate(t.deadline)
-        return t
+      var list = (await api.taskApi.list()) || []
+      this.data._allTasks = list.map(function(item) {
+        return {
+          ...item,
+          tagCls: item.completed_time ? 'tag-success' : 'tag-warning',
+          taskIcon: item.task_type === '入库' ? '📥' : item.task_type === '出库' ? '📤' : '📋',
+          fmtCreated: util.formatDate(item.created_time)
+        };
       })
-      this.setData({ todoList: tasks })
-    } catch (err) {
-      console.error('加载任务失败', err)
-    } finally {
-      util.hideLoading()
-    }
+      this.filterList()
+    } catch (e) { console.error(e) }
+    wx.hideLoading()
   },
 
-  switchTab(e) {
-    this.setData({ activeTab: e.currentTarget.dataset.tab })
+  setFilter(e) {
+    this.setData({ filterType: e.currentTarget.dataset.type })
+    this.filterList()
   },
 
-  // 完成任务
-  async completeTask(e) {
-    const taskId = e.currentTarget.dataset.id
-    const confirmed = await util.showConfirm('确认完成', '确定该任务已完成？')
-    if (!confirmed) return
-
-    try {
-      const task = this.data.todoList.find(t => t.task_id === taskId)
-      if (task) {
-        await api.updateWorkTask({
-          task_id: taskId,
-          task_status: 'completed',
-          completed_time: new Date().toISOString()
-        })
-        util.showToast('任务已完成', 'success')
-        this.loadTodos()
-      }
-    } catch (err) {
-      console.error('更新任务失败', err)
-    }
+  onTaskTap(e) {
+    var task = this.data.taskList[e.currentTarget.dataset.index];
+    if (!task) return;
+    var page = '';
+    var orderNo = task.related_order_no || '';
+    if (task.task_type === '入库') page = '/pages/inbound/inbound?order_no=' + orderNo;
+    else if (task.task_type === '出库') page = '/pages/outbound/outbound?order_no=' + orderNo;
+    else if (task.task_type === '质检') page = '/pages/quality/quality?order_no=' + orderNo;
+    if (page) wx.navigateTo({ url: page });
   },
 
-  // 打开新增批次弹窗
-  openTaskModal(e) {
-    const type = e.currentTarget.dataset.type
-    if (type === 'inbound') {
-      this.setData({
-        showBatchModal: true,
-        batchForm: {
-          batch_id: '',
-          goods_id: '',
-          production_date: '',
-          expiry_date: '',
-          initial_quantity: ''
-        }
+  filterList() {
+    const { _allTasks, filterType } = this.data
+    const app = getApp()
+
+    if (filterType === 'mine') {
+      // "我的任务": 只显示未完成的任务
+      var uid = app.globalData.userInfo ? app.globalData.userInfo.user_id : null
+      var list = _allTasks.filter(function(t) {
+        return t.assignee_id === uid && !t.completed_time
       })
+      this.setData({ taskList: list })
     } else {
-      this.showComingSoon()
+      // "全部": 未完成的排最上方，已完成排下方
+      var pending = []
+      var done = []
+      for (var i = 0; i < _allTasks.length; i++) {
+        var t = _allTasks[i]
+        if (t.completed_time) {
+          done.push(t)
+        } else {
+          pending.push(t)
+        }
+      }
+      this.setData({ taskList: pending.concat(done) })
     }
-  },
-
-  closeBatchModal() {
-    this.setData({ showBatchModal: false })
-  },
-
-  // 批次表单
-  onBatchInput(e) {
-    const field = e.currentTarget.dataset.field
-    this.setData({ ['batchForm.' + field]: e.detail.value })
-  },
-
-  onProdDateChange(e) {
-    this.setData({ 'batchForm.production_date': e.detail.value })
-  },
-
-  onExpDateChange(e) {
-    this.setData({ 'batchForm.expiry_date': e.detail.value })
-  },
-
-  async submitBatch() {
-    const { batchForm } = this.data
-
-    if (!batchForm.batch_id) {
-      util.showToast('请输入批次号')
-      return
-    }
-    if (!batchForm.goods_id) {
-      util.showToast('请输入货物ID')
-      return
-    }
-    if (!batchForm.initial_quantity) {
-      util.showToast('请输入初始数量')
-      return
-    }
-
-    try {
-      util.showLoading('创建中...')
-      await api.createBatch({
-        batch_id: batchForm.batch_id,
-        goods_id: parseInt(batchForm.goods_id),
-        production_date: batchForm.production_date || null,
-        expiry_date: batchForm.expiry_date || null,
-        initial_quantity: parseInt(batchForm.initial_quantity),
-        remaining_quantity: parseInt(batchForm.initial_quantity),
-        batch_status: 'active'
-      })
-
-      util.hideLoading()
-      util.showToast('批次创建成功', 'success')
-      this.closeBatchModal()
-    } catch (err) {
-      util.hideLoading()
-      console.error('创建批次失败', err)
-    }
-  },
-
-  showComingSoon() {
-    util.showToast('功能开发中，敬请期待...')
-  },
-
-  noop() {}
+  }
 })

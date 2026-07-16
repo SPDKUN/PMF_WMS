@@ -1,0 +1,34 @@
+<view class="page-container">
+  <view class="wh-list">
+    <view class="wh-card" wx:for="{{list}}" wx:key="warehouse_id" bindtap="goDetail" data-id="{{item.warehouse_id}}">
+      <view class="wh-top">
+        <view class="wh-icon-wrap" style="background: {{item.typeBg}}">
+          <text class="wh-icon">{{item.typeIcon}}</text>
+        </view>
+        <view class="wh-info">
+          <text class="wh-name">{{item.warehouse_name}}</text>
+          <text class="wh-type">{{item.warehouse_type}}</text>
+        </view>
+        <text class="tag {{item.tagCls}}">{{item.status}}</text>
+      </view>
+      <view class="wh-stats">
+        <view class="wh-stat">
+          <text class="wh-stat-value">{{item.total_slots}}</text>
+          <text class="wh-stat-label">总库位</text>
+        </view>
+        <view class="wh-stat">
+          <text class="wh-stat-value" style="color: #10B981;">{{item.available_slots}}</text>
+          <text class="wh-stat-label">空余库位</text>
+        </view>
+        <view class="wh-stat">
+          <text class="wh-stat-value" style="color: #2563EB;">{{item.total_slots - item.available_slots}}</text>
+          <text class="wh-stat-label">已占用</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <view class="empty-state" wx:if="{{list.length === 0}}">
+    <text>暂无库房</text>
+  </view>
+</view>

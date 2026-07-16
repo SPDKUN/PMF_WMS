@@ -1,0 +1,44 @@
+<view class="page-container">
+  <view class="search-bar">
+    <text class="search-icon">🔍</text>
+    <input class="search-input" placeholder="搜索货物名称..." bindinput="onSearch" />
+  </view>
+  
+  <scroll-view class="tab-scroll" scroll-x>
+    <view class="tab-row">
+      <view class="tab-item {{currentTab === index ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="id" data-index="{{index}}" bindtap="switchTab">
+        <text class="tab-text">{{item.label}}</text>
+        <text class="tab-count">{{item.count}}</text>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <view class="inv-grid">
+    <view class="inv-card" wx:for="{{filteredList}}" wx:key="inventory_id" bindtap="goDetail" data-id="{{item.inventory_id}}">
+      <view class="inv-left inv-left-{{item.statusColor}}"></view>
+      <view class="inv-body">
+        <view class="inv-top">
+          <view class="inv-name-wrap">
+            <text class="inv-name">{{item.goods_name}}</text>
+            <text class="inv-batch">批次: {{item.batch_id}}</text>
+          </view>
+          <view class="inv-qty-wrap">
+            <text class="inv-qty">{{item.quantity}}</text>
+            <text class="inv-unit">{{item.unit || '件'}}</text>
+          </view>
+        </view>
+        <view class="inv-bottom">
+          <view class="inv-info">
+            <text class="tag {{item.tagCls}}">{{item.inventory_status}}</text>
+            <text class="inv-location">📍 {{item.location_name || '未分配'}}</text>
+          </view>
+          <text class="inv-locked" wx:if="{{item.locked_quantity > 0}}">锁定: {{item.locked_quantity}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="empty-state" wx:if="{{filteredList.length === 0}}">
+      <text>暂无库存记录</text>
+    </view>
+  </view>
+</view>

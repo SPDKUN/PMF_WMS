@@ -1,92 +1,231 @@
-/* 个人中心样式 */
+/* profile.wxss */
 .profile-page {
   min-height: 100vh;
-  background: #f5f7fa;
-  padding: 20rpx;
 }
 
 .profile-header {
-  background: linear-gradient(135deg, #409eff 0%, #2d6cdf 100%);
-  border-radius: 20rpx;
-  padding: 50rpx 36rpx;
-  margin-bottom: 20rpx;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 60%, #1E40AF 100%);
+  padding: 0 30rpx 60rpx;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  color: #fff;
+  border-radius: 0 0 60rpx 60rpx;
 }
 
-.avatar {
+.profile-avatar {
   width: 120rpx;
   height: 120rpx;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  border-radius: 60rpx;
+  background: rgba(255,255,255,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 52rpx;
-  font-weight: bold;
-  color: #fff;
-  margin-right: 30rpx;
-  flex-shrink: 0;
+  margin-bottom: 20rpx;
+  backdrop-filter: blur(10px);
+}
+
+.avatar-text {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #FFFFFF;
 }
 
 .profile-name {
-  font-size: 40rpx;
-  font-weight: bold;
-  margin-bottom: 4rpx;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 8rpx;
 }
 
-.profile-username {
-  font-size: 26rpx;
-  opacity: 0.8;
-  margin-bottom: 6rpx;
-}
-
-/* 信息行 */
-.info-row {
+.profile-meta {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f5f7fa;
 }
 
-.info-row:last-child {
-  border-bottom: none;
+.profile-dept, .profile-pos {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.75);
 }
 
-.info-label {
-  font-size: 28rpx;
-  color: #909399;
+.profile-divider {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.4);
+  margin: 0 16rpx;
 }
 
-.info-value {
-  font-size: 28rpx;
-  color: #303133;
-  text-align: right;
+.menu-section {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  margin: 30rpx 30rpx 0;
+  padding: 0 8rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
 }
 
-/* 分隔线 */
-.section-divider {
-  padding: 16rpx 0;
-  text-align: center;
-  border-top: 1rpx dashed #e4e7ed;
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 24rpx;
 }
 
-/* 退出登录 */
-.logout-section {
-  padding: 40rpx 0;
+.menu-item:active {
+  opacity: 0.6;
+}
+
+.menu-icon {
+  font-size: 32rpx;
+  margin-right: 20rpx;
+}
+
+.menu-label {
+  flex: 1;
+  font-size: 30rpx;
+  color: #1E293B;
+}
+
+.menu-arrow {
+  font-size: 32rpx;
+  color: #CBD5E1;
+  font-weight: 300;
+}
+
+.menu-divider {
+  height: 2rpx;
+  background: #F1F5F9;
+  margin-left: 76rpx;
 }
 
 .logout-btn {
-  width: 100%;
+  margin: 60rpx 30rpx;
   height: 88rpx;
-  background: #fff;
-  color: #f56c6c;
-  font-size: 30rpx;
-  border: 2rpx solid #f56c6c;
-  border-radius: 12rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 44rpx;
+  background: #FEF2F2;
+  border: 2rpx solid #FECACA;
+  font-size: 30rpx;
+  color: #DC2626;
+  font-weight: 500;
+}
+
+.logout-btn:active {
+  background: #FEE2E2;
+}
+
+/* 弹窗遮罩 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-content {
+  width: 580rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  overflow: hidden;
+  animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 32rpx;
+  border-bottom: 2rpx solid #F1F5F9;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.modal-close {
+  font-size: 32rpx;
+  color: #94A3B8;
+  padding: 10rpx;
+}
+
+.modal-close:active {
+  opacity: 0.5;
+}
+
+.modal-body {
+  padding: 40rpx 32rpx;
+}
+
+.modal-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.modal-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50rpx;
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.modal-avatar-text {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.modal-user-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.modal-info-list {
+  background: #F8FAFC;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+}
+
+.modal-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #F1F5F9;
+}
+
+.modal-info-item:last-child {
+  border-bottom: none;
+}
+
+.modal-info-label {
+  font-size: 28rpx;
+  color: #94A3B8;
+}
+
+.modal-info-value {
+  font-size: 28rpx;
+  color: #1E293B;
+  font-weight: 500;
 }

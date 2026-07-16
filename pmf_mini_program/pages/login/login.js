@@ -1,86 +1,71 @@
-// 登录页逻辑
-const api = require('../../utils/api')
-const util = require('../../utils/util')
+const app = getApp()
 
 Page({
   data: {
     username: '',
     password: '',
-    loading: false,
-    errorMsg: ''
-  },
-
-  onLoad() {
-    // 检查是否已登录
-    const token = wx.getStorageSync('token')
-    if (token) {
-      wx.switchTab({ url: '/pages/home/home' })
-    }
+    canLogin: false
   },
 
   onUsernameInput(e) {
-    this.setData({ username: e.detail.value, errorMsg: '' })
+    const username = e.detail.value
+    this.setData({ username })
+    this.checkCanLogin()
   },
 
   onPasswordInput(e) {
-    this.setData({ password: e.detail.value, errorMsg: '' })
+    const password = e.detail.value
+    this.setData({ password })
+    this.checkCanLogin()
   },
 
-  async handleLogin() {
-    const { username, password } = this.data
-
-    if (!username.trim()) {
-      this.setData({ errorMsg: '请输入用户名' })
-      return
-    }
-    if (!password.trim()) {
-      this.setData({ errorMsg: '请输入密码' })
-      return
-    }
-
-    this.setData({ loading: true, errorMsg: '' })
-
-    try {
-      const result = await api.login(username, password)
-      const token = result.token
-      const userInfo = result.data
-
-      // 检查账号是否被停用（与Vue前端一致）
-      if (userInfo && userInfo.status === 0) {
-        this.setData({ errorMsg: '该账号已被停用，请联系管理员', loading: false })
-        return
-      }
-
-      if (token) {
-        // 保存登录信息
-        wx.setStorageSync('token', token)
-        wx.setStorageSync('userInfo', userInfo)
-        // 生成会话ID（AI聊天记录按登录会话隔离）
-        wx.setStorageSync('ai_session_id', Date.now().toString())
-
-        const app = getApp()
-        app.globalData.isLoggedIn = true
-        app.globalData.token = token
-        app.globalData.userInfo = userInfo
-
-        util.showToast('登录成功', 'success')
-        setTimeout(() => {
-          wx.switchTab({ url: '/pages/home/home' })
-        }, 1000)
-      } else {
-        this.setData({ errorMsg: '登录失败：未获取到Token' })
-      }
-    } catch (err) {
-      console.error('登录失败', err)
-      // 显示后端返回的具体错误信息
-      const msg = (err && err.msg) ? err.msg : '网络问题或者用户名密码错误'
-      this.setData({ errorMsg: msg })
-    } finally {
-      this.setData({ loading: false })
-    }
+  checkCanLogin() {
+    this.setData({
+      canLogin: this.data.username.length > 0 && this.data.password.length > 0
+    })
   },
 
-  goToRegister() {
-    wx.navigateTo({ url: '/pages/register/register' })
-  }
+  handleLogin() {
+    if (!this.data.canLogin) {
+      wx.showToast({ title: '请输入用户名和密码', icon: 'none' })
+      return
+    }
+    wx.showLoading({ title: '登录中...', mask: true })
+    
+    wx.request({
+      url: app.globalData.baseUrl + '/auth/login',
+      method: 'GET',
+      data: {
+        username: this.data.username,
+        password: this.data.password
+      },
+      success: (res) => {
+        wx.hideLoading()
+        if (res.data && res.data.code === 200) {
+          const userInfo = res.data.data
+          const token = res.data.token
+          
+          app.globalData.userInfo = userInfo
+          app.globalData.token = token
+          
+          wx.setStorageSync('userInfo', JSON.stringify(userInfo))
+          wx.setStorageSync('token', token)
+          app.globalData.justLoggedIn = true
+          
+          wx.showToast({ title: '登录成功', icon: 'success', duration: 1000 })
+          setTimeout(() => {
+            wx.reLaunch({ url: '/pages/home/home' })
+          }, 1000)
+        } else {
+          wx.showToast({ title: res.data?.msg || '登录失败', icon: 'none' })
+        }
+      },
+      fail: () => {
+        wx.hideLoading()
+        wx.showToast({ title: '网络连接失败', icon: 'none' })
+      }
+    })
+  },
+
+
 })

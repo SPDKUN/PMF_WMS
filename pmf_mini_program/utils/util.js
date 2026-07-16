@@ -1,106 +1,55 @@
-/**
- * 工具函数
- */
-
-/**
- * 格式化时间
- * @param {Date|string|number} date 日期
- * @param {string} format 格式（默认 'YYYY-MM-DD HH:mm:ss'）
- */
-function formatTime(date, format) {
-  if (!date) return ''
-  const d = new Date(date)
-  const year = d.getFullYear()
-  const month = d.getMonth() + 1
-  const day = d.getDate()
-  const hour = d.getHours()
-  const minute = d.getMinutes()
-  const second = d.getSeconds()
-
-  format = format || 'YYYY-MM-DD HH:mm:ss'
-
-  return format
-    .replace('YYYY', year)
-    .replace('MM', padZero(month))
-    .replace('DD', padZero(day))
-    .replace('HH', padZero(hour))
-    .replace('mm', padZero(minute))
-    .replace('ss', padZero(second))
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  var d = new Date(dateStr);
+  var y = d.getFullYear();
+  var m = ('0' + (d.getMonth() + 1)).slice(-2);
+  var day = ('0' + d.getDate()).slice(-2);
+  var h = ('0' + d.getHours()).slice(-2);
+  var min = ('0' + d.getMinutes()).slice(-2);
+  return y + '-' + m + '-' + day + ' ' + h + ':' + min;
 }
 
-/**
- * 格式化日期
- */
-function formatDate(date) {
-  return formatTime(date, 'YYYY-MM-DD')
+function formatDateShort(dateStr) {
+  if (!dateStr) return '-';
+  var d = new Date(dateStr);
+  var m = ('0' + (d.getMonth() + 1)).slice(-2);
+  var day = ('0' + d.getDate()).slice(-2);
+  return m + '-' + day;
 }
 
-/**
- * 格式化数字（保留旧版兼容）
- */
-function formatNumber(n) {
-  n = n.toString()
-  return n[1] ? n : '0' + n
+function getStatusTag(status) {
+  var map = {
+    '正常': 'tag-success',
+    '待检': 'tag-warning',
+    '锁定': 'tag-danger',
+    '报废': 'tag-danger',
+    '草稿': 'tag-default',
+    '已审核': 'tag-info',
+    '已完成': 'tag-success',
+    '待入库': 'tag-warning',
+    '待出库': 'tag-info',
+    '待报废': 'tag-danger',
+    '进行中': 'tag-warning',
+    '待处理': 'tag-warning',
+    '启用': 'tag-success',
+    '停用': 'tag-danger'
+  };
+  return map[status] || 'tag-default';
 }
 
-/**
- * 补零
- */
-function padZero(n) {
-  n = n.toString()
-  return n[1] ? n : '0' + n
-}
-
-/**
- * 显示加载提示
- */
-function showLoading(title) {
-  wx.showLoading({
-    title: title || '加载中...',
-    mask: true
-  })
-}
-
-/**
- * 隐藏加载提示
- */
-function hideLoading() {
-  wx.hideLoading()
-}
-
-/**
- * 显示消息提示
- */
 function showToast(title, icon) {
-  wx.showToast({
-    title: title || '',
-    icon: icon || 'none',
-    duration: 2000
-  })
+  if (!icon) icon = 'none';
+  wx.showToast({ title: title, icon: icon, duration: 2000 });
 }
 
-/**
- * 显示确认对话框
- */
-function showConfirm(title, content) {
-  return new Promise((resolve) => {
-    wx.showModal({
-      title: title || '提示',
-      content: content || '',
-      success(res) {
-        resolve(res.confirm)
-      }
-    })
-  })
+function showSuccess(title) {
+  wx.showToast({ title: title, icon: 'success', duration: 1500 });
 }
 
 module.exports = {
-  formatTime,
-  formatDate,
-  formatNumber,
-  padZero,
-  showLoading,
-  hideLoading,
-  showToast,
-  showConfirm
-}
+  formatDate: formatDate,
+  formatDateShort: formatDateShort,
+  getStatusTag: getStatusTag,
+  showToast: showToast,
+  showSuccess: showSuccess
+};

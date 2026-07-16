@@ -1,95 +1,123 @@
-<!-- 首页 - 智能仓储驾驶舱 -->
-<scroll-view class="home-page" scroll-y enable-back-to-top>
-  <!-- 欢迎卡片 -->
-  <view class="welcome-card">
-    <view class="welcome-info">
-      <view class="greeting">{{greeting}}</view>
-      <view class="user-name">{{userInfo.real_name || userInfo.username || '用户'}}</view>
-      <view class="role-tag tag-primary">{{userInfo.position || '仓库管理员'}}</view>
-    </view>
-    <view class="welcome-date">{{currentDate}}</view>
-  </view>
-
-  <!-- 统计数据 -->
-  <view class="stats-row">
-    <view class="stat-card stat-blue">
-      <view class="stat-number">{{stats.warehouseCount}}</view>
-      <view class="stat-label">仓库总数</view>
-    </view>
-    <view class="stat-card stat-green">
-      <view class="stat-number">{{stats.goodsCount}}</view>
-      <view class="stat-label">货物种类</view>
-    </view>
-    <view class="stat-card stat-orange">
-      <view class="stat-number">{{stats.userCount}}</view>
-      <view class="stat-label">人员总数</view>
-    </view>
-    <view class="stat-card stat-purple">
-      <view class="stat-number">{{stats.todayTasks}}</view>
-      <view class="stat-label">今日待办</view>
-    </view>
-  </view>
-
-  <!-- AI助手 -->
-  <view class="card ai-card">
-    <view class="card-title">🤖 AI 智能助手</view>
-    <view class="ai-input-row">
-      <input class="ai-input" placeholder="询问仓储相关问题..." value="{{aiQuestion}}" bindinput="onAiInput" confirm-type="send" bindconfirm="sendAiQuestion" />
-      <button class="ai-send-btn" bindtap="sendAiQuestion">发送</button>
-    </view>
-  </view>
-
-  <!-- 快捷操作 -->
-  <view class="card">
-    <view class="card-title">⚡ 快捷操作</view>
-    <view class="quick-actions">
-      <view class="action-item" bindtap="navigateTo" data-url="/pages/manage/manage">
-        <view class="action-icon action-blue">📦</view>
-        <view class="action-text">入库管理</view>
+<scroll-view class="home-page" scroll-y>
+  <!-- 自定义导航栏 -->
+  <view class="nav-bar" style="padding-top: {{navBarHeight}}px;">
+    <view class="nav-content">
+      <view class="nav-left">
+        <text class="nav-greeting">你好，{{userInfo.real_name || '用户'}}</text>
+        <text class="nav-date">{{currentDate}}</text>
       </view>
-      <view class="action-item" bindtap="navigateTo" data-url="/pages/manage/manage">
-        <view class="action-icon action-green">🚚</view>
-        <view class="action-text">出库管理</view>
-      </view>
-      <view class="action-item" bindtap="navigateTo" data-url="/pages/query/query">
-        <view class="action-icon action-orange">📋</view>
-        <view class="action-text">库存查询</view>
-      </view>
-      <view class="action-item" bindtap="navigateTo" data-url="/pages/tasks/tasks">
-        <view class="action-icon action-purple">✅</view>
-        <view class="action-text">任务中心</view>
+      <view class="nav-right">
+        <view class="nav-icon-wrap" bindtap="toggleNotifications">
+          <text class="nav-icon">🔔</text>
+        </view>
       </view>
     </view>
   </view>
-
-  <!-- 待办列表 -->
-  <view class="card">
-    <view class="card-title flex-between">
-      <text>📝 待办事项</text>
-      <text class="text-primary text-sm" bindtap="navigateTo" data-url="/pages/tasks/tasks">查看全部 →</text>
-    </view>
-    <view wx:if="{{todoList.length === 0}}" class="empty-state">
-      <view class="icon">🎉</view>
-      <view>暂无待办任务</view>
-    </view>
-    <view wx:else>
-      <view class="todo-item" wx:for="{{todoList}}" wx:key="task_id">
-        <view class="todo-left">
-          <view class="todo-priority" style="background: {{item.priority === 'high' ? '#f56c6c' : item.priority === 'medium' ? '#e6a23c' : '#67c23a'}}"></view>
-          <view class="todo-info">
-            <view class="todo-title">{{item.task_type || '待处理任务'}}</view>
-            <view class="todo-meta text-sm text-muted">
-              <text wx:if="{{item.related_order_no}}">单号: {{item.related_order_no}} | </text>
-              <text>截止: {{item.deadline || '-'}}</text>
-            </view>
+  
+  <!-- 通知弹窗 -->
+  <view class="notif-overlay {{showNotifications ? 'show' : ''}}" bindtap="toggleNotifications">
+    <view class="notif-panel" catchtap="stopPropagation">
+      <view class="notif-header">
+        <text class="notif-title">消息通知</text>
+        <text class="notif-close" bindtap="toggleNotifications">✕</text>
+      </view>
+      <scroll-view class="notif-body" scroll-y>
+        <view class="notif-item" wx:for="{{notifications}}" wx:key="id">
+          <text class="notif-icon">{{item.icon}}</text>
+          <view class="notif-content">
+            <text class="notif-item-title">{{item.title}}</text>
+            <text class="notif-desc">{{item.desc}}</text>
           </view>
         </view>
-        <view class="todo-status tag {{item.task_status === 'completed' ? 'tag-success' : 'tag-warning'}}">
-          {{item.task_status === 'completed' ? '已完成' : '进行中'}}
+      </scroll-view>
+    </view>
+  </view>
+  
+  <!-- 统计卡片 -->
+  <view class="stats-row">
+    <view class="stat-card" wx:for="{{stats}}" wx:key="id" bindtap="onStatTap" data-index="{{index}}">
+      <view class="stat-icon" style="background: {{item.bgColor}}">
+        <text>{{item.icon}}</text>
+      </view>
+      <text class="stat-number">{{item.count}}</text>
+      <text class="stat-label">{{item.label}}</text>
+    </view>
+  </view>
+  
+  <!-- AI智能助手 -->
+  <view class="ai-assistant" bindtap="openAiAssistant">
+    <view class="ai-left">
+      <view class="ai-avatar">
+        <text>🤖</text>
+      </view>
+      <view class="ai-info">
+        <text class="ai-title">AI 智能助手</text>
+        <text class="ai-desc">点击咨询仓储相关问题</text>
+      </view>
+    </view>
+    <text class="ai-arrow">›</text>
+  </view>
+  
+  <!-- 快捷功能 -->
+  <view class="section-wrap">
+    <view class="section-header">
+      <text class="section-title">快捷功能</text>
+    </view>
+    <view class="quick-grid">
+      <view class="quick-item" wx:for="{{quickActions}}" wx:key="id" bindtap="onQuickAction" data-page="{{item.page}}">
+        <view class="quick-icon" style="background: {{item.bgColor}}">
+          <text>{{item.icon}}</text>
         </view>
+        <text class="quick-label">{{item.label}}</text>
       </view>
     </view>
   </view>
-
-  <view style="height: 40rpx;"></view>
+  
+  <!-- 待办任务 -->
+  <view class="section-wrap">
+    <view class="section-header">
+      <text class="section-title">待办任务</text>
+      <text class="section-more" bindtap="goTasks">查看更多 ›</text>
+    </view>
+    <view class="task-card" wx:for="{{recentTasks}}" wx:key="task_id">
+      <view class="task-priority priority-{{item.priority === '高' ? 'high' : item.priority === '中' ? 'medium' : 'low'}}"></view>
+      <view class="task-body">
+        <view class="task-top">
+          <text class="task-type">{{item.task_type}}</text>
+          <text class="task-tag {{item.task_status === '已完成' ? 'tag-success' : item.task_status === '进行中' ? 'tag-warning' : 'tag-info'}}">{{item.task_status || '待处理'}}</text>
+        </view>
+        <view class="task-info">
+          <text class="task-detail" wx:if="{{item.related_order_no}}">单号：{{item.related_order_no}}</text>
+          <text class="task-deadline">截止：{{item.deadline || '-'}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty-state" wx:if="{{recentTasks.length === 0}}">
+      <text class="empty-text">暂无待办任务</text>
+    </view>
+  </view>
 </scroll-view>
+  <!-- AI对话框 -->
+  <view class="ai-chat-overlay {{showAiChat ? 'show' : ''}}" bindtap="closeAiChat">
+    <view class="ai-chat-panel" catchtap="stopPropagation">
+      <view class="ai-chat-header">
+        <text class="ai-chat-title">AI 智能助手</text>
+        <text class="ai-chat-close" bindtap="closeAiChat">✕</text>
+      </view>
+      <scroll-view class="ai-chat-body" scroll-y>
+        <view class="ai-msg {{item.role === 'user' ? 'user-msg' : 'ai-msg-item'}}" wx:for="{{aiMessages}}" wx:key="role">
+          <view wx:if="{{item.role === 'ai'}}" class="msg-avatar">🤖</view>
+          <view class="msg-bubble">{{item.text}}</view>
+          <view wx:if="{{item.role === 'user'}}" class="msg-avatar">👤</view>
+        </view>
+        <view class="ai-msg ai-msg-item" wx:if="{{aiLoading}}">
+          <view class="msg-avatar">🤖</view>
+          <view class="msg-bubble thinking">思考中...</view>
+        </view>
+      </scroll-view>
+      <view class="ai-chat-footer">
+        <input class="ai-input" placeholder="输入您的问题..." value="{{aiInput}}" bindinput="onAiInput" confirm-type="send" bindconfirm="sendAiMessage" />
+        <view class="ai-send-btn {{aiInput.trim() && !aiLoading ? 'active' : ''}}" bindtap="sendAiMessage">发送</view>
+      </view>
+    </view>
+  </view>

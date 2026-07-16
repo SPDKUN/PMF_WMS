@@ -1,0 +1,109 @@
+<view class="page-container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <text class="search-icon">🔍</text>
+    <input class="search-input" placeholder="搜索货物编号/名称" value="{{searchKeyword}}" bindinput="onSearchInput" confirm-type="search" />
+    <text class="search-clear {{searchKeyword ? 'show' : ''}}" bindtap="onSearchClear">✕</text>
+  </view>
+
+  <!-- 统计栏 -->
+  <view class="summary-bar">
+    <view class="summary-item" wx:for="{{summary}}" wx:key="id">
+      <text class="summary-value">{{item.count}}</text>
+      <text class="summary-label">{{item.label}}</text>
+    </view>
+  </view>
+  
+  <!-- 分类切换 -->
+  <scroll-view class="tab-scroll" scroll-x>
+    <view class="tab-row">
+      <view class="tab-item {{currentTab === index ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="id" data-index="{{index}}" bindtap="switchTab">
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <!-- 货物列表 -->
+  <view class="goods-list">
+    <view class="goods-card" wx:for="{{filteredList}}" wx:key="goods_id" bindtap="showDetail" data-id="{{item.goods_id}}">
+      <view class="goods-top">
+        <view class="goods-cat-tag cat-{{item.category === '原料' ? 'raw' : 'finished'}}">{{item.category}}</view>
+        <view class="goods-name">{{item.goods_name}}</view>
+      </view>
+      <view class="goods-meta">
+        <view class="goods-meta-item">
+          <text class="meta-label">编号</text>
+          <text class="meta-value">{{item.goods_code}}</text>
+        </view>
+        <view class="goods-meta-item">
+          <text class="meta-label">规格</text>
+          <text class="meta-value">{{item.storage_condition}}</text>
+        </view>
+        <view class="goods-meta-item">
+          <text class="meta-label">单位</text>
+          <text class="meta-value">{{item.unit}}</text>
+        </view>
+      </view>
+      <view class="goods-bottom">
+        <text class="goods-qty-label">库存数量</text>
+        <text class="goods-qty">{{item.quantity}} <text class="goods-unit">{{item.unit}}</text></text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="empty-state" wx:if="{{filteredList.length === 0}}">
+    <text>暂无货物数据</text>
+  </view>
+  
+  <!-- 货物详情弹窗 -->
+  <view class="modal-overlay {{showModal ? 'show' : ''}}" bindtap="closeModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">货物详情</text>
+        <text class="modal-close" bindtap="closeModal">✕</text>
+      </view>
+      <scroll-view class="modal-body" scroll-y wx:if="{{detailItem}}">
+        <view class="detail-card">
+          <view class="detail-row">
+            <text class="detail-label">货物编号</text>
+            <text class="detail-value">{{detailItem.goods_code}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">货物名称</text>
+            <text class="detail-value">{{detailItem.goods_name}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">货物类型</text>
+            <text class="detail-value">
+              <text class="tag-sm tag-{{detailItem.categoryClass}}">{{detailItem.category}}</text>
+            </text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">储存条件</text>
+            <text class="detail-value">
+              <text class="tag-sm tag-cond-{{detailItem.storageClass}}">{{detailItem.storage_condition}}</text>
+            </text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">单位</text>
+            <text class="detail-value">{{detailItem.unit}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">当前库存</text>
+            <text class="detail-value detail-qty">{{detailItem.quantity}} {{detailItem.unit}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">状态</text>
+            <text class="detail-value">
+              <text class="tag-sm tag-normal">正常</text>
+            </text>
+          </view>
+          <view class="detail-row" wx:if="{{detailItem.goods_id}}">
+            <text class="detail-label">货物ID</text>
+            <text class="detail-value">#{{detailItem.goods_id}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

@@ -1,5 +1,4 @@
 {
-  "desc": "PMF智能仓储管理系统 - 微信小程序",
   "rules": [{
     "action": "allow",
     "page": "*"

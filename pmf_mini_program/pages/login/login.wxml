@@ -1,32 +1,36 @@
-<!-- 登录页 -->
 <view class="login-page">
   <view class="login-header">
-    <view class="logo-text">PMF</view>
-    <view class="subtitle">智能仓储管理系统</view>
-    <view class="desc">Smart Warehouse Management System</view>
-  </view>
-
-  <view class="login-form">
-    <view class="form-group">
-      <view class="form-label">用户名</view>
-      <input class="form-input" placeholder="请输入用户名" value="{{username}}" bindinput="onUsernameInput" />
-    </view>
-
-    <view class="form-group">
-      <view class="form-label">密码</view>
-      <input class="form-input" type="password" placeholder="请输入密码" value="{{password}}" bindinput="onPasswordInput" />
-    </view>
-
-    <button class="login-btn" bindtap="handleLogin" loading="{{loading}}">登 录</button>
-
-    <view class="error-msg" wx:if="{{errorMsg}}">{{errorMsg}}</view>
-
-    <view class="register-link" bindtap="goToRegister">
-      还没有账号？<text class="text-primary">立即注册</text>
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <view class="logo-circle">
+        <text class="logo-text">W</text>
+      </view>
+      <view class="app-title">预制菜WMS</view>
+      <view class="app-subtitle">仓储管理系统</view>
     </view>
   </view>
-
+  
+  <view class="login-card">
+    <view class="card-title">账号登录</view>
+    
+    <view class="input-group">
+      <view class="input-item">
+        <text class="input-icon">👤</text>
+        <input class="input-field" placeholder="请输入用户名" value="{{username}}" bindinput="onUsernameInput" />
+      </view>
+      <view class="input-divider"></view>
+      <view class="input-item">
+        <text class="input-icon">🔒</text>
+        <input class="input-field" type="password" placeholder="请输入密码" value="{{password}}" bindinput="onPasswordInput" />
+      </view>
+    </view>
+    
+    <view class="login-btn {{canLogin ? 'active' : ''}}" bindtap="handleLogin">
+      <text>登 录</text>
+    </view>
+  </view>
+  
   <view class="login-footer">
-    <text class="text-muted text-sm">© 2026 PMF Warehouse Management</text>
+    <text class="footer-text">PMF-WMS v2.0</text>
   </view>
 </view>
