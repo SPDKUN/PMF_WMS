@@ -1,5 +1,6 @@
-﻿const app = getApp()
+const app = getApp()
 const api = require('../../utils/api')
+const util = require('../../utils/util')
 
 Page({
   data: {
@@ -16,10 +17,23 @@ Page({
     deadline: '',
     remark: '',
     canSubmit: false,
-    _goodsMap: {}
+    _goodsMap: {},
+    // 来自本地数据库的创建人和创建时间
+    creatorName: '',
+    creatorId: null,
+    createTime: ''
   },
 
   onLoad() {
+    // 从本地数据库读取当前登录用户信息作为创建人
+    var userInfo = app.globalData.userInfo
+    if (userInfo) {
+      this.setData({
+        creatorName: userInfo.real_name || userInfo.username || '未知用户',
+        creatorId: userInfo.user_id || null,
+        createTime: util.formatDate(new Date().toISOString())
+      })
+    }
     this.loadData()
   },
 
@@ -47,10 +61,24 @@ Page({
           batchDisplay: b.batch_id + (name ? ' - ' + name : '')
         }
       })
+      // 如果本地已有创建人信息，默认选中当前用户为执行人
+      var defaultOperatorId = this.data.operatorId
+      var defaultOperatorName = this.data.operatorName
+      if (!defaultOperatorId && this.data.creatorId && users && users.length > 0) {
+        for (var u = 0; u < users.length; u++) {
+          if (users[u].user_id === this.data.creatorId) {
+            defaultOperatorId = users[u].user_id
+            defaultOperatorName = users[u].real_name
+            break
+          }
+        }
+      }
       this.setData({
         userList: users || [],
         batchList: enrichedBatches || [],
-        _goodsMap: goodsMap
+        _goodsMap: goodsMap,
+        operatorId: defaultOperatorId,
+        operatorName: defaultOperatorName
       })
     } catch (e) {
       wx.showToast({ title: '加载数据失败', icon: 'none' })
@@ -111,6 +139,8 @@ Page({
         inboundType: this.data.inboundType,
         batchId: this.data.batchId,
         operatorId: this.data.operatorId,
+        // 将本地数据库中的创建人ID传给后端，与入库单关联
+        creatorId: this.data.creatorId,
         priority: this.data.priority,
         deadline: this.data.deadline,
         remark: this.data.remark

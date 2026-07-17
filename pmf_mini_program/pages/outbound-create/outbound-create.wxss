@@ -19,6 +19,8 @@
 .form-picker text { font-size: 28rpx; color: #1E293B; }
 .form-picker-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .picker-arrow { font-size: 32rpx; color: #CBD5E1; flex-shrink: 0; }
+.form-readonly { background: #F0F4FF; }
+.form-readonly-text { color: #3B82F6; font-weight: 500; }
 
 .submit-area { padding: 20rpx 0; }
 .submit-btn { height: 88rpx; border-radius: 44rpx; display: flex; align-items: center; justify-content: center; font-size: 32rpx; font-weight: 600; color: #FFFFFF; background: linear-gradient(135deg, #94A3B8, #CBD5E1); }

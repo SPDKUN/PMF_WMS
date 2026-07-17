@@ -118,6 +118,14 @@ Page({
           fmtCreate: util.formatDate(list[i].create_time)
         });
       }
+      // 按创建时间倒序排列（最新在前）
+      mapped.sort(function(a, b) {
+        var ta = a.create_time || '';
+        var tb = b.create_time || '';
+        if (ta > tb) return -1;
+        if (ta < tb) return 1;
+        return 0;
+      });
       self.data._rawList = mapped;
       mapped = mapped.filter(function(m) { return m.order_status !== '草稿' });
       self.data._allList = mapped;

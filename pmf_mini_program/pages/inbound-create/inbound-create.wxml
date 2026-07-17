@@ -32,6 +32,25 @@
     </view>
   </view>
 
+  <!-- 创建信息（来自本地数据库） -->
+  <view class="form-card">
+    <view class="form-section">
+      <text class="form-section-title">创建信息</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">创建人</text>
+      <view class="form-picker form-readonly">
+        <text class="form-readonly-text">{{creatorName || '未登录'}}</text>
+      </view>
+    </view>
+    <view class="form-item">
+      <text class="form-label">创建时间</text>
+      <view class="form-picker form-readonly">
+        <text class="form-readonly-text">{{createTime || '-'}}</text>
+      </view>
+    </view>
+  </view>
+
   <view class="form-card">
     <view class="form-section">
       <text class="form-section-title">任务设置</text>

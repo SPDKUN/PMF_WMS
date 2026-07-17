@@ -95,9 +95,19 @@ Page({
           fmtTime: list[i].inspection_time ? util.formatDate(list[i].inspection_time) : '待检验',
           remark: list[i].remark,
           tagCls: util.getStatusTag(list[i].order_status),
-          task_id: taskMap[list[i].quality_check_no] || null
+          task_id: taskMap[list[i].quality_check_no] || null,
+          create_time: list[i].create_time,
+          fmtCreate: util.formatDate(list[i].create_time)
         });
       }
+      // 按创建时间倒序排列（最新在前）
+      mapped.sort(function(a, b) {
+        var ta = a.create_time || '';
+        var tb = b.create_time || '';
+        if (ta > tb) return -1;
+        if (ta < tb) return 1;
+        return 0;
+      });
       self.data._rawList = mapped;
       self.data._allList = mapped;
       self.filterList();

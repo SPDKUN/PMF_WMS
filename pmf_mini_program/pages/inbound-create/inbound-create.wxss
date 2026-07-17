@@ -28,6 +28,8 @@
   background: #F8FAFC; border-radius: 12rpx; padding: 16rpx 20rpx; box-sizing: border-box;
 }
 .form-textarea::placeholder { color: #CBD5E1; }
+.form-readonly { background: #F0F4FF; }
+.form-readonly-text { color: #3B82F6; font-weight: 500; }
 
 .submit-area { padding: 20rpx 0; }
 .submit-btn {

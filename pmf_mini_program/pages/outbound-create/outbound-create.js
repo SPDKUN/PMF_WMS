@@ -1,5 +1,6 @@
-﻿const app = getApp()
+const app = getApp()
 const api = require('../../utils/api')
+const util = require('../../utils/util')
 
 Page({
   data: {
@@ -24,10 +25,25 @@ Page({
     deadline: '',
     canSubmit: false,
     _inventoryData: [],
-    goodsStockInfo: ''
+    goodsStockInfo: '',
+    // 来自本地数据库的创建人和创建时间
+    creatorName: '',
+    creatorId: null,
+    createTime: ''
   },
 
-  onLoad() { this.loadData() },
+  onLoad() {
+    // 从本地数据库读取当前登录用户信息作为创建人
+    var userInfo = app.globalData.userInfo
+    if (userInfo) {
+      this.setData({
+        creatorName: userInfo.real_name || userInfo.username || '未知用户',
+        creatorId: userInfo.user_id || null,
+        createTime: util.formatDate(new Date().toISOString())
+      })
+    }
+    this.loadData()
+  },
 
   async loadData() {
     wx.showLoading({ title: '加载中...' })
@@ -41,11 +57,25 @@ Page({
       var goodsDisplay = goodsList.map(function(g) {
         return g.goods_name + ' (' + (g.goods_code || '') + ')'
       })
+      // 如果本地已有创建人信息，默认选中当前用户为执行人
+      var defaultOperatorId = this.data.operatorId
+      var defaultOperatorName = this.data.operatorName
+      if (!defaultOperatorId && this.data.creatorId && users && users.length > 0) {
+        for (var u = 0; u < users.length; u++) {
+          if (users[u].user_id === this.data.creatorId) {
+            defaultOperatorId = users[u].user_id
+            defaultOperatorName = users[u].real_name
+            break
+          }
+        }
+      }
       this.setData({
         userList: users || [],
         goodsList: goodsList,
         goodsDisplayList: goodsDisplay,
-        _inventoryData: inventory || []
+        _inventoryData: inventory || [],
+        operatorId: defaultOperatorId,
+        operatorName: defaultOperatorName
       })
     } catch (e) {
       wx.showToast({ title: '加载数据失败', icon: 'none' })
@@ -216,7 +246,8 @@ Page({
         assigneeId: d.operatorId,
         priority: d.priority,
         deadline: d.deadline,
-        operatorId: app.globalData.userInfo ? app.globalData.userInfo.user_id : null
+        // 将本地数据库中的创建人ID传给后端，与出库单关联
+        operatorId: d.creatorId || (app.globalData.userInfo ? app.globalData.userInfo.user_id : null)
       })
       // 自动发布：创建后将出库单状态改为"已审核"
       var orderNo = result && result.related_order_no

@@ -102,6 +102,14 @@ Page({
           locations: detailLocMap[list[i].outbound_no] || []
         });
       }
+      // 按创建时间倒序排列（最新在前）
+      mapped.sort(function(a, b) {
+        var ta = a.create_time || '';
+        var tb = b.create_time || '';
+        if (ta > tb) return -1;
+        if (ta < tb) return 1;
+        return 0;
+      });
       // 保存原始列表，用于从任务跳转时查找
       self.data._rawList = mapped;
       // 列表显示过滤掉草稿
