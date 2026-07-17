@@ -58,4 +58,8 @@
         DELETE FROM adjustment_order_detail WHERE adjustment_no = #{adjustment_no}
     </delete>
 
+    <delete id="deleteByBatchId">
+        DELETE FROM adjustment_order_detail WHERE batch_id = #{batch_id}
+    </delete>
+
 </mapper>

@@ -15,4 +15,5 @@ public interface AdjustmentOrderDetailMapper {
     int deleteById(@Param("detail_id") Integer detailId);
     java.util.ArrayList<AdjustmentOrderDetail> findByAdjustmentNo(@Param("adjustment_no") String adjustmentNo);
     int deleteByAdjustmentNo(@Param("adjustment_no") String adjustmentNo);
+    int deleteByBatchId(@Param("batch_id") String batchId);
 }

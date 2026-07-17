@@ -53,6 +53,9 @@ public class OutboundServiceImpl implements OutboundService {
     @Autowired
     private InventoryCheckDetailMapper inventoryCheckDetailMapper;
 
+    @Autowired
+    private AdjustmentOrderDetailMapper adjustmentOrderDetailMapper;
+
     @Override
     @Transactional
     public WorkTask createOutboundTask(CreateOutboundRequest request) {
@@ -321,6 +324,8 @@ public class OutboundServiceImpl implements OutboundService {
                 if (batch.getRemaining_quantity() <= 0) {
                     qualityCheckDetailMapper.deleteByBatchId(batch.getBatch_id());
                     inventoryCheckDetailMapper.deleteByBatchId(batch.getBatch_id());
+                    adjustmentOrderDetailMapper.deleteByBatchId(batch.getBatch_id());
+                    outboundOrderDetailMapper.deleteByBatchId(batch.getBatch_id());
                     inventoryMapper.deleteByBatchId(batch.getBatch_id());
                     batchMapper.deleteById(batch.getBatch_id());
                 }

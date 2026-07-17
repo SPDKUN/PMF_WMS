@@ -54,6 +54,9 @@ public class DefectiveServiceImpl implements DefectiveService {
     private InventoryCheckDetailMapper inventoryCheckDetailMapper;
 
     @Autowired
+    private AdjustmentOrderDetailMapper adjustmentOrderDetailMapper;
+
+    @Autowired
     private OutboundOrderDetailMapper outboundOrderDetailMapper;
 
     @Override
@@ -292,6 +295,7 @@ public class DefectiveServiceImpl implements DefectiveService {
         for (String batchId : batchIdsToDelete) {
             qualityCheckDetailMapper.deleteByBatchId(batchId);
             inventoryCheckDetailMapper.deleteByBatchId(batchId);
+            adjustmentOrderDetailMapper.deleteByBatchId(batchId);
             outboundOrderDetailMapper.deleteByBatchId(batchId);
             inventoryMapper.deleteByBatchId(batchId);
         }
