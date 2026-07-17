@@ -2,8 +2,8 @@
   <div class="tasks-page">
     <!-- 选项卡 -->
     <div class="tab-row">
-      <button :class="{ active: activeTab === 'todo' }" @click="activeTab = 'todo'">我的待办</button>
-      <button :class="{ active: activeTab === 'assign' }" @click="activeTab = 'assign'">操作中心</button>
+      <button :class="{ active: activeTab === 'todo' }" @click="switchTab('todo')">我的待办</button>
+      <button :class="{ active: activeTab === 'assign' }" @click="switchTab('assign')">操作中心</button>
     </div>
 
     <!-- 我的待办 -->
@@ -1101,6 +1101,10 @@ export default {
     this.fetchAllBatches()
   },
   methods: {
+    switchTab(key) {
+      this.activeTab = key
+      this.$router.replace({ query: { tab: key } })
+    },
     getUserId() {
       if (this.userId) return this.userId
       const stored = localStorage.getItem('userInfo')

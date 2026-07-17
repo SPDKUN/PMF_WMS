@@ -671,6 +671,7 @@ export default {
 
     switchTab(key) {
       this.activeTab = key
+      this.$router.replace({ query: { tab: key } })
       this.page[key] = 1  // 切换标签重置页码
       if (key === 'personnel' && this.personnelList.length === 0) {
         this.fetchPersonnel()

@@ -2,9 +2,9 @@
   <div class="manage-page">
     <!-- 选项卡 -->
     <div class="tab-row">
-      <button :class="{ active: activeTab === 'personnel' }" @click="activeTab = 'personnel'">人员列表</button>
-      <button :class="{ active: activeTab === 'warehouse' }" @click="activeTab = 'warehouse'">仓库列表</button>
-      <button :class="{ active: activeTab === 'goods' }" @click="activeTab = 'goods'">货物列表</button>
+      <button :class="{ active: activeTab === 'personnel' }" @click="switchTab('personnel')">人员列表</button>
+      <button :class="{ active: activeTab === 'warehouse' }" @click="switchTab('warehouse')">仓库列表</button>
+      <button :class="{ active: activeTab === 'goods' }" @click="switchTab('goods')">货物列表</button>
     </div>
 
     <!-- 人员列表 -->
@@ -558,6 +558,10 @@ export default {
     this.fetchGoods()
   },
   methods: {
+    switchTab(key) {
+      this.activeTab = key
+      this.$router.replace({ query: { tab: key } })
+    },
     // --- 分页页码生成 ---
     getPageNumbers(totalPages, current) {
       const pages = []
