@@ -250,3 +250,54 @@
   color: #94A3B8;
   font-size: 24rpx;
 }
+
+/* 完成按钮 */
+.modal-btn-confirm {
+  padding: 16rpx 64rpx;
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-left: 24rpx;
+}
+.modal-btn-confirm:active { opacity: 0.85; }
+
+.hidden { display: none !important; }
+
+/* 完成弹窗表单 */
+.form-item-inline {
+  padding: 16rpx 0;
+  border-bottom: 2rpx solid #F1F5F9;
+}
+.form-item-inline:last-child { border-bottom: none; }
+
+.form-label-inline {
+  display: block;
+  font-size: 26rpx;
+  color: #64748B;
+  margin-bottom: 10rpx;
+}
+.required { color: #F56C6C; }
+
+.form-picker {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64rpx; background: #F8FAFC; border-radius: 12rpx; padding: 0 20rpx;
+}
+.form-picker text { font-size: 28rpx; color: #1E293B; }
+.picker-arrow { font-size: 32rpx; color: #CBD5E1; flex-shrink: 0; }
+
+.qc-textarea {
+  width: 100%; min-height: 100rpx; font-size: 26rpx; color: #1E293B;
+  background: #F8FAFC; border-radius: 12rpx; padding: 16rpx 20rpx; box-sizing: border-box;
+}
+.qc-input {
+  width: 100%; height: 64rpx; font-size: 26rpx; color: #1E293B;
+  background: #F8FAFC; border-radius: 12rpx; padding: 0 20rpx; box-sizing: border-box;
+}
+
+.inv-qty-input {
+  width: 90rpx; height: 48rpx; font-size: 22rpx; color: #1E293B;
+  background: #F8FAFC; border: 2rpx solid #E2E8F0; border-radius: 8rpx;
+  text-align: center; padding: 0 4rpx;
+}

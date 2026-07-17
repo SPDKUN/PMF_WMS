@@ -7,50 +7,40 @@
       <text class="form-label">选择货物 <text class="required">*</text></text>
       <picker mode="selector" range="{{goodsDisplayList}}" bindchange="onGoodsChange">
         <view class="form-picker">
-          <text>{{selectedGoods ? selectedGoods.goods_name + ' (' + selectedGoods.goods_code + ')' : '请选择货物'}}</text>
-          <text class="picker-arrow">›</text>
-        </view>
-      </picker>
-      <text class="form-hint" wx:if="{{goodsStockInfo}}">{{goodsStockInfo}}</text>
-    </view>
-    <view class="form-item" wx:if="{{selectedGoods}}">
-      <text class="form-label">选择批次 <text class="required">*</text></text>
-      <picker mode="selector" range="{{batchDisplayList}}" bindchange="onBatchChange">
-        <view class="form-picker">
-          <text class="form-picker-text">{{selectedBatchDisplay || '请选择批次'}}</text>
+          <text>{{selectedGoods ? selectedGoods.goods_name + ' (' + (selectedGoods.goods_code || '') + ')' : '请选择货物'}}</text>
           <text class="picker-arrow">›</text>
         </view>
       </picker>
     </view>
-    <view class="form-item" wx:if="{{selectedBatch && locationDisplayList.length > 0}}">
-      <text class="form-label">选择库位 <text class="required">*</text></text>
-      <picker mode="selector" range="{{locationDisplayList}}" bindchange="onLocationChange">
-        <view class="form-picker">
-          <text class="form-picker-text">{{selectedLocationDisplay || '请选择库位'}}</text>
-          <text class="picker-arrow">›</text>
+
+    <!-- 库存表格（多行选择） -->
+    <view wx:if="{{inventoryRows.length > 0}}" class="inv-table-section">
+      <view class="inv-table-header">
+        <text class="inv-th inv-th-batch">批次</text>
+        <text class="inv-th inv-th-loc">位置</text>
+        <text class="inv-th inv-th-expiry">到期日期</text>
+        <text class="inv-th inv-th-avail">可出库</text>
+        <text class="inv-th inv-th-qty">选择数量</text>
+      </view>
+      <view class="inv-table-row" wx:for="{{inventoryRows}}" wx:key="inventory_id">
+        <text class="inv-td inv-td-batch">{{item.batch_id || '-'}}</text>
+        <text class="inv-td inv-td-loc">{{item.location_name || '-'}}</text>
+        <text class="inv-td inv-td-expiry">{{item.expiry_date || '-'}}</text>
+        <text class="inv-td inv-td-avail">{{item.available}}</text>
+        <view class="inv-td inv-td-qty">
+          <input class="inv-qty-input" type="number" min="0" max="{{item.available}}" value="{{item.selectQty}}" data-index="{{index}}" bindinput="onQtyInput" />
         </view>
-      </picker>
-      <text class="form-hint" wx:if="{{selectedLocation}}">该批次在各库位的库存分布，请选择出库的库位</text>
+      </view>
+      <view class="inv-table-total">
+        <text>已选总数量：<text class="total-num">{{outboundTotalSelected || 0}}</text></text>
+      </view>
     </view>
-    <view class="form-item" wx:if="{{selectedBatch && locationDisplayList.length === 0}}">
-      <text class="form-label" style="color:#EF4444;font-size:24rpx;">未找到已入库的库位记录，请先完成入库</text>
-    </view>
-    <view class="form-item">
-      <text class="form-label">出库数量</text>
-      <input class="form-input" type="number" placeholder="输入数量" value="{{quantity}}" bindinput="onQtyInput" />
-    </view>
-    <view class="form-item">
-      <text class="form-label">执行人 <text class="required">*</text></text>
-      <picker mode="selector" range="{{userList}}" range-key="real_name" bindchange="onOperatorChange">
-        <view class="form-picker">
-          <text>{{operatorName || '请选择执行人'}}</text>
-          <text class="picker-arrow">›</text>
-        </view>
-      </picker>
+    <view wx:elif="{{selectedGoods && inventoryRows.length === 0}}" class="inv-empty">
+      <text>该货物暂无可用库存</text>
     </view>
   </view>
 
-  <!-- 创建信息（来自本地数据库） -->
+  <!-- 创建信息 -->
   <view class="form-card">
     <view class="form-section">
       <text class="form-section-title">创建信息</text>
@@ -69,9 +59,19 @@
     </view>
   </view>
 
+  <!-- 任务设置 -->
   <view class="form-card">
     <view class="form-section">
       <text class="form-section-title">任务设置</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">负责人 <text class="required">*</text></text>
+      <picker mode="selector" range="{{userList}}" range-key="real_name" bindchange="onOperatorChange">
+        <view class="form-picker">
+          <text>{{assigneeName || '请选择负责人'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
     </view>
     <view class="form-item">
       <text class="form-label">优先级 <text class="required">*</text></text>
@@ -83,7 +83,7 @@
       </picker>
     </view>
     <view class="form-item">
-      <text class="form-label">截止日期</text>
+      <text class="form-label">截至日期 <text class="required">*</text></text>
       <picker mode="date" bindchange="onDateChange">
         <view class="form-picker">
           <text>{{deadline || '请选择日期'}}</text>

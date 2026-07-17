@@ -86,10 +86,12 @@ Page({
       }
       stats[2].count = totalQty || 0;
 
+      var uid = app.globalData.userInfo ? app.globalData.userInfo.user_id : null;
       var pendingCount = 0;
       var recent = [];
       for (var j = 0; j < tasks.length; j++) {
         var t = tasks[j];
+        if (t.assignee_id !== uid) continue;
         var isCompleted = t.completed_time !== null && t.completed_time !== undefined && t.completed_time !== '';
         var statusField = t.task_status || t.status || '';
         var isPending = !isCompleted && statusField !== '已完成' && statusField !== '已关闭';
@@ -133,12 +135,8 @@ Page({
 
   showNotificationsContent: function() {
     var tasks = this.data.recentTasks || [];
-    var user = app.globalData.userInfo || {};
-    var position = user.position || '';
     var notifs = [];
     for (var i = 0; i < tasks.length; i++) {
-      if (position === '质检员' && tasks[i].task_type !== '质检') continue;
-      if (position === '仓库员工' && tasks[i].task_type !== '入库' && tasks[i].task_type !== '出库') continue;
       notifs.push({
         icon: tasks[i].task_type === '入库' ? '📥' : tasks[i].task_type === '出库' ? '📤' : '📋',
         title: tasks[i].task_type + '任务',

@@ -1,6 +1,5 @@
 const app = getApp()
 const api = require('../../utils/api')
-const util = require('../../utils/util')
 
 Page({
   data: {
@@ -8,74 +7,56 @@ Page({
     userList: [],
     goodsList: [],
     goodsDisplayList: [],
-    batchList: [],
-    batchDisplayList: [],
     selectedGoods: null,
-    selectedBatch: null,
-    selectedBatchDisplay: '',
-    // 库位相关
-    locationList: [],
-    locationDisplayList: [],
-    selectedLocation: null,
-    selectedLocationDisplay: '',
-    quantity: '',
-    operatorId: null,
-    operatorName: '',
+    selectedGoodsId: null,
+    // 库存行（多行选择）
+    inventoryRows: [],
+    // 任务字段
+    assigneeId: null,
+    assigneeName: '',
     priority: '',
     deadline: '',
     canSubmit: false,
-    _inventoryData: [],
-    goodsStockInfo: '',
-    // 来自本地数据库的创建人和创建时间
     creatorName: '',
-    creatorId: null,
     createTime: ''
   },
 
   onLoad() {
-    // 从本地数据库读取当前登录用户信息作为创建人
     var userInfo = app.globalData.userInfo
     if (userInfo) {
       this.setData({
         creatorName: userInfo.real_name || userInfo.username || '未知用户',
-        creatorId: userInfo.user_id || null,
-        createTime: util.formatDate(new Date().toISOString())
+        createTime: this._fmtNow()
       })
     }
     this.loadData()
   },
 
+  _fmtNow() {
+    var now = new Date()
+    var m = ('0' + (now.getMonth() + 1)).slice(-2)
+    var d = ('0' + now.getDate()).slice(-2)
+    var h = ('0' + now.getHours()).slice(-2)
+    var min = ('0' + now.getMinutes()).slice(-2)
+    return now.getFullYear() + '-' + m + '-' + d + ' ' + h + ':' + min
+  },
+
   async loadData() {
     wx.showLoading({ title: '加载中...' })
     try {
-      const [users, goods, inventory] = await Promise.all([
+      const [users, goods] = await Promise.all([
         api.warehouseStaffApi.list(),
-        api.goodsApi.list(),
-        api.inventoryApi.listWithDetails()
+        api.goodsApi.list()
       ])
       var goodsList = goods || []
+      // 获取每个货物的库存总量
       var goodsDisplay = goodsList.map(function(g) {
-        return g.goods_name + ' (' + (g.goods_code || '') + ')'
+        return g.goods_name + ' (剩余 ' + (g.quantity || 0) + ' ' + (g.unit || '件') + ')'
       })
-      // 如果本地已有创建人信息，默认选中当前用户为执行人
-      var defaultOperatorId = this.data.operatorId
-      var defaultOperatorName = this.data.operatorName
-      if (!defaultOperatorId && this.data.creatorId && users && users.length > 0) {
-        for (var u = 0; u < users.length; u++) {
-          if (users[u].user_id === this.data.creatorId) {
-            defaultOperatorId = users[u].user_id
-            defaultOperatorName = users[u].real_name
-            break
-          }
-        }
-      }
       this.setData({
         userList: users || [],
         goodsList: goodsList,
-        goodsDisplayList: goodsDisplay,
-        _inventoryData: inventory || [],
-        operatorId: defaultOperatorId,
-        operatorName: defaultOperatorName
+        goodsDisplayList: goodsDisplay
       })
     } catch (e) {
       wx.showToast({ title: '加载数据失败', icon: 'none' })
@@ -83,183 +64,133 @@ Page({
     wx.hideLoading()
   },
 
-  onGoodsChange(e) {
+  async onGoodsChange(e) {
     var goods = this.data.goodsList[e.detail.value]
     if (!goods) return
-    var inv = this.data._inventoryData || []
-    // 只显示已入库（status=正常）的库存
-    var matchedInv = inv.filter(function(i) {
-      return i.goods_id === goods.goods_id && i.quantity > 0 && i.inventory_status === '正常'
-    })
-    // 按批次聚合
-    var batchQtyMap = {}
-    var batchIds = []
-    for (var i = 0; i < matchedInv.length; i++) {
-      var bid = matchedInv[i].batch_id
-      if (!bid) continue
-      if (!batchQtyMap[bid]) {
-        batchQtyMap[bid] = 0
-        batchIds.push(bid)
+    wx.showLoading({ title: '加载库存...' })
+    try {
+      var rows = await api.outboundApi.availableInventory(goods.goods_id)
+      if (!rows) rows = []
+      // 计算可用数量 = quantity - locked_quantity
+      for (var i = 0; i < rows.length; i++) {
+        rows[i].available = Math.max(0, (rows[i].quantity || 0) - (rows[i].locked_quantity || 0))
+        rows[i].selectQty = 0
+        rows[i].expiry_date = rows[i].expiry_date || null
+        rows[i].location_name = rows[i].location_name || '-'
       }
-      batchQtyMap[bid] += (matchedInv[i].quantity || 0)
-    }
-    var batchList = []
-    var batchDisplay = []
-    for (var j = 0; j < batchIds.length; j++) {
-      var bid2 = batchIds[j]
-      batchList.push({ batch_id: bid2, available_qty: batchQtyMap[bid2] })
-      batchDisplay.push(bid2 + ' (可出库: ' + batchQtyMap[bid2] + ')')
-    }
-    var totalStock = 0
-    for (var k = 0; k < matchedInv.length; k++) {
-      totalStock += (matchedInv[k].quantity || 0)
-    }
-    this.setData({
-      selectedGoods: goods,
-      selectedBatch: null,
-      selectedBatchDisplay: '',
-      selectedLocation: null,
-      selectedLocationDisplay: '',
-      locationList: [],
-      locationDisplayList: [],
-      quantity: '',
-      batchList: batchList,
-      batchDisplayList: batchDisplay,
-      goodsStockInfo: '总库存: ' + totalStock + ' ' + (goods.unit || '件')
-    })
-    this.checkSubmit()
-  },
-
-  onBatchChange(e) {
-    var batch = this.data.batchList[e.detail.value]
-    if (!batch) return
-    // 查找该批次对应已入库库存的库位
-    var inv = this.data._inventoryData || []
-    var matchedInv = inv.filter(function(i) {
-      return i.batch_id === batch.batch_id && i.goods_id === this.data.selectedGoods.goods_id && i.inventory_status === '正常' && i.quantity > 0 && i.location_id != null
-    }.bind(this))
-    // 按库位分组
-    var locMap = {}
-    for (var i = 0; i < matchedInv.length; i++) {
-      var lid = matchedInv[i].location_id
-      if (!lid) continue
-      if (!locMap[lid]) {
-        locMap[lid] = {
-          location_id: lid,
-          location_name: matchedInv[i].location_name || '库位#' + lid,
-          zone_id: matchedInv[i].zone_id,
-          warehouse_id: matchedInv[i].warehouse_id,
-          quantity: 0
-        }
-      }
-      locMap[lid].quantity += (matchedInv[i].quantity || 0)
-    }
-    var locIds = Object.keys(locMap)
-    var locationList = []
-    var locationDisplay = []
-    for (var j = 0; j < locIds.length; j++) {
-      var loc = locMap[locIds[j]]
-      locationList.push(loc)
-      locationDisplay.push(loc.location_name + ' (库存: ' + loc.quantity + ')')
-    }
-    this.setData({
-      selectedBatch: batch,
-      selectedBatchDisplay: batch.batch_id + ' (可出库: ' + batch.available_qty + ')',
-      selectedLocation: null,
-      selectedLocationDisplay: '',
-      locationList: locationList,
-      locationDisplayList: locationDisplay,
-      quantity: ''
-    })
-    this.checkSubmit()
-  },
-
-  onLocationChange(e) {
-    var loc = this.data.locationList[e.detail.value]
-    if (loc) {
-      this.setData({
-        selectedLocation: loc,
-        selectedLocationDisplay: loc.location_name + ' (库存: ' + loc.quantity + ')'
+      // FIFO: 按到期日期排序，日期靠前的排前面
+      rows.sort(function(a, b) {
+        if (!a.expiry_date) return 1
+        if (!b.expiry_date) return -1
+        return a.expiry_date < b.expiry_date ? -1 : a.expiry_date > b.expiry_date ? 1 : 0
       })
+      this.setData({
+        selectedGoods: goods,
+        selectedGoodsId: goods.goods_id,
+        inventoryRows: rows
+      })
+      this.calcTotal()
+    } catch (e) {
+      wx.showToast({ title: '加载库存失败', icon: 'none' })
     }
-    this.checkSubmit()
+    wx.hideLoading()
   },
 
   onQtyInput(e) {
-    this.setData({ quantity: e.detail.value })
-    this.checkSubmit()
+    var idx = e.currentTarget.dataset.index
+    var val = parseInt(e.detail.value) || 0
+    var rows = this.data.inventoryRows
+    if (idx >= 0 && idx < rows.length) {
+      rows[idx].selectQty = Math.max(0, Math.min(val, rows[idx].available))
+      this.setData({ inventoryRows: rows })
+      this.calcTotal()
+    }
+  },
+
+  calcTotal() {
+    var rows = this.data.inventoryRows
+    var total = 0
+    for (var i = 0; i < rows.length; i++) {
+      total += (rows[i].selectQty || 0)
+    }
+    var canSubmit = total > 0 && this.data.assigneeId && this.data.priority && this.data.deadline
+    this.setData({
+      outboundTotalSelected: total,
+      canSubmit: canSubmit
+    })
   },
 
   onOperatorChange(e) {
     var user = this.data.userList[e.detail.value]
-    this.setData({ operatorId: user.user_id, operatorName: user.real_name })
-    this.checkSubmit()
+    if (user) {
+      this.setData({ assigneeId: user.user_id, assigneeName: user.real_name })
+      this.calcTotal()
+    }
   },
 
   onPriorityChange(e) {
     this.setData({ priority: this.data.priorities[e.detail.value] })
-    this.checkSubmit()
+    this.calcTotal()
   },
 
   onDateChange(e) {
     this.setData({ deadline: e.detail.value })
-    this.checkSubmit()
-  },
-
-  checkSubmit() {
-    var d = this.data
-    this.setData({
-      canSubmit: d.selectedGoods && d.selectedBatch && d.selectedLocation && d.operatorId && d.priority
-    })
+    this.calcTotal()
   },
 
   async handleSubmit() {
     var d = this.data
-    if (!d.canSubmit) {
-      wx.showToast({ title: '请填写完整信息', icon: 'none' })
+    if (d.outboundTotalSelected <= 0) {
+      wx.showToast({ title: '请选择出库数量', icon: 'none' })
       return
     }
-    var qty = parseInt(d.quantity) || 0
-    if (qty <= 0) {
-      wx.showToast({ title: '请输入有效出库数量', icon: 'none' })
+    if (!d.assigneeId) {
+      wx.showToast({ title: '请选择负责人', icon: 'none' })
       return
     }
-    if (qty > (d.selectedLocation.quantity || 0)) {
-      wx.showToast({ title: '该库位库存不足！可出库: ' + d.selectedLocation.quantity, icon: 'none' })
+    if (!d.priority) {
+      wx.showToast({ title: '请选择优先级', icon: 'none' })
       return
     }
-    if (qty > (d.selectedBatch.available_qty || 0)) {
-      wx.showToast({ title: '批次库存不足！可出库: ' + d.selectedBatch.available_qty, icon: 'none' })
+    if (!d.deadline) {
+      wx.showToast({ title: '请选择截至日期', icon: 'none' })
       return
     }
-    wx.showLoading({ title: '创建中...', mask: true })
-    try {
-      var result = await api.outboundApi.create({
-        items: [{
-          goodsId: d.selectedGoods.goods_id,
-          batchId: d.selectedBatch.batch_id,
-          quantity: qty,
-          warehouseId: d.selectedLocation.warehouse_id,
-          zoneId: d.selectedLocation.zone_id,
-          locationId: d.selectedLocation.location_id
-        }],
-        assigneeId: d.operatorId,
-        priority: d.priority,
-        deadline: d.deadline,
-        // 将本地数据库中的创建人ID传给后端，与出库单关联
-        operatorId: d.creatorId || (app.globalData.userInfo ? app.globalData.userInfo.user_id : null)
-      })
-      // 自动发布：创建后将出库单状态改为"已审核"
-      var orderNo = result && result.related_order_no
-      if (orderNo) {
-        await api.outboundApi.update({ outbound_no: orderNo, order_status: '已审核' }).catch(function(e) { console.error('Auto-publish error:', e) })
+
+    wx.showModal({
+      title: '确认创建',
+      content: '确定要创建出库任务吗？将锁定所有涉及的库位。',
+      success: async (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '创建中...', mask: true })
+        try {
+          var rows = d.inventoryRows.filter(function(r) { return r.selectQty > 0 })
+          var items = rows.map(function(r) {
+            return {
+              goodsId: r.goods_id,
+              batchId: r.batch_id,
+              quantity: r.selectQty,
+              warehouseId: r.warehouse_id,
+              zoneId: r.zone_id,
+              locationId: r.location_id
+            }
+          })
+          var uid = app.globalData.userInfo ? app.globalData.userInfo.user_id : null
+          await api.outboundApi.create({
+            items: items,
+            assigneeId: d.assigneeId,
+            priority: d.priority,
+            deadline: d.deadline,
+            operatorId: uid
+          })
+          wx.hideLoading()
+          wx.showToast({ title: '出库任务创建成功', icon: 'success' })
+          setTimeout(function() { wx.navigateBack() }, 1500)
+        } catch (e) {
+          wx.hideLoading()
+          wx.showToast({ title: e && e.msg ? e.msg : '创建失败', icon: 'none' })
+        }
       }
-      wx.hideLoading()
-      wx.showToast({ title: '创建成功', icon: 'success' })
-      setTimeout(function() { wx.navigateBack() }, 1500)
-    } catch (e) {
-      wx.hideLoading()
-      wx.showToast({ title: e && e.msg ? e.msg : '操作失败', icon: 'none' })
-    }
+    })
   }
 })

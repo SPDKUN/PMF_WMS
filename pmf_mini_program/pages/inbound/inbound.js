@@ -92,30 +92,44 @@ Page({
   loadData: function() {
     var self = this;
     wx.showLoading({ title: '加载中...' });
-    Promise.all([api.inboundApi.list(), api.taskApi.list()]).then(function(results) {
+    Promise.all([api.inboundApi.list(), api.taskApi.list(), api.userApi.list()]).then(function(results) {
       var list = results[0];
       var tasks = results[1] || [];
+      var users = results[2] || [];
       if (!list) list = [];
+      // 构建用户ID → 真实姓名映射
+      var userMap = {};
+      for (var u = 0; u < users.length; u++) {
+        userMap[users[u].user_id] = users[u].real_name || users[u].username || '';
+      }
       var taskMap = {};
       for (var t = 0; t < tasks.length; t++) {
         if (tasks[t].related_order_no) {
-          taskMap[tasks[t].related_order_no] = tasks[t].task_id;
+          taskMap[tasks[t].related_order_no] = tasks[t];
         }
       }
       var mapped = [];
       for (var i = 0; i < list.length; i++) {
+        var task = taskMap[list[i].inbound_no] || {};
+        var opName = task.operator_name || task.assignee_name || '';
+        if (!opName && task.assignee_id) {
+          opName = userMap[task.assignee_id] || '';
+        }
+        if (!opName) {
+          opName = list[i].operator_name || '-';
+        }
         mapped.push({
           inbound_no: list[i].inbound_no,
           inbound_type: list[i].inbound_type || '-',
           order_status: list[i].order_status || '草稿',
-          operator_name: list[i].operator_name || '-',
+          operator_name: opName,
           inbound_time: list[i].inbound_time,
           formattedTime: util.formatDate(list[i].inbound_time),
           remark: list[i].remark,
           tagCls: util.getStatusTag(list[i].order_status),
-          task_id: taskMap[list[i].inbound_no] || null,
-          create_time: list[i].create_time,
-          fmtCreate: util.formatDate(list[i].create_time)
+          task_id: task.task_id || null,
+          create_time: task.created_time || list[i].create_time,
+          fmtCreate: util.formatDate(task.created_time || list[i].create_time)
         });
       }
       // 按创建时间倒序排列（最新在前）

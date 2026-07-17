@@ -27,4 +27,47 @@
 .submit-btn.active { background: linear-gradient(135deg, #2563EB, #1D4ED8); box-shadow: 0 8rpx 24rpx rgba(37,99,235,0.3); }
 .submit-btn.active:active { opacity: 0.85; transform: scale(0.98); }
 
+/* 库存表格 */
+.inv-table-section { margin-top: 16rpx; }
+.inv-table-header {
+  display: flex; align-items: center;
+  padding: 14rpx 8rpx; background: #F1F5F9; border-radius: 10rpx 10rpx 0 0;
+}
+.inv-th { font-size: 22rpx; color: #64748B; font-weight: 600; text-align: center; }
+.inv-th-batch { flex: 2; }
+.inv-th-loc { flex: 2; }
+.inv-th-expiry { flex: 2; }
+.inv-th-avail { flex: 1.5; }
+.inv-th-qty { flex: 1.5; }
+
+.inv-table-row {
+  display: flex; align-items: center;
+  padding: 16rpx 8rpx; border-bottom: 2rpx solid #F1F5F9;
+  background: #FFFFFF;
+}
+.inv-table-row:last-child { border-bottom: none; border-radius: 0 0 10rpx 10rpx; }
+.inv-td { font-size: 24rpx; color: #334155; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inv-td-batch { flex: 2; }
+.inv-td-loc { flex: 2; }
+.inv-td-expiry { flex: 2; }
+.inv-td-avail { flex: 1.5; }
+.inv-td-qty { flex: 1.5; display: flex; justify-content: center; }
+
+.inv-qty-input {
+  width: 80rpx; height: 48rpx; font-size: 24rpx; color: #1E293B;
+  background: #F8FAFC; border: 2rpx solid #E2E8F0; border-radius: 8rpx;
+  text-align: center; padding: 0 4rpx;
+}
+
+.inv-table-total {
+  text-align: right; padding: 14rpx 8rpx;
+  font-size: 24rpx; font-weight: 600; color: #334155;
+  background: #F8FAFC; border-radius: 0 0 10rpx 10rpx;
+}
+.total-num { color: #2563EB; font-size: 28rpx; }
+
+.inv-empty {
+  text-align: center; padding: 24rpx; font-size: 24rpx; color: #94A3B8;
+}
+
 page { background: #F8FAFC; }

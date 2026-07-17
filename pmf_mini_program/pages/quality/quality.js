@@ -78,12 +78,13 @@ Page({
       var taskMap = {};
       for (var t = 0; t < tasks.length; t++) {
         if (tasks[t].related_order_no) {
-          taskMap[tasks[t].related_order_no] = tasks[t].task_id;
+          taskMap[tasks[t].related_order_no] = tasks[t];
         }
       }
       var userMap = self.data._userMap || {};
       var mapped = [];
       for (var i = 0; i < list.length; i++) {
+        var task = taskMap[list[i].quality_check_no] || {};
         var inspectorName = list[i].inspector_name || userMap[list[i].inspector_id] || '-';
         mapped.push({
           quality_check_no: list[i].quality_check_no,
@@ -95,9 +96,9 @@ Page({
           fmtTime: list[i].inspection_time ? util.formatDate(list[i].inspection_time) : '待检验',
           remark: list[i].remark,
           tagCls: util.getStatusTag(list[i].order_status),
-          task_id: taskMap[list[i].quality_check_no] || null,
-          create_time: list[i].create_time,
-          fmtCreate: util.formatDate(list[i].create_time)
+          task_id: task.task_id || null,
+          create_time: task.created_time || list[i].create_time,
+          fmtCreate: util.formatDate(task.created_time || list[i].create_time)
         });
       }
       // 按创建时间倒序排列（最新在前）

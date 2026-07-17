@@ -1,9 +1,6 @@
 <view class="page-container">
   <view class="filter-bar">
-    <view class="filter-item {{filterType === 'all' ? 'active' : ''}}" data-type="all" bindtap="setFilter">
-      <text>全部</text>
-    </view>
-    <view class="filter-item {{filterType === 'mine' ? 'active' : ''}}" data-type="mine" bindtap="setFilter">
+    <view class="filter-item active">
       <text>我的任务</text>
     </view>
   </view>
@@ -25,7 +22,7 @@
         </view>
         <view class="task-bottom">
           <text class="task-priority-tag">优先级: {{item.priority}}</text>
-          <text class="task-time">📅 {{item.fmtCreated || '-'}}</text>
+          <text class="task-time">{{item.fmtCreated || '-'}}</text>
         </view>
       </view>
     </view>
@@ -44,7 +41,6 @@
       <text class="modal-close" bindtap="closeDetail">✕</text>
     </view>
     <scroll-view class="modal-body" scroll-y>
-      <!-- 头部信息 -->
       <view class="detail-section" wx:if="{{detailHeadFields.length > 0}}">
         <text class="detail-section-title">基本信息</text>
         <view class="detail-head-grid">
@@ -55,18 +51,15 @@
         </view>
       </view>
 
-      <!-- 明细列表 -->
       <view class="detail-section">
         <text class="detail-section-title">明细列表 (共{{detailList.length}}条)</text>
         <view wx:if="{{detailList.length > 0}}" class="detail-table-wrap">
           <view class="detail-table">
-            <!-- 表头 -->
             <view class="detail-table-header">
               <view class="detail-th" wx:for="{{detailColumns}}" wx:key="key" style="flex: 1;">
                 <text>{{item.label}}</text>
               </view>
             </view>
-            <!-- 数据行 -->
             <view class="detail-table-row" wx:for="{{detailList}}" wx:for-item="row" wx:key="*this">
               <view class="detail-td" wx:for="{{detailColumns}}" wx:for-item="col" wx:key="key" style="flex: 1;">
                 <text>{{row[col.key] || '-'}}</text>
@@ -84,6 +77,157 @@
     </scroll-view>
     <view class="modal-footer">
       <view class="modal-btn-cancel" bindtap="closeDetail">关闭</view>
+      <view class="modal-btn-confirm {{detailTask && !detailTask.completed_time ? '' : 'hidden'}}" bindtap="goComplete">
+        <text>去完成</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 完成弹窗 -->
+<view class="modal-overlay {{showComplete ? 'show' : ''}}" bindtap="closeComplete">
+  <view class="modal-content detail-modal" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{completeTitle}}</text>
+      <text class="modal-close" bindtap="closeComplete">✕</text>
+    </view>
+    <scroll-view class="modal-body" scroll-y>
+
+      <!-- 出库：显示明细 -->
+      <view wx:if="{{completeType === '出库'}}">
+        <view wx:if="{{completeLoading}}">
+          <text style="display:block;text-align:center;padding:30rpx;color:#94A3B8;">加载中...</text>
+        </view>
+        <view wx:else>
+          <view class="detail-table-wrap">
+            <view class="detail-table">
+              <view class="detail-table-header">
+                <view class="detail-th" style="flex:2;"><text>批次</text></view>
+                <view class="detail-th" style="flex:2;"><text>位置</text></view>
+                <view class="detail-th" style="flex:1.5;"><text>数量</text></view>
+              </view>
+              <view class="detail-table-row" wx:for="{{completeDetail}}" wx:key="*this">
+                <view class="detail-td" style="flex:2;"><text>{{item.batchId || item.batch_id || '-'}}</text></view>
+                <view class="detail-td" style="flex:2;"><text>{{item.locationName || item.location_name || '-'}}</text></view>
+                <view class="detail-td" style="flex:1.5;"><text>{{item.quantity || '-'}}</text></view>
+              </view>
+            </view>
+          </view>
+          <view wx:if="{{completeDetail.length === 0}}" class="detail-empty"><text>暂无明细数据</text></view>
+        </view>
+      </view>
+
+      <!-- 质检：结果表单 -->
+      <view wx:if="{{completeType === '质检'}}">
+        <view class="form-item-inline">
+          <text class="form-label-inline">质检结果 <text class="required">*</text></text>
+          <picker mode="selector" range="{{qcResults}}" bindchange="onQcResultChange">
+            <view class="form-picker">
+              <text>{{qcResult || '请选择结果'}}</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+        <view class="form-item-inline" wx:if="{{qcResult === '不合格'}}">
+          <text class="form-label-inline" style="color:#EF4444;">不合格原因 <text class="required">*</text></text>
+          <textarea class="qc-textarea" placeholder="请填写不合格原因" value="{{qcDefectReason}}" bindinput="onQcInput" data-field="qcDefectReason" />
+        </view>
+        <view class="form-item-inline">
+          <text class="form-label-inline">处理建议</text>
+          <input class="qc-input" placeholder="如：报废、退货、降级" value="{{qcHandlingSuggestion}}" bindinput="onQcInput" data-field="qcHandlingSuggestion" />
+        </view>
+        <view class="form-item-inline">
+          <text class="form-label-inline">备注</text>
+          <textarea class="qc-textarea" placeholder="选填" value="{{qcRemark}}" bindinput="onQcInput" data-field="qcRemark" />
+        </view>
+        <view class="form-hint" wx:if="{{qcResult === '不合格'}}" style="color:#EF4444;font-size:24rpx;padding:10rpx 0;">
+          ⚠ 选择"不合格"后，该批次将被标记为"报废"
+        </view>
+      </view>
+
+      <!-- 库存盘点：实盘数量输入 -->
+      <view wx:if="{{completeType === '库存盘点'}}">
+        <view wx:if="{{completeLoading}}">
+          <text style="display:block;text-align:center;padding:30rpx;color:#94A3B8;">加载中...</text>
+        </view>
+        <view wx:else>
+          <view class="detail-table-wrap">
+            <view class="detail-table">
+              <view class="detail-table-header">
+                <view class="detail-th" style="flex:2;"><text>货物/库位</text></view>
+                <view class="detail-th" style="flex:1.5;"><text>账面数量</text></view>
+                <view class="detail-th" style="flex:1.5;"><text>实盘数量</text></view>
+              </view>
+              <view class="detail-table-row" wx:for="{{invCheckRows}}" wx:key="detail_id">
+                <view class="detail-td" style="flex:2;">
+                  <text>{{item._goodsName || '-'}}</text>
+                  <text style="font-size:20rpx;color:#94A3B8;display:block;">{{item._locationName || '-'}}</text>
+                </view>
+                <view class="detail-td" style="flex:1.5;"><text>{{item.book_quantity || 0}}</text></view>
+                <view class="detail-td" style="flex:1.5;">
+                  <input class="inv-qty-input" type="number" min="0" max="10" value="{{item._actualInput}}" data-index="{{index}}" bindinput="onInvCheckQtyInput" placeholder="0" />
+                </view>
+              </view>
+            </view>
+          </view>
+          <view wx:if="{{invCheckRows.length === 0}}" class="detail-empty"><text>暂无盘点明细</text></view>
+        </view>
+      </view>
+
+      <!-- 库存调整：显示明细 -->
+      <view wx:if="{{completeType === '库存调整'}}">
+        <view wx:if="{{completeLoading}}">
+          <text style="display:block;text-align:center;padding:30rpx;color:#94A3B8;">加载中...</text>
+        </view>
+        <view wx:else>
+          <view class="detail-table-wrap">
+            <view class="detail-table">
+              <view class="detail-table-header">
+                <view class="detail-th" style="flex:2;"><text>货物</text></view>
+                <view class="detail-th" style="flex:2;"><text>原库位</text></view>
+                <view class="detail-th" style="flex:2;"><text>新库位</text></view>
+                <view class="detail-th" style="flex:1.5;"><text>数量</text></view>
+              </view>
+              <view class="detail-table-row" wx:for="{{completeDetail}}" wx:key="*this">
+                <view class="detail-td" style="flex:2;"><text>{{item.goodsName || item.goods_name || '-'}}</text></view>
+                <view class="detail-td" style="flex:2;"><text>{{item.fromLocationName || item.from_location_name || '-'}}</text></view>
+                <view class="detail-td" style="flex:2;"><text>{{item.toLocationName || item.to_location_name || '-'}}</text></view>
+                <view class="detail-td" style="flex:1.5;"><text>{{item.quantity || '-'}}</text></view>
+              </view>
+            </view>
+          </view>
+          <view wx:if="{{completeDetail.length === 0}}" class="detail-empty"><text>暂无明细数据</text></view>
+        </view>
+      </view>
+
+      <!-- 次品处理：显示明细 -->
+      <view wx:if="{{completeType === '处理不合格货物'}}">
+        <view wx:if="{{completeLoading}}">
+          <text style="display:block;text-align:center;padding:30rpx;color:#94A3B8;">加载中...</text>
+        </view>
+        <view wx:else>
+          <view class="detail-table-wrap">
+            <view class="detail-table">
+              <view class="detail-table-header">
+                <view class="detail-th" style="flex:2;"><text>货物</text></view>
+                <view class="detail-th" style="flex:2;"><text>批次</text></view>
+                <view class="detail-th" style="flex:1.5;"><text>数量</text></view>
+              </view>
+              <view class="detail-table-row" wx:for="{{completeDetail}}" wx:key="*this">
+                <view class="detail-td" style="flex:2;"><text>{{item.goodsName || item.goods_name || '-'}}</text></view>
+                <view class="detail-td" style="flex:2;"><text>{{item.batchId || item.batch_id || '-'}}</text></view>
+                <view class="detail-td" style="flex:1.5;"><text>{{item.quantity || '-'}}</text></view>
+              </view>
+            </view>
+          </view>
+          <view wx:if="{{completeDetail.length === 0}}" class="detail-empty"><text>暂无明细数据</text></view>
+        </view>
+      </view>
+
+    </scroll-view>
+    <view class="modal-footer">
+      <view class="modal-btn-cancel" bindtap="closeComplete">取消</view>
+      <view class="modal-btn-confirm" bindtap="confirmComplete">确认完成</view>
     </view>
   </view>
 </view>

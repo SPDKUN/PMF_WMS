@@ -64,15 +64,21 @@ Page({
   loadData: function() {
     var self = this;
     wx.showLoading({ title: '加载中...' });
-    Promise.all([api.outboundApi.list(), api.taskApi.list(), api.outboundDetailApi.list()]).then(function(results) {
+    Promise.all([api.outboundApi.list(), api.taskApi.list(), api.outboundDetailApi.list(), api.userApi.list()]).then(function(results) {
       var list = results[0];
       var tasks = results[1] || [];
       var allDetails = results[2] || [];
+      var users = results[3] || [];
       if (!list) list = [];
+      // 构建用户ID → 真实姓名映射
+      var userMap = {};
+      for (var u = 0; u < users.length; u++) {
+        userMap[users[u].user_id] = users[u].real_name || users[u].username || '';
+      }
       var taskMap = {};
       for (var t = 0; t < tasks.length; t++) {
         if (tasks[t].related_order_no) {
-          taskMap[tasks[t].related_order_no] = tasks[t].task_id;
+          taskMap[tasks[t].related_order_no] = tasks[t];
         }
       }
       var detailLocMap = {};
@@ -87,18 +93,26 @@ Page({
       }
       var mapped = [];
       for (var i = 0; i < list.length; i++) {
+        var task = taskMap[list[i].outbound_no] || {};
+        var opName = task.operator_name || task.assignee_name || '';
+        if (!opName && task.assignee_id) {
+          opName = userMap[task.assignee_id] || '';
+        }
+        if (!opName) {
+          opName = list[i].operator_name || '-';
+        }
         mapped.push({
           outbound_no: list[i].outbound_no,
           outbound_type: list[i].outbound_type || '-',
           order_status: list[i].order_status || '草稿',
-          operator_name: list[i].operator_name || '-',
+          operator_name: opName,
           outbound_time: list[i].outbound_time,
           formattedTime: util.formatDate(list[i].outbound_time),
           remark: list[i].remark,
           tagCls: util.getStatusTag(list[i].order_status),
-          task_id: taskMap[list[i].outbound_no] || null,
-          create_time: list[i].create_time,
-          fmtCreate: util.formatDate(list[i].create_time),
+          task_id: task.task_id || null,
+          create_time: task.created_time || list[i].create_time,
+          fmtCreate: util.formatDate(task.created_time || list[i].create_time),
           locations: detailLocMap[list[i].outbound_no] || []
         });
       }

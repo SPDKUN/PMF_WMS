@@ -96,7 +96,9 @@ var outboundApi = {
   create: function(data) { return request('/outbound/create', 'POST', data); },
   update: function(data) { return request('/outboundOrderHead', 'PUT', data); },
   complete: function(taskId, data) { return request('/outbound/complete/' + taskId, 'PUT', data); },
-  reject: function(taskId, data) { return request('/outbound/reject/' + taskId, 'PUT', data); }
+  reject: function(taskId, data) { return request('/outbound/reject/' + taskId, 'PUT', data); },
+  availableInventory: function(goodsId) { return request('/outbound/availableInventory?goodsId=' + goodsId); },
+  detail: function(taskId) { return request('/outbound/detail/' + taskId); }
 };
 
 var taskApi = {
@@ -161,6 +163,10 @@ var inventoryCheckHeadApi = {
 var inventoryCheckDetailApi = {
   list: function() { return request('/inventoryCheckDetail/list'); }
 };
+var inventoryCheckApi = {
+  details: function(checkNo) { return request('/inventoryCheck/details?checkNo=' + checkNo); },
+  complete: function(taskId, data) { return request('/inventoryCheck/complete/' + taskId, 'PUT', data); }
+};
 
 // 库存调整 API
 var adjustmentOrderHeadApi = {
@@ -169,6 +175,18 @@ var adjustmentOrderHeadApi = {
 };
 var adjustmentOrderDetailApi = {
   list: function() { return request('/adjustmentOrderDetail/list'); }
+};
+var adjustmentApi = {
+  detail: function(taskId) { return request('/adjustment/detail/' + taskId); },
+  complete: function(taskId, data) { return request('/adjustment/complete/' + taskId, 'PUT', data); },
+  reject: function(taskId, data) { return request('/adjustment/reject/' + taskId, 'PUT', data); }
+};
+
+// 次品处理 API
+var defectiveApi = {
+  detail: function(taskId) { return request('/defective/detail/' + taskId); },
+  complete: function(taskId, data) { return request('/defective/complete/' + taskId, 'PUT', data); },
+  reject: function(taskId, data) { return request('/defective/reject/' + taskId, 'PUT', data); }
 };
 
 module.exports = {
@@ -195,6 +213,9 @@ module.exports = {
   tempHumidityApi: tempHumidityApi,
   inventoryCheckHeadApi: inventoryCheckHeadApi,
   inventoryCheckDetailApi: inventoryCheckDetailApi,
+  inventoryCheckApi: inventoryCheckApi,
   adjustmentOrderHeadApi: adjustmentOrderHeadApi,
-  adjustmentOrderDetailApi: adjustmentOrderDetailApi
+  adjustmentOrderDetailApi: adjustmentOrderDetailApi,
+  adjustmentApi: adjustmentApi,
+  defectiveApi: defectiveApi
 };
