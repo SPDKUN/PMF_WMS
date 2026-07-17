@@ -1,23 +1,4 @@
-# API接口文档
-
-## 预制菜WMS智能仓储管理系统
-
----
-
-### 文档信息
-
-| 项目 | 内容 |
-|------|------|
-| 项目名称 | 预制菜WMS智能仓储管理系统 (PMF-WMS) |
-| 版本 | v2.0 |
-| Base URL | `http://127.0.0.1:8088` |
-| 接口总数 | 142个 |
-| 控制器数 | 32个 |
-| 数据格式 | JSON (统一ResultData包装) |
-| 认证方式 | JWT Bearer Token (Authorization请求头) |
-| 编写日期 | 2026-07-17 |
-
----
+# API接口文档——预制菜WMS仓储管理系统
 
 ## 1. 通用规范
 
@@ -370,12 +351,12 @@ POST /auth/login
 
 ### 9.2 质检单CRUD
 
-#### QualityCheckHeadController — `/qualityCheckHead` (5个CRUD端点)
-#### QualityCheckDetailController — `/qualityCheckDetail` (5个CRUD端点)
+##### QualityCheckHeadController — `/qualityCheckHead` (5个CRUD端点)
+##### QualityCheckDetailController — `/qualityCheckDetail` (5个CRUD端点)
 
 ---
 
-## 10. 盘点业务模块 (核心)
+## 10. 库存盘点业务模块 (核心)
 
 ### 10.1 InventoryCheckController — `/inventoryCheck`
 
@@ -580,7 +561,3 @@ POST /auth/login
 | DashboardController | /dashboard | 4 | 看板4图表数据 |
 | TemperatureHumidityRecordController | /temperatureHumidityRecord | 6 | 温湿度CRUD+上传 |
 | **合计** | | **142** | |
-
----
-
-*（附：接口调用示例和Postman Collection请参见项目backend目录下的接口测试文件）*

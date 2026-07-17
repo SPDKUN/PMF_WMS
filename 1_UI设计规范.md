@@ -1,19 +1,4 @@
-# UI设计规范文档
-
-## 预制菜WMS智能仓储管理系统
-
----
-
-### 文档信息
-
-| 项目 | 内容 |
-|------|------|
-| 项目名称 | 预制菜WMS智能仓储管理系统 (PMF-WMS) |
-| 版本 | v2.0 |
-| 编写日期 | 2026-07-17 |
-| 适用范围 | Web管理端 (front) + 微信小程序端 (pmf_mini_program) |
-
----
+# UI设计规范——预制菜WMS仓储管理系统
 
 ## 1. 设计概述
 
@@ -22,7 +7,7 @@
 本系统面向预制菜工厂的仓库管理人员，设计遵循以下原则：
 - **高效性**：大屏宽屏布局(1920×1080)，信息密度适中，减少操作步骤
 - **清晰性**：色彩编码区分状态，图标+文字双重识别
-- **一致性**：Web端与小程序端共享统一的设计语言和配色体系
+- **一致性**：Web端（青绿色系）与小程序端（蓝色系）共享统一的组件结构和交互模式，配色各成体系但风格协调
 - **可访问性**：支持亮色/暗色双主题，适应不同光照环境
 
 ### 1.2 设计工具
@@ -36,53 +21,108 @@
 
 ## 2. 色彩系统
 
-### 2.1 主色调
+### 2.1 Web端主色调 — 青绿色系 (Teal Green)
 
-系统以**蓝色(#2563EB)**为主色调，传达专业、信任、科技感。
+Web端以**青绿色 `hsl(160,84%,40%)`** 为主色调。实际代码位于 `front/src/style.css`，使用HSL自定义属性实现动态调节：
 
-| 色阶 | 色值 | 用途 |
+```css
+:root {
+  --primary-h: 160;        /* 色相：青绿色 */
+  --primary-s: 84%;        /* 饱和度 */
+  --primary-l: 40%;        /* 亮度 */
+  --primary: hsl(160, 84%, 40%);
+}
+```
+
+| 色阶 | CSS变量 | 计算值 | 用途 |
+|------|---------|--------|------|
+| Primary | `--primary` | `hsl(160, 84%, 40%)` ≈ #10B981 | 主按钮、选中态、链接、侧边栏激活项 |
+| Primary Hover | `--primary-hover` | `hsl(160, 84%, 48%)` | 悬停态（亮度+8%） |
+| Primary Active | `--primary-active` | `hsl(160, 84%, 32%)` | 按钮按下态（亮度-8%） |
+| Primary Dark | `--primary-dark` | `hsl(160, 84%, 28%)` | 深色强调（亮度-12%） |
+| Primary BG | `--primary-bg` | `hsl(160, 50%, 96%)` | 主色浅背景 |
+| Primary BG Hover | `--primary-bg-hover` | `hsl(160, 50%, 90%)` | 背景悬停态 |
+| Primary Disabled | `--primary-disabled` | `hsl(160, 50%, 70%)` | 主色禁用态 |
+| Ring (焦点环) | `--ring` | `hsl(160, 84%, 60%)` | 输入框聚焦外发光 |
+
+**侧边栏渐变** (`--sidebar-gradient`)：
+```css
+linear-gradient(135deg,
+  hsl(160, 60%, 42%) 0%,    /* 青绿偏亮 */
+  hsl(160, 84%, 36%) 50%,   /* 青绿主色 */
+  hsl(160, 84%, 28%) 100%   /* 青绿深色 */
+)
+```
+
+侧边栏文字: `hsla(0, 0%, 100%, 0.85)` → 激活项背景: `hsla(0, 0%, 100%, 0.20)`
+
+### 2.2 Web端功能色
+
+| 名称 | CSS变量 | 色值 | 用途 |
+|------|---------|------|------|
+| Danger 危险 | `--danger` | `hsl(5, 90%, 58%)` ≈ #EF4444 | 报废、锁定、错误、删除 |
+| Danger BG | `--danger-bg` | `hsl(5, 90%, 96%)` | 危险色浅背景 |
+| Warning 警告 | `--warning` | `hsl(36, 80%, 50%)` ≈ #F59E0B | 待处理、待检、即将过期 |
+| Warning BG | `--warning-bg` | `hsl(36, 80%, 96%)` | 警告色浅背景 |
+| Success 成功 | `--success` | `hsl(160, 84%, 40%)` | 正常状态、已完成、通过（**与主色相同**） |
+| Success BG | `--success-bg` | `hsl(160, 50%, 96%)` | 成功色浅背景 |
+| Info 信息 | `--info` | `hsl(0, 0%, 55%)` ≈ #8C8C8C | 已审核、提示信息（**灰色**） |
+
+### 2.3 Web端中性色 (CSS自定义属性)
+
+所有背景和边框都带有主色色相（`hue=160`），保持整体色调统一：
+
+| 变量名 | 亮色模式值 | 暗色模式值 | 用途 |
+|--------|-----------|-----------|------|
+| `--background` | `hsl(0, 0%, 100%)` | `hsl(160, 5%, 12%)` | 页面背景 |
+| `--background-deep` | `hsl(160, 30%, 96%)` | `hsl(160, 5%, 9%)` | 深层背景(表头) |
+| `--page-bg` | `hsl(160, 40%, 97%)` | `hsl(160, 5%, 8%)` | 页面底色 |
+| `--card` | `hsl(0, 0%, 100%)` | `hsl(160, 5%, 15%)` | 卡片背景 |
+| `--foreground` | `hsl(0, 0%, 20%)` | `hsl(0, 0%, 93%)` | 主文字 |
+| `--foreground-regular` | `hsl(0, 0%, 38%)` | `hsl(0, 0%, 70%)` | 常规文字 |
+| `--foreground-muted` | `hsl(0, 0%, 55%)` | `hsl(0, 0%, 50%)` | 次要文字 |
+| `--foreground-placeholder` | `hsl(0, 0%, 75%)` | `hsl(0, 0%, 45%)` | 占位文字 |
+| `--border` | `hsl(160, 10%, 90%)` | `hsl(160, 5%, 22%)` | 边框 |
+| `--border-light` | `hsl(160, 10%, 94%)` | — | 浅边框 |
+| `--input-border` | `hsl(160, 8%, 86%)` | — | 输入框边框 |
+| `--bg-secondary` | `hsl(0, 0%, 96%)` | — | 次要背景 |
+| `--topbar-bg` | `hsla(0, 0%, 100%, 0.85)` | — | 顶栏玻璃态背景 |
+| `--overlay-bg` | `rgba(0, 0, 0, 0.35)` | — | 弹窗遮罩 |
+| `--tooltip-bg` | `hsl(0, 0%, 19%)` | — | 工具提示背景 |
+
+### 2.4 Web端暗色主题覆盖 (`[data-theme="dark"]`)
+
+```css
+[data-theme="dark"] {
+  --primary-l: 50%;          /* 主色提亮至 hsl(160, 84%, 50%) */
+  --primary-bg: hsl(160, 30%, 12%);
+  --primary-bg-hover: hsl(160, 30%, 18%);
+  --background: hsl(160, 5%, 12%);
+  --page-bg: hsl(160, 5%, 8%);
+  --card: hsl(160, 5%, 15%);
+  --foreground: hsl(0, 0%, 93%);
+}
+```
+
+### 2.5 小程序端色彩变量 (独立的蓝色主题)
+
+小程序端使用**独立的蓝色主题**，定义在 `styles/theme.wxss`：
+
+| 变量 | 色值 | 说明 |
 |------|------|------|
-| Primary | `#2563EB` | 主按钮、选中态、链接、侧边栏激活项 |
-| Primary Light | `#60A5FA` | 悬停态、次要高亮 |
-| Primary Dark | `#1D4ED8` | 按钮按下态、深色强调 |
-| Primary BG | `hsl(220, 70%, 96%)` | 主色浅背景 |
+| `--primary` | `#2563EB` | 主色（蓝色） |
+| `--primary-light` | `#60A5FA` | 浅蓝 |
+| `--primary-dark` | `#1D4ED8` | 深蓝 |
+| `--success` | `#10B981` | 成功绿 |
+| `--warning` | `#F59E0B` | 警告橙 |
+| `--danger` | `#EF4444` | 危险红 |
+| `--info` | `#3B82F6` | 信息蓝 |
+| `--bg-primary` | `#F8FAFC` | 页面背景 |
+| `--bg-card` | `#FFFFFF` | 卡片背景 |
+| `--text-primary` | `#1E293B` | 主文字 |
+| `--text-secondary` | `#64748B` | 次要文字 |
 
-### 2.2 功能色
-
-| 名称 | 色值 | 用途 |
-|------|------|------|
-| Success 成功 | `#10B981` / `#22C55E` | 正常状态、已完成、通过 |
-| Warning 警告 | `#F59E0B` / `#E6A23C` | 待处理、待检、即将过期 |
-| Danger 危险 | `#EF4444` / `#F56C6C` | 报废、锁定、错误、删除 |
-| Info 信息 | `#3B82F6` | 已审核、提示信息 |
-| Accent 强调 | `#8B5CF6` | 质检相关功能标识 |
-
-### 2.3 中性色 (Web端 CSS变量)
-
-| 变量名 | 亮色模式 | 暗色模式 | 用途 |
-|--------|----------|----------|------|
-| `--page-bg` | `hsl(0,0%,100%)` | `hsl(160,8%,8%)` | 页面背景 |
-| `--background` | `hsl(160,40%,97%)` | `hsl(160,5%,12%)` | 区域背景 |
-| `--card` | `hsl(0,0%,100%)` | `hsl(160,5%,15%)` | 卡片背景 |
-| `--foreground` | `hsla(0,0%,20%,1)` | `hsla(0,0%,93%,1)` | 主文字 |
-| `--foreground-muted` | `hsla(0,0%,55%,1)` | `hsla(0,0%,50%,1)` | 次要文字 |
-| `--foreground-placeholder` | `hsla(0,0%,75%,1)` | `hsla(0,0%,45%,1)` | 占位文字 |
-| `--border` | `hsl(160,10%,92%)` | `hsl(160,5%,22%)` | 边框 |
-
-### 2.4 小程序端色彩变量 (styles/theme.wxss)
-
-| 变量 | 色值 |
-|------|------|
-| `--primary` | `#2563EB` |
-| `--primary-light` | `#60A5FA` |
-| `--primary-dark` | `#1D4ED8` |
-| `--success` | `#10B981` |
-| `--warning` | `#F59E0B` |
-| `--danger` | `#EF4444` |
-| `--bg-primary` | `#F8FAFC` |
-| `--bg-card` | `#FFFFFF` |
-| `--text-primary` | `#1E293B` |
-| `--text-secondary` | `#64748B` |
+> **Web端与小程序的配色差异**：Web端使用青绿色(#00BC96)，小程序使用蓝色(#2563EB)。两者是**独立设计的两套色彩体系**。
 
 ---
 
@@ -174,27 +214,9 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 
 ## 6. 布局规范
 
-### 6.1 Web端整体布局
+### 6.1 Web端整体布局 
 
-```
-┌────────────────────────────────────────────┐
-│  侧边栏 (224px/60px)  │  主内容区          │
-│  ┌─────────────────┐  │  ┌──────────────┐ │
-│  │ Logo + 品牌名    │  │  │ 顶栏 (48px)  │ │
-│  ├─────────────────┤  │  ├──────────────┤ │
-│  │ 导航菜单         │  │  │              │ │
-│  │ ├ 主页          │  │  │  页面内容     │ │
-│  │ ├ 我的管理       │  │  │              │ │
-│  │ ├ 数据看板       │  │  │              │ │
-│  │ ├ 明细查询       │  │  │              │ │
-│  │ ├ 工作任务       │  │  │              │ │
-│  │ ├ AI助手        │  │  │              │ │
-│  │ └ 个人中心       │  │  │              │ │
-│  ├─────────────────┤  │  ├──────────────┤ │
-│  │ 退出登录         │  │  │ 页脚          │ │
-│  └─────────────────┘  │  └──────────────┘ │
-└────────────────────────────────────────────┘
-```
+<img src="C:\Users\王佳宁\AppData\Roaming\Typora\typora-user-images\image-20260717161416356.png" alt="image-20260717161416356" style="zoom: 50%;" />
 
 - **侧边栏**：可折叠(224px ↔ 60px)，折叠状态存储在localStorage
 - **顶栏**：面包屑导航 + 主题切换 + 日期显示 + 用户头像
@@ -202,6 +224,8 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 - **页脚**：`"PMF WMS 智能仓储管理系统 | (c) 2026 Prepared-Meal-Factory"`
 
 ### 6.2 小程序端布局
+
+<img src="C:\Users\王佳宁\AppData\Roaming\Typora\typora-user-images\image-20260717161924020.png" alt="image-20260717161924020" style="zoom:50%;" />
 
 - **底部TabBar** (4项)：首页 / 库存 / 任务 / 我的
 - **导航栏**：白色背景，黑色文字，标题"预制菜WMS"
@@ -215,12 +239,13 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 ### 7.1 按钮
 
 **Web端：**
-- 主按钮 `.btn-primary`：蓝绿色背景，白色文字，圆角6px
-- 搜索按钮 `.btn-search`：蓝色调
-- 危险按钮 `.btn-danger`：红色调
-- 悬停时加深背景色，点击时`opacity: 0.85`
+- 主按钮 `.btn-primary`：青绿色背景(`hsl(160,84%,40%)`)，白色文字，圆角6px
+- 搜索按钮 `.btn-search`：青绿色调
+- 危险按钮 `.btn-danger`：红色调(`hsl(5,90%,58%)`)
+- 悬停时亮度+8%(`hsl(160,84%,48%)`)，点击时亮度-8%(`hsl(160,84%,32%)`)
 
 **小程序端：**
+
 - 主按钮 `.btn-primary`：蓝色渐变(`#2563EB` → `#1D4ED8`)，白色文字，高度88rpx，圆角44rpx(胶囊形)
 - 次要按钮 `.btn-secondary`：灰色背景
 - 禁用态：灰色渐变(`#94A3B8` → `#CBD5E1`)
@@ -233,6 +258,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 - 内边距：根据内容16-24px
 
 **小程序端卡片 (`.card`)：**
+
 - 白色背景，圆角16rpx，内边距30rpx
 - 阴影`0 2rpx 12rpx rgba(0,0,0,0.04)`
 
@@ -240,11 +266,11 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 
 | 状态 | CSS类 | 背景色 | 文字色 |
 |------|-------|--------|--------|
-| 正常/已完成/启用 | `.tag-success` | `#F0F9EB` | `#67C23A` |
-| 待检/待入库/待处理 | `.tag-warning` | `#FDF6EC` | `#E6A23C` |
-| 报废/锁定/停用 | `.tag-danger` | `#FEF0F0` | `#F56C6C` |
-| 已审核/待出库 | `.tag-info` | `#EFF6FF` | `#2563EB` |
-| 草稿/默认 | `.tag-default` | `#F1F5F9` | `#64748B` |
+| 正常/已完成/启用 | `.tag-success` | `hsl(160,50%,96%)` | `hsl(160,84%,40%)` |
+| 待检/待入库/待处理 | `.tag-warning` | `hsl(36,80%,96%)` | `hsl(36,80%,50%)` |
+| 报废/锁定/停用 | `.tag-danger` | `hsl(5,90%,96%)` | `hsl(5,90%,58%)` |
+| 已审核/待出库 | `.tag-info` | `hsl(0,0%,96%)` | `hsl(0,0%,55%)` (灰色) |
+| 草稿/默认 | `.tag-default` | `hsl(0,0%,96%)` | `hsl(0,0%,55%)` |
 
 样式：`font-size: 20rpx; padding: 6rpx 16rpx; border-radius: 8rpx`
 
@@ -280,7 +306,8 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 ### 7.6 表单输入
 
 **Web端：**
-- 输入框：`9px 12px`内边距，`--input-border`边框，聚焦时蓝色边框+外发光
+
+- 输入框：`9px 12px`内边距，`--input-border`边框（`hsl(160,8%,86%)`），聚焦时青绿色边框+外发光（`--ring: hsl(160,84%,60%)`）
 - 文本域：最小高度80px
 
 **小程序端：**
@@ -296,6 +323,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 - 进度条：绿色(<25%) → 橙色(<50%) → 琥珀色(<75%) → 红色(≥75%)
 
 **小程序端 (Canvas 2D):**
+
 - 折线图：带圆点标记 + 图例
 - 柱状图：绿色渐变柱体，横向滚动支持
 - 双轴柱状图：红色(温度)+蓝色(湿度)
@@ -394,12 +422,22 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 
 ---
 
-## 12. 设计标注（附）
+## 12. 设计标注
 
-*此处插入实际页面的标注截图，包括：*
 1. Web端首页布局标注
-2. Web端任务中心布局标注
+
+   ![image-20260717151421942](C:\Users\王佳宁\AppData\Roaming\Typora\typora-user-images\image-20260717151421942.png)
+
+2. Web端操作中心布局标注
+
+   ![image-20260717151513075](C:\Users\王佳宁\AppData\Roaming\Typora\typora-user-images\image-20260717151513075.png)
+
 3. 小程序端首页标注
+
+   <img src="C:\Users\王佳宁\AppData\Roaming\Typora\typora-user-images\image-20260717151547565.png" alt="image-20260717151547565" style="zoom:50%;" />
+
 4. 小程序端入库列表标注
-5. 色彩系统色板
-6. 组件状态图(按钮/标签/卡片各态)
+
+   <img src="C:\Users\王佳宁\AppData\Roaming\Typora\typora-user-images\image-20260717151632320.png" alt="image-20260717151632320" style="zoom:50%;" />
+
+   
