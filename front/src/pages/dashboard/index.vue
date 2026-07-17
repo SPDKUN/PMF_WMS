@@ -132,7 +132,7 @@ export default {
         //提示框配置：触发类型（鼠标悬停触发），背景颜色，边框颜色，文字颜色
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#5ab1ef', textStyle: { color: '#333' } },
         //图例组件：数据，距离容器顶部距离，文字颜色
-        legend: { data: ['入库数量', '出库数量'], top: 4, textStyle: { color: 'var(--foreground-regular)' } },
+        legend: { data: ['入库数量', '出库数量'], top: 4, textStyle: { color: this.getCssVar('--foreground-regular', '#666') } },
         //绘图网格
         grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
         xAxis: {
@@ -273,7 +273,7 @@ export default {
         //提示框
         tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#67e0e3', textStyle: { color: '#333' } },
         //图例
-        legend: { data: ['温度(°C)', '湿度(%)'], top: 4, textStyle: { color: 'var(--foreground-regular)' } },
+        legend: { data: ['温度(°C)', '湿度(%)'], top: 4, textStyle: { color: this.getCssVar('--foreground-regular', '#666') } },
         //绘图网格
         grid: { left: '3%', right: '4%', top: 30, bottom: 0, containLabel: true },
         xAxis: { type: 'category', data: names },//x轴为仓库名称
@@ -344,6 +344,11 @@ export default {
       if (this.lineChart) this.lineChart.resize()
       if (this.barChart) this.barChart.resize()
       if (this.tempHumidityChart) this.tempHumidityChart.resize()
+    },
+
+    //读取 CSS 变量实际值（ECharts 无法解析 var()）
+    getCssVar(name, fallback) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
     },
 
     //根据仓库饱和度返回进度条颜色
