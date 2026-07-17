@@ -53,7 +53,7 @@
         </div>
         <div class="stat-body">
           <div class="stat-value">{{ quickStats.todayInbound }}</div>
-          <div class="stat-label">今日入库（单）</div>
+          <div class="stat-label">今日入库数量</div>
         </div>
       </div>
       <div class="stat-card">
@@ -62,7 +62,7 @@
         </div>
         <div class="stat-body">
           <div class="stat-value">{{ quickStats.todayOutbound }}</div>
-          <div class="stat-label">今日出库（单）</div>
+          <div class="stat-label">今日出库数量</div>
         </div>
       </div>
       <div class="stat-card">
@@ -71,7 +71,7 @@
         </div>
         <div class="stat-body">
           <div class="stat-value">{{ quickStats.pendingQC }}</div>
-          <div class="stat-label">待质检任务</div>
+          <div class="stat-label">待质检批次数</div>
         </div>
       </div>
       <div class="stat-card">
@@ -80,7 +80,7 @@
         </div>
         <div class="stat-body">
           <div class="stat-value">{{ quickStats.alertCount }}</div>
-          <div class="stat-label">库存预警</div>
+          <div class="stat-label">不合格批次数</div>
         </div>
       </div>
     </div>
@@ -159,25 +159,45 @@ export default {
   methods: {
     async fetchQuickStats() {
       try {
-        const [qcRes] = await Promise.all([
-          request.get('/qualityCheck/myTasks', { params: { assigneeId: JSON.parse(localStorage.getItem('userInfo') || '{}').user_id || '' } })
-        ])
-        if (qcRes.code === 200) {
-          this.quickStats.pendingQC = (qcRes.data || []).length
-        }
-      } catch (e) { /* ignore */ }
-      // 入库/出库/预警暂用默认值，后端有对应接口后可替换
-      try {
-        const [inRes, outRes] = await Promise.all([
-          request.get('/inboundOrderHead/list'),
-          request.get('/outboundOrderHead/list')
-        ])
         const today = new Date().toISOString().slice(0, 10)
-        if (inRes.code === 200) {
-          this.quickStats.todayInbound = (inRes.data || []).filter(i => (i.created_at || '').startsWith(today)).length
+        const [batchRes, inHeadRes, outHeadRes, inDetailRes, outDetailRes] = await Promise.all([
+          request.get('/batch/list'),
+          request.get('/inboundOrderHead/list'),
+          request.get('/outboundOrderHead/list'),
+          request.get('/inboundOrderDetail/list'),
+          request.get('/outboundOrderDetail/list')
+        ])
+        // 批次状态统计
+        if (batchRes.code === 200) {
+          const batches = batchRes.data || []
+          this.quickStats.pendingQC = batches.filter(b => b.batch_status === '待检').length
+          this.quickStats.alertCount = batches.filter(b => b.batch_status === '报废').length
         }
-        if (outRes.code === 200) {
-          this.quickStats.todayOutbound = (outRes.data || []).filter(o => (o.created_at || '').startsWith(today)).length
+        // 今日入库数量：匹配今日入库单的明细数量之和
+        if (inHeadRes.code === 200 && inDetailRes.code === 200) {
+          const todayInNos = new Set(
+            (inHeadRes.data || [])
+              .filter(h => (h.inbound_time || h.create_time || '').startsWith(today))
+              .map(h => h.inbound_no)
+          )
+          let total = 0
+          ;(inDetailRes.data || []).forEach(d => {
+            if (todayInNos.has(d.inbound_no)) total += (d.quantity || 0)
+          })
+          this.quickStats.todayInbound = total
+        }
+        // 今日出库数量：匹配今日出库单的明细数量之和
+        if (outHeadRes.code === 200 && outDetailRes.code === 200) {
+          const todayOutNos = new Set(
+            (outHeadRes.data || [])
+              .filter(h => (h.outbound_time || h.create_time || '').startsWith(today))
+              .map(h => h.outbound_no)
+          )
+          let total = 0
+          ;(outDetailRes.data || []).forEach(d => {
+            if (todayOutNos.has(d.outbound_no)) total += (d.quantity || 0)
+          })
+          this.quickStats.todayOutbound = total
         }
       } catch (e) { /* ignore */ }
     },
